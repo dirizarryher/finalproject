@@ -17,7 +17,7 @@
 
 int set = 0, direction = -1, jump = 0, counter = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
-    sprite_x = 80, sprite_y = 41;
+    sprite_x = 80, sprite_y = 40;
 
 //X Windows variables
 Display *dpy;
@@ -62,7 +62,7 @@ void render(Game *game);
 
 int main(void)
 {
-	int done=0;
+    	int done=0;
 	srand(time(NULL));
 	initXWindows();
 	init_opengl();
@@ -80,7 +80,11 @@ int main(void)
 	game.circle[0].center.x = 10;
 	game.circle[0].center.y = -20;
 	game.circle[0].radius = 100;
-
+	//added sprite drawing here so it won't redraw it at the same place constantly
+	game.box[2].width = 10;
+	game.box[2].height = 20;
+	game.box[2].center.x = sprite_x;
+	game.box[2].center.y = sprite_y;
 
 	//start animation
 	while(!done) {
@@ -222,7 +226,8 @@ int check_keys(XEvent *e, Game *game) {
 		}
 
 		if (key == XK_Up) {
-			jump ^= 1 ;
+		    	if(jump == 0)
+				jump = 1 ;
 			return 0; 
 		}
 
@@ -240,27 +245,24 @@ void movement(Game *game)
 	game->box[1].center.x = box_x -= 3;
 	game->box[1].center.y = box_y;
 
-	game->box[2].width = 10;
-	game->box[2].height = 20;
-	game->box[2].center.x = sprite_x;
-	game->box[2].center.y = sprite_y;
-	if (jump) {
-		game->box[2].center.y = sprite_y + 90;
-		jump = 0;
+	//The program was rending the sprite at the spot each frame, so we couldnt get it to jump
+	//So I took it out and added in some code that sort of simulates a jump plus gravity
+	//Feel free to make it better
+	
+	if (jump > 0) {
+		game->box[2].center.y += 2;
+		jump ++;
+		if (jump == 51)
+			jump = -50;
 	} 
 	else {
-		for (int a = 0; a < 100000; a++) {
-			if (game->box[2].center.y == sprite_y)
-				game->box[2].center.y -= 1;
+		if(game->box[2].center.y > sprite_y) {
+		    game->box[2].center.y -= 2;
+		    jump ++;
 		}
 	}
-	/*if (val == 0 ) { 
-	  box_y += 60;
-	  }
-	  else { 
-	  box_y -= 60;
-	  }*/
-
+	// I did not edit past this -Ryan
+	
 	if ( game->box[1].center.x < -40)
 		box_x = 1500;
 	game->lastMousex = 445;

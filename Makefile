@@ -4,7 +4,7 @@
 #CFLAGS = -I ./include
 VPATH   = src include
 CC      = gcc
-LIBS += -framework IOKit
+#LIBS += -framework IOKit
 
 
 all: hw1
