@@ -31,7 +31,7 @@
 #include "log.h"
 #include "ppm.h"
 extern "C" {
-	#include "fonts.h"
+#include "fonts.h"
 }
 
 #define WINDOW_WIDTH  4000
@@ -58,8 +58,8 @@ typedef Flt	Matrix[4][4];
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 #define VecDot(a,b)	((a)[0]*(b)[0]+(a)[1]*(b)[1]+(a)[2]*(b)[2])
 #define VecSub(a,b,c) (c)[0]=(a)[0]-(b)[0]; \
-                      (c)[1]=(a)[1]-(b)[1]; \
-                      (c)[2]=(a)[2]-(b)[2]
+			     (c)[1]=(a)[1]-(b)[1]; \
+(c)[2]=(a)[2]-(b)[2]
 //constants
 const float timeslice = 1.0f;
 const float gravity = -0.2f;
@@ -81,7 +81,7 @@ double timeSpan=0.0;
 unsigned int upause=0;
 double timeDiff(struct timespec *start, struct timespec *end) {
 	return (double)(end->tv_sec - start->tv_sec ) +
-			(double)(end->tv_nsec - start->tv_nsec) * oobillion;
+		(double)(end->tv_nsec - start->tv_nsec) * oobillion;
 }
 void timeCopy(struct timespec *dest, struct timespec *source) {
 	memcpy(dest, source, sizeof(struct timespec));
@@ -150,27 +150,27 @@ int deflection=0;
 
 //Structures
 struct Vecs {
-        float x, y, z;
+	float x, y, z;
 };
 
 struct Shape {
-        float width, height;
-        float radius;
-        Vecs center;
+	float width, height;
+	float radius;
+	Vecs center;
 };
 
 struct Particle {
-        Shape s;
-        Vecs velocity;
+	Shape s;
+	Vecs velocity;
 };
 
 struct Game {
-        Shape box[5];
-        Shape circle[2];
-        Particle particle[MAX_PARTICLES];
-        int n;
-        int lastMousex;
-        int lastMousey;
+	Shape box[5];
+	Shape circle[2];
+	Particle particle[MAX_PARTICLES];
+	int n;
+	int lastMousex;
+	int lastMousey;
 };
 
 //function prototypes
@@ -183,24 +183,31 @@ void checkKeys(XEvent *e);
 void init();
 void physics(void);
 void render(Game *game);
+int check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
 
 int main(void)
 {
+	int keys = 0;
 	Game game;
-        game.n=0;	
+	game.n=0;	
 
 	//declare a box shape
-        int x = 400, y = 10, length = 4000;
-        //declare a box shape
-        game.box[0].width = length;
-        game.box[0].height = 10;
-        game.box[0].center.x = x;
-        game.box[0].center.y = y;
-        game.circle[0].center.x = 10;
-        game.circle[0].center.y = -20;
-        game.circle[0].radius = 100;
+	int x = 400, y = 10, length = 4000;
+	//declare a box shape
+	game.box[0].width = length;
+	game.box[0].height = 10;
+	game.box[0].center.x = x;
+	game.box[0].center.y = y;
+	game.circle[0].center.x = 10;
+	game.circle[0].center.y = -20;
+	game.circle[0].radius = 100;
 
+
+	game.box[2].width = 10;
+	game.box[2].height = 20;
+	game.box[2].center.x = sprite_x;
+	game.box[2].center.y = sprite_y;
 
 	logOpen();
 	initXWindows();
@@ -215,6 +222,7 @@ int main(void)
 			checkResize(&e);
 			checkMouse(&e);
 			checkKeys(&e);
+			keys = check_Gamekeys(&e, &game);
 		}
 		//
 		//Below is a process to apply physics at a consistent rate.
@@ -252,15 +260,15 @@ int main(void)
 }
 
 void makeParticle(Game *game, int x, int y) {
-        if (game->n >= MAX_PARTICLES)
-                return;
-        //position of particle
-        Particle *p = &game->particle[game->n];
-        p->s.center.x = rand() % 51 + 380;
-        p->s.center.y = y;
-        p->velocity.y = rnd()*0.1 - 0.5;
-        p->velocity.x = direction;
-        game->n++;
+	if (game->n >= MAX_PARTICLES)
+		return;
+	//position of particle
+	Particle *p = &game->particle[game->n];
+	p->s.center.x = rand() % 51 + 380;
+	p->s.center.y = y;
+	p->velocity.y = rnd()*0.1 - 0.5;
+	p->velocity.x = direction;
+	game->n++;
 }
 
 
@@ -306,10 +314,10 @@ void initXWindows(void)
 	Colormap cmap = XCreateColormap(dpy, root, vi->visual, AllocNone);
 	swa.colormap = cmap;
 	swa.event_mask = ExposureMask | KeyPressMask | KeyReleaseMask |
-						StructureNotifyMask | SubstructureNotifyMask;
+		StructureNotifyMask | SubstructureNotifyMask;
 	win = XCreateWindow(dpy, root, 0, 0, xres, yres, 0,
-							vi->depth, InputOutput, vi->visual,
-							CWColormap | CWEventMask, &swa);
+			vi->depth, InputOutput, vi->visual,
+			CWColormap | CWEventMask, &swa);
 	GLXContext glc = glXCreateContext(dpy, vi, NULL, GL_TRUE);
 	glXMakeCurrent(dpy, win, glc);
 	setTitle();
@@ -404,7 +412,7 @@ void initOpengl(void)
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-							GL_RGB, GL_UNSIGNED_BYTE, bigfootImage->data);
+			GL_RGB, GL_UNSIGNED_BYTE, bigfootImage->data);
 	//-------------------------------------------------------------------------
 	//
 	//silhouette
@@ -418,7 +426,7 @@ void initOpengl(void)
 	//must build a new set of data...
 	unsigned char *silhouetteData = buildAlphaData(bigfootImage);	
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
-							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+			GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
 	free(silhouetteData);
 	//glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
 	//	GL_RGB, GL_UNSIGNED_BYTE, bigfootImage->data);
@@ -434,7 +442,7 @@ void initOpengl(void)
 	//must build a new set of data...
 	silhouetteData = buildAlphaData(umbrellaImage);	
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
-							GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+			GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
 	free(silhouetteData);
 	//glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
 	//	GL_RGB, GL_UNSIGNED_BYTE, bigfootImage->data);
@@ -446,8 +454,8 @@ void initOpengl(void)
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
 	glTexImage2D(GL_TEXTURE_2D, 0, 3,
-							forestImage->width, forestImage->height,
-							0, GL_RGB, GL_UNSIGNED_BYTE, forestImage->data);
+			forestImage->width, forestImage->height,
+			0, GL_RGB, GL_UNSIGNED_BYTE, forestImage->data);
 	//-------------------------------------------------------------------------
 	//
 	//forest transparent part
@@ -462,7 +470,7 @@ void initOpengl(void)
 	h = forestTransImage->height;
 	unsigned char *ftData = buildAlphaData(forestTransImage);	
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
-							GL_RGBA, GL_UNSIGNED_BYTE, ftData);
+			GL_RGBA, GL_UNSIGNED_BYTE, ftData);
 	free(ftData);
 	//glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
 	//GL_RGB, GL_UNSIGNED_BYTE, bigfootImage->data);
@@ -535,6 +543,28 @@ void checkMouse(XEvent *e)
 	}
 }
 
+int check_Gamekeys(XEvent *e, Game *game) {
+	if (e->type == KeyPress) {
+		int key = XLookupKeysym(&e->xkey, 0);
+		if (key == XK_Escape) {
+			return 1;
+		}
+		//You may check other keys here
+		if (key == XK_s) {
+			set ^= 1 ;
+			return 0; 
+		}
+
+		if (key == XK_Up) {
+		    	if(jump == 0)
+				jump = 1;
+			return 0; 
+		}
+
+	}
+	return 0;
+}
+
 void checkKeys(XEvent *e)
 {
 	//keyboard input?
@@ -557,7 +587,7 @@ void checkKeys(XEvent *e)
 		case XK_b:
 			showBigfoot ^= 1;
 			if (showBigfoot) {
-			   bigfoot.pos[0] = -250.0;
+				bigfoot.pos[0] = -250.0;
 			}
 			break;
 		case XK_d:
@@ -591,10 +621,6 @@ void checkKeys(XEvent *e)
 		case XK_Right:
 			VecCopy(umbrella.pos, umbrella.lastpos);
 			umbrella.pos[0] += 10.0;
-			break;
-		case XK_Up:
-			VecCopy(umbrella.pos, umbrella.lastpos);
-			umbrella.pos[1] += 10.0;
 			break;
 		case XK_Down:
 			VecCopy(umbrella.pos, umbrella.lastpos);
@@ -693,12 +719,12 @@ void moveBigfoot()
 	bigfoot.pos[1] += bigfoot.vel[1];
 	//Check for collision with window edges
 	if ((bigfoot.pos[0] < -140.0 && bigfoot.vel[0] < 0.0) ||
-				(bigfoot.pos[0] >= (float)xres+140.0 && bigfoot.vel[0] > 0.0)) {
+			(bigfoot.pos[0] >= (float)xres+140.0 && bigfoot.vel[0] > 0.0)) {
 		bigfoot.vel[0] = -bigfoot.vel[0];
 		addgrav = 0;
 	}
 	if ((bigfoot.pos[1] < 150.0 && bigfoot.vel[1] < 0.0) ||
-				(bigfoot.pos[1] >= (float)yres && bigfoot.vel[1] > 0.0)) {
+			(bigfoot.pos[1] >= (float)yres && bigfoot.vel[1] > 0.0)) {
 		bigfoot.vel[1] = -bigfoot.vel[1];
 		addgrav = 0;
 	}
@@ -725,7 +751,7 @@ void createRaindrop(const int n)
 		node->pos[1] = rnd() * 100.0f + (float)yres;
 		VecCopy(node->pos, node->lastpos);
 		node->vel[0] = 
-		node->vel[1] = 0.0f;
+			node->vel[1] = 0.0f;
 		node->color[0] = rnd() * 0.2f + 0.8f;
 		node->color[1] = rnd() * 0.2f + 0.8f;
 		node->color[2] = rnd() * 0.2f + 0.8f;
@@ -756,10 +782,10 @@ void checkRaindrops()
 		node->vel[1] += gravity;
 		VecCopy(node->pos, node->lastpos);
 
-//----------------------------------------------------------------
-//The next 2 lines are temporary code just for this assignment.
-//Comment them out, then fix the raindrop delet function.
-//----------------------------------------------------------------
+		//----------------------------------------------------------------
+		//The next 2 lines are temporary code just for this assignment.
+		//Comment them out, then fix the raindrop delet function.
+		//----------------------------------------------------------------
 		float test = rnd() * 100.0;
 		if (node->pos[1] > test)
 		{
@@ -778,7 +804,7 @@ void checkRaindrops()
 	node = ihead;
 	while (node) {
 		n++;
-		#ifdef USE_SOUND
+#ifdef USE_SOUND
 		if (node->pos[1] < 0.0f) {
 			//raindrop hit ground
 			if (!node->sound && play_sounds) {
@@ -794,16 +820,16 @@ void checkRaindrops()
 				node->sound=1;
 			}
 		}
-		#endif //USE_SOUND
+#endif //USE_SOUND
 		//collision detection for raindrop on umbrella
 		if (showUmbrella) {
 			if (umbrella.shape == UMBRELLA_FLAT) {
 				if (node->pos[0] >= (umbrella.pos[0] - umbrella.width2) &&
-					node->pos[0] <= (umbrella.pos[0] + umbrella.width2)) {
+						node->pos[0] <= (umbrella.pos[0] + umbrella.width2)) {
 					if (node->lastpos[1] > umbrella.lastpos[1] ||
-						node->lastpos[1] > umbrella.pos[1]) {
+							node->lastpos[1] > umbrella.pos[1]) {
 						if (node->pos[1] <= umbrella.pos[1] ||
-							node->pos[1] <= umbrella.lastpos[1]) {
+								node->pos[1] <= umbrella.lastpos[1]) {
 							if (node->linewidth > 1) {
 								Raindrop *savenode = node->next;
 								deleteRain(node);
@@ -821,7 +847,7 @@ void checkRaindrops()
 				//Log("distance: %f  umbrella.radius: %f\n",
 				//							distance,umbrella.radius);
 				if (distance <= umbrella.radius &&
-										node->pos[1] > umbrella.pos[1]) {
+						node->pos[1] > umbrella.pos[1]) {
 					if (node->linewidth > 1) {
 						if (deflection) {
 							//deflect raindrop
@@ -875,8 +901,8 @@ void drawUmbrella(void)
 		glColor4f(1.0f, 0.2f, 0.2f, 0.5f);
 		glLineWidth(8);
 		glBegin(GL_LINES);
-			glVertex2f(umbrella.pos[0]-umbrella.width2, umbrella.pos[1]);
-			glVertex2f(umbrella.pos[0]+umbrella.width2, umbrella.pos[1]);
+		glVertex2f(umbrella.pos[0]-umbrella.width2, umbrella.pos[1]);
+		glVertex2f(umbrella.pos[0]+umbrella.width2, umbrella.pos[1]);
 		glEnd();
 		glLineWidth(1);
 	} else {
@@ -887,11 +913,11 @@ void drawUmbrella(void)
 		glAlphaFunc(GL_GREATER, 0.0f);
 		glBindTexture(GL_TEXTURE_2D, umbrellaTexture);
 		glBegin(GL_QUADS);
-			float w = umbrella.width2;
-			glTexCoord2f(0.0f, 0.0f); glVertex2f(-w,  w);
-			glTexCoord2f(1.0f, 0.0f); glVertex2f( w,  w);
-			glTexCoord2f(1.0f, 1.0f); glVertex2f( w, -w);
-			glTexCoord2f(0.0f, 1.0f); glVertex2f(-w, -w);
+		float w = umbrella.width2;
+		glTexCoord2f(0.0f, 0.0f); glVertex2f(-w,  w);
+		glTexCoord2f(1.0f, 0.0f); glVertex2f( w,  w);
+		glTexCoord2f(1.0f, 1.0f); glVertex2f( w, -w);
+		glTexCoord2f(0.0f, 1.0f); glVertex2f(-w, -w);
 		glEnd();
 		glBindTexture(GL_TEXTURE_2D, 0);
 		glDisable(GL_ALPHA_TEST);
@@ -909,8 +935,8 @@ void drawRaindrops(void)
 		glColor4fv(node->color);
 		glLineWidth(node->linewidth);
 		glBegin(GL_LINES);
-			glVertex2f(0.0f, 0.0f);
-			glVertex2f(0.0f, node->length);
+		glVertex2f(0.0f, 0.0f);
+		glVertex2f(0.0f, node->length);
 		glEnd();
 		glPopMatrix();
 		node = node->next;
@@ -934,10 +960,10 @@ void render(Game *game)
 	if (forest) {
 		glBindTexture(GL_TEXTURE_2D, forestTexture);
 		glBegin(GL_QUADS);
-			glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
-			glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
-			glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
-			glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
+		glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
+		glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
+		glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
+		glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
 		glEnd();
 	}
 	if (showBigfoot) {
@@ -952,67 +978,67 @@ void render(Game *game)
 			glColor4ub(255,255,255,255);
 		}
 		glBegin(GL_QUADS);
-			if (bigfoot.vel[0] > 0.0) {
-				glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
-				glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
-				glTexCoord2f(1.0f, 0.0f); glVertex2i( wid, wid);
-				glTexCoord2f(1.0f, 1.0f); glVertex2i( wid,-wid);
-			} else {
-				glTexCoord2f(1.0f, 1.0f); glVertex2i(-wid,-wid);
-				glTexCoord2f(1.0f, 0.0f); glVertex2i(-wid, wid);
-				glTexCoord2f(0.0f, 0.0f); glVertex2i( wid, wid);
-				glTexCoord2f(0.0f, 1.0f); glVertex2i( wid,-wid);
-			}
+		if (bigfoot.vel[0] > 0.0) {
+			glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
+			glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+			glTexCoord2f(1.0f, 0.0f); glVertex2i( wid, wid);
+			glTexCoord2f(1.0f, 1.0f); glVertex2i( wid,-wid);
+		} else {
+			glTexCoord2f(1.0f, 1.0f); glVertex2i(-wid,-wid);
+			glTexCoord2f(1.0f, 0.0f); glVertex2i(-wid, wid);
+			glTexCoord2f(0.0f, 0.0f); glVertex2i( wid, wid);
+			glTexCoord2f(0.0f, 1.0f); glVertex2i( wid,-wid);
+		}
 		glEnd();
 		glPopMatrix();
 		//
 		if (trees && silhouette) {
 			glBindTexture(GL_TEXTURE_2D, forestTransTexture);
 			glBegin(GL_QUADS);
-				glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
-				glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
-				glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
-				glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
+			glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
+			glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
+			glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
+			glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
 			glEnd();
 		}
 		glDisable(GL_ALPHA_TEST);
 	}
-	
-	
-	float w, h;
-        //Draw shapes...
-        //
-        //circle
-        Shape *s;
-        float rad = 0.0;
-        int x = 0, y = 0;
-        glColor3ub(90,140,90);
-        for (int i = 0; i < SEGMENTS; i++) {
-                for (int j = 0; j < 2; j++){
-                        s = &game->circle[j];
-                        x = cos(ADJUST) * s->radius + s->center.x;
-                        y = sin(ADJUST) * s->radius + s->center.y;
-                        rad += ADJUST;
-                        glVertex2f(x, y);
-                }
-        }
 
-        //draw box
-        glColor3ub(90,140,90);
-        for (int j=0; j<5; j++){
-                s = &game->box[j];
-                glPushMatrix();
-                glTranslatef(s->center.x, s->center.y, s->center.z);
-                w = s->width;
-                h = s->height;
-                glBegin(GL_QUADS);
-                glVertex2i(-w,-h);
-                glVertex2i(-w, h);
-                glVertex2i( w, h);
-                glVertex2i( w,-h);
-                glEnd();
-                glPopMatrix();
-        }
+
+	float w, h;
+	//Draw shapes...
+	//
+	//circle
+	Shape *s;
+	float rad = 0.0;
+	int x = 0, y = 0;
+	glColor3ub(90,140,90);
+	for (int i = 0; i < SEGMENTS; i++) {
+		for (int j = 0; j < 2; j++){
+			s = &game->circle[j];
+			x = cos(ADJUST) * s->radius + s->center.x;
+			y = sin(ADJUST) * s->radius + s->center.y;
+			rad += ADJUST;
+			glVertex2f(x, y);
+		}
+	}
+
+	//draw box
+	glColor3ub(90,140,90);
+	for (int j=0; j<5; j++){
+		s = &game->box[j];
+		glPushMatrix();
+		glTranslatef(s->center.x, s->center.y, s->center.z);
+		w = s->width;
+		h = s->height;
+		glBegin(GL_QUADS);
+		glVertex2i(-w,-h);
+		glVertex2i(-w, h);
+		glVertex2i( w, h);
+		glVertex2i( w,-h);
+		glEnd();
+		glPopMatrix();
+	}
 
 
 	glDisable(GL_TEXTURE_2D);
@@ -1058,18 +1084,17 @@ void movement(Game *game)
 	game->box[1].center.x = box_x -= 3;
 	game->box[1].center.y = box_y;
 
-	game->box[2].width = 10;
-	game->box[2].height = 20;
-	game->box[2].center.x = sprite_x;
-	game->box[2].center.y = sprite_y;
-	if (jump) {
-		game->box[2].center.y = sprite_y + 90;
-		jump = 0;
+	if (jump > 0) {
+		game->box[2].center.y += 2;
+		jump++;
+		if (jump == 51)
+			jump = -50;
 	} 
 	else {
-		for (int a = 0; a < 100000; a++) {
-			if (game->box[2].center.y == sprite_y)
-				game->box[2].center.y -= 1;
+		if(game->box[2].center.y > sprite_y) {
+			game->box[2].center.y -= 2;
+			sleep(.8);
+			jump ++;
 		}
 	}
 	/*if (val == 0 ) { 
