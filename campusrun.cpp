@@ -34,7 +34,7 @@ extern "C" {
 #include "fonts.h"
 }
 
-#define WINDOW_WIDTH  4000
+#define WINDOW_WIDTH  2000
 #define WINDOW_HEIGHT 1000
 #define SEGMENTS 60
 #define ADJUST (3.14159 * 2.0) / (float)SEGMENTS
@@ -91,6 +91,12 @@ void timeCopy(struct timespec *dest, struct timespec *source) {
 
 int done=0;
 int xres=800, yres=600;
+
+typedef struct t_background {
+	Vec pos;
+	Vec vel;
+} Background;
+Background background;
 
 typedef struct t_bigfoot {
 	Vec pos;
@@ -449,6 +455,8 @@ void initOpengl(void)
 	//-------------------------------------------------------------------------
 	//
 	//forest
+	int forest_w = WINDOW_WIDTH * 2;
+	int forest_h = WINDOW_HEIGHT;
 	glBindTexture(GL_TEXTURE_2D, forestTexture);
 	//
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
