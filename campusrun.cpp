@@ -50,6 +50,7 @@ int box_x = 400, box_y = 60, box_length = 40, val = 0,
 typedef double Flt;
 typedef double Vec[3];
 typedef Flt	Matrix[4][4];
+int backgroundx = 0;
 
 //macros
 #define rnd() (((Flt)rand())/(Flt)RAND_MAX)
@@ -194,7 +195,7 @@ void movement(Game *game);
 
 int main(void)
 {
-	int keys = 0;
+	//int keys = 0;
 	Game game;
 	game.n=0;	
 
@@ -228,7 +229,7 @@ int main(void)
 			checkResize(&e);
 			checkMouse(&e);
 			checkKeys(&e);
-			keys = check_Gamekeys(&e, &game);
+			//keys = check_Gamekeys(&e, &game);
 		}
 		//
 		//Below is a process to apply physics at a consistent rate.
@@ -551,7 +552,7 @@ void checkMouse(XEvent *e)
 	}
 }
 
-int check_Gamekeys(XEvent *e, Game *game) {
+/*int check_Gamekeys(XEvent *e, Game *game) {
 	if (e->type == KeyPress) {
 		int key = XLookupKeysym(&e->xkey, 0);
 		if (key == XK_Escape) {
@@ -571,7 +572,7 @@ int check_Gamekeys(XEvent *e, Game *game) {
 
 	}
 	return 0;
-}
+}*/
 
 void checkKeys(XEvent *e)
 {
@@ -655,6 +656,10 @@ void checkKeys(XEvent *e)
 			//half the width
 			umbrella.width2 = umbrella.width * 0.5;
 			umbrella.radius = (float)umbrella.width2;
+			break;
+		case XK_Up:
+		    	if(jump == 0)
+				jump = 1;
 			break;
 		case XK_Escape:
 			done=1;
@@ -968,12 +973,13 @@ void render(Game *game)
 	if (forest) {
 		glBindTexture(GL_TEXTURE_2D, forestTexture);
 		glBegin(GL_QUADS);
-		glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
-		glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
-		glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
-		glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
+		glTexCoord2f(0.0f, 1.0f); glVertex2i(backgroundx, 0);
+		glTexCoord2f(0.0f, 0.0f); glVertex2i(backgroundx, yres);
+		glTexCoord2f(1.0f, 0.0f); glVertex2i((xres*2)+backgroundx, yres);
+		glTexCoord2f(1.0f, 1.0f); glVertex2i((xres*2)+backgroundx, 0);
 		glEnd();
 	}
+	backgroundx-=1;
 	if (showBigfoot) {
 		glPushMatrix();
 		glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);

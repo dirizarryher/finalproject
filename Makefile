@@ -1,5 +1,5 @@
 # cs335 hw1
-# Ty Morrell CS335  
+# Ryan Frapwelll CS335  
 # to compile your project, type make and press enter
 #CFLAGS = -I ./include
 VPATH   = src include
