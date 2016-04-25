@@ -50,7 +50,7 @@ int box_x = 400, box_y = 60, box_length = 40, val = 0,
 typedef double Flt;
 typedef double Vec[3];
 typedef Flt	Matrix[4][4];
-int backgroundx = 0;
+double backgroundx = 0;
 
 //macros
 #define rnd() (((Flt)rand())/(Flt)RAND_MAX)
@@ -973,13 +973,17 @@ void render(Game *game)
 	if (forest) {
 		glBindTexture(GL_TEXTURE_2D, forestTexture);
 		glBegin(GL_QUADS);
-		glTexCoord2f(0.0f, 1.0f); glVertex2i(backgroundx, 0);
+		/*glTexCoord2f(0.0f, 1.0f); glVertex2i(backgroundx, 0);
 		glTexCoord2f(0.0f, 0.0f); glVertex2i(backgroundx, yres);
 		glTexCoord2f(1.0f, 0.0f); glVertex2i((xres*2)+backgroundx, yres);
-		glTexCoord2f(1.0f, 1.0f); glVertex2i((xres*2)+backgroundx, 0);
+		glTexCoord2f(1.0f, 1.0f); glVertex2i((xres*2)+backgroundx, 0);*/
+		glTexCoord2f(0.0f-backgroundx, 1.0f); glVertex2i(0, 0);
+		glTexCoord2f(0.0f-backgroundx, 0.0f); glVertex2i(0, yres);
+		glTexCoord2f(1.0f-backgroundx, 0.0f); glVertex2i(xres, yres);
+		glTexCoord2f(1.0f-backgroundx, 1.0f); glVertex2i(xres, 0);
 		glEnd();
 	}
-	backgroundx-=1;
+	backgroundx-=.005;
 	if (showBigfoot) {
 		glPushMatrix();
 		glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
