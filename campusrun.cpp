@@ -43,14 +43,14 @@ extern "C" {
 
 int set = 0, direction = -1, jump = 0, counter = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
-    sprite_x = 80, sprite_y = 155;
+    sprite_x = 140, sprite_y = 75;
 
 
 //defined types
 typedef double Flt;
 typedef double Vec[3];
 typedef Flt	Matrix[4][4];
-double backgroundx = 0;
+double backgroundx = 0, spritesheetx = 0;
 
 //macros
 #define rnd() (((Flt)rand())/(Flt)RAND_MAX)
@@ -105,7 +105,7 @@ typedef struct t_bigfoot {
 } Bigfoot;
 Bigfoot bigfoot;
 
-Ppmimage bigfootImage[6];
+Ppmimage *bigfootImage;
 Ppmimage *forestImage=NULL;
 GLuint bigfootTexture;
 GLuint silhouetteTexture;
@@ -395,7 +395,7 @@ void initOpengl(void)
     //
     //load the images file into a ppm structure.
     //
-    bigfootImage     = ppm6GetImage("./images/Idle__000.ppm");
+    bigfootImage     = ppm6GetImage("./images/runner/runner_sheet2.ppm");
     forestImage      = ppm6GetImage("./images/gamebackground.ppm");
     //
     //create opengl texture elements
@@ -927,7 +927,7 @@ void render(Game *game)
     //
     //
     //draw a quad with texture
-    float wid = 120.0f;
+    float wid = 60.0f;
     glColor3f(1.0, 1.0, 1.0);
     if (forest) {
 	glBindTexture(GL_TEXTURE_2D, forestTexture);
@@ -942,7 +942,7 @@ void render(Game *game)
 	glTexCoord2f(1.0f-backgroundx, 1.0f); glVertex2i(xres, 0);
 	glEnd();
     }
-    backgroundx-=.0009;
+    backgroundx-=.005;
     if (showBigfoot) {
 	glPushMatrix();
 	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
@@ -955,21 +955,23 @@ void render(Game *game)
 	    glColor4ub(255,255,255,255);
 	}
 	glBegin(GL_QUADS);
+	sleep(.9);
 	if (bigfoot.vel[0] > 0.0) {
+	    glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
+	    glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
+	    glTexCoord2f(0.111111111f+spritesheetx, 0.0f); glVertex2i( wid,wid);
+	    glTexCoord2f(0.111111111f+spritesheetx, 1.0f); glVertex2i( wid,-wid);
+	} else {
 	    glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
 	    glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
-	    glTexCoord2f(1.0f, 0.0f); glVertex2i( wid, wid);
-	    glTexCoord2f(1.0f, 1.0f); glVertex2i( wid,-wid);
-	} else {
-	    glTexCoord2f(1.0f, 1.0f); glVertex2i(-wid,-wid);
-	    glTexCoord2f(1.0f, 0.0f); glVertex2i(-wid, wid);
-	    glTexCoord2f(0.0f, 0.0f); glVertex2i( wid, wid);
-	    glTexCoord2f(0.0f, 1.0f); glVertex2i( wid,-wid);
+	    glTexCoord2f(0.1f, 1.0f); glVertex2i( wid, wid);
+	    glTexCoord2f(0.1f, 0.0f); glVertex2i( wid,-wid);
 	}
 	glEnd();
 	glPopMatrix();
 	//
     }
+    spritesheetx += .11111111111;
 
 
     float w, h;
