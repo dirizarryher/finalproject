@@ -43,7 +43,8 @@ extern "C" {
 
 int set = 0, direction = -1, jump = 0, counter = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
-    sprite_x = 140, sprite_y = 75;
+    sprite_x = 140, sprite_y = 75; 
+int tmp = 2;
 
 
 //defined types
@@ -943,6 +944,10 @@ void render(Game *game)
 	glEnd();
     }
     backgroundx-=.005;
+    /*if(jump == 1) {
+	bigfootImage = ppm6GetImage("./images/runner/jump_sheet.ppm");
+	spritesheetx = 0;
+    }*/
     if (showBigfoot) {
 	glPushMatrix();
 	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
@@ -956,6 +961,17 @@ void render(Game *game)
 	}
 	glBegin(GL_QUADS);
 	sleep(.9);
+	/*if(jump < 12 && jump > 0) {
+	    sprite_y += 3;
+	    jump++;
+	}
+	if(jump >= 12 && jump < 23) {
+	    sprite_y -= 3;
+	    jump ++;
+	}
+	if(jump == 23)
+	    jump = 0;
+	*/
 	if (bigfoot.vel[0] > 0.0) {
 	    glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
 	    glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
