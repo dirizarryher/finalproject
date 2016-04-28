@@ -1,7 +1,6 @@
 //Name: David A. Hernandez II
 //Program: Sprite Header File
 //Purpose: 
-
 #ifndef SPRITE_H
 #define SPRITE_H
 #include <gl\gl.h>
@@ -19,7 +18,7 @@ class Sprite
             GLfloat width;
             GLfloat height;
         };
-        struct Shape
+        struct Object
         {
             GLfloat top;
             GLfloat bottom;
@@ -28,20 +27,14 @@ class Sprite
             //GLfloat center??
         };
     protected:
-        //Dynamically holds all OPGL texture handles that make up Sprite
-        GLuint* textures;
-        //Incremented each time a texture is added to Sprite
-        unsigned int textureIndex;
-        //Incremented each time we want to advance the frame of animation
-        unsigned int currentFrame;
-        //Stores total number of frames that make up the animation
-        unsigned int numberOfFrames;
-        //The number of seconds passed before animation frame advances.
-        //Helps control speed of the animation
-        GLfloat animationDelay;
-        //Holds amount of time that elapsed since the last animation
-        //frame was changed
-        GLfloat animationElapsed;
+        GLuint* textures;           //Holds all OPGL texture handles for Sprite
+        unsigned int textureIndex;  //Increment each time a texture is added to Sprite
+        unsigned int currentFrame;  //Increment each time animation frame advances
+        unsigned int numberOfFrames;//Total number of frames of the animation
+        
+        GLfloat animationDelay;     //Time passed between frames
+                                    //Controls speed of animation
+        GLfloat animationElapsed;   //Amount of time elapsed since last frame change
 
         //Positions, height & width, velocity of Sprite 
         //larger values of velocity will cause sprite to move
@@ -52,10 +45,10 @@ class Sprite
 
         //Collision detection flag
         bool collision;
-        //Flag to see if sprite should be flipped horizontally
+        //Flag checks if sprite should be flipped horizontally
         //when rendering
         bool flipHorizontal;
-        //Flag to see if sprite should be flipped vertically
+        //Flag checks if sprite should be flipped vertically
         bool flipVertical;
         //If sprite is currently visible in the game
         bool visible;
@@ -94,17 +87,7 @@ class Sprite
             else
                 return textures[currentFrame];
         }      
-
-        const Point GetPosition() 
-        { 
-            return position; 
-        }
-        const Size GetSize() const 
-        { 
-            return size; 
-        }
-
-        void SetPosition(const GLuint px; const GLfloat py)
+        void SetPosition(const GLuint px, const GLfloat py) //(const GLfloat px, const GLfloat py)
         {
             position.x = px;
             position.y = py;
@@ -113,7 +96,14 @@ class Sprite
         {
             position = pPosition;
         }
-
+        const Point GetPosition() 
+        { 
+            return position; 
+        }
+        const Size GetSize() const 
+        { 
+            return size; 
+        }
         void SetFrameSize(const GLfloat pWidth, const GLfloat pHeight)
         {
             size.width = pWidth;
