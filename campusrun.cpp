@@ -105,7 +105,7 @@ typedef struct t_bigfoot {
 } Bigfoot;
 Bigfoot bigfoot;
 
-Ppmimage bigfootImage[6];
+Ppmimage *bigfootImage;
 Ppmimage *forestImage=NULL;
 GLuint bigfootTexture;
 GLuint silhouetteTexture;
