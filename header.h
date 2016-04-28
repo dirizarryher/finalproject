@@ -1,3 +1,5 @@
+//Created and idead by Ryan Frapwell
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -169,3 +171,4 @@ int check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
 
 extern void sliding(int slide, int sprite_y);
+extern void Jumpint(double spreadsheetx, float wid);
