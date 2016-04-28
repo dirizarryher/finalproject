@@ -16,179 +16,7 @@
 //
 //
 //
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <time.h>
-#include <math.h>
-#include <X11/Xlib.h>
-//#include <X11/Xutil.h>
-//#include <GL/gl.h>
-//#include <GL/glu.h>
-#include <X11/keysym.h>
-#include <GL/glx.h>
-#include "log.h"
-#include "ppm.h"
-extern "C" {
-#include "fonts.h"
-}
-
-#define WINDOW_WIDTH  2000
-#define WINDOW_HEIGHT 1000
-#define SEGMENTS 60
-#define ADJUST (3.14159 * 2.0) / (float)SEGMENTS
-#define MAX_PARTICLES 5000
-#define GRAVITY 0.1
-
-int set = 0, direction = -1, jump = 0, counter = 0;
-int box_x = 400, box_y = 60, box_length = 40, val = 0,
-    sprite_x = 140, sprite_y = 75; 
-int tmp = 2;
-
-
-//defined types
-typedef double Flt;
-typedef double Vec[3];
-typedef Flt	Matrix[4][4];
-double backgroundx = 0, spritesheetx = 0;
-
-//macros
-#define rnd() (((Flt)rand())/(Flt)RAND_MAX)
-#define random(a) (rand()%a)
-#define MakeVector(x, y, z, v) (v)[0]=(x),(v)[1]=(y),(v)[2]=(z)
-#define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
-#define VecDot(a,b)	((a)[0]*(b)[0]+(a)[1]*(b)[1]+(a)[2]*(b)[2])
-#define VecSub(a,b,c) (c)[0]=(a)[0]-(b)[0]; \
-			     (c)[1]=(a)[1]-(b)[1]; \
-(c)[2]=(a)[2]-(b)[2]
-//constants
-const float timeslice = 1.0f;
-const float gravity = -0.2f;
-#define ALPHA 1
-
-//X Windows variables
-Display *dpy;
-Window win;
-
-
-//-----------------------------------------------------------------------------
-//Setup timers
-const double physicsRate = 1.0 / 30.0;
-const double oobillion = 1.0 / 1e9;
-struct timespec timeStart, timeCurrent;
-struct timespec timePause;
-double physicsCountdown=0.0;
-double timeSpan=0.0;
-unsigned int upause=0;
-double timeDiff(struct timespec *start, struct timespec *end) {
-    return (double)(end->tv_sec - start->tv_sec ) +
-	(double)(end->tv_nsec - start->tv_nsec) * oobillion;
-}
-void timeCopy(struct timespec *dest, struct timespec *source) {
-    memcpy(dest, source, sizeof(struct timespec));
-}
-//-----------------------------------------------------------------------------
-
-
-int done=0;
-int xres=800, yres=600;
-
-typedef struct t_background {
-    Vec pos;
-    Vec vel;
-} Background;
-Background background;
-
-typedef struct t_bigfoot {
-    Vec pos;
-    Vec vel;
-} Bigfoot;
-Bigfoot bigfoot;
-
-Ppmimage *bigfootImage;
-Ppmimage *forestImage=NULL;
-GLuint bigfootTexture;
-GLuint silhouetteTexture;
-GLuint forestTexture;
-int showBigfoot=1;
-int forest=1;
-int silhouette=1;
-int trees=1;
-int showRain=0;
-//
-typedef struct t_raindrop {
-    int type;
-    int linewidth;
-    int sound;
-    Vec pos;
-    Vec lastpos;
-    Vec vel;
-    Vec maxvel;
-    Vec force;
-    float length;
-    float color[4];
-    struct t_raindrop *prev;
-    struct t_raindrop *next;
-} Raindrop;
-Raindrop *ihead=NULL;
-int ndrops=1;
-int totrain=0;
-int maxrain=0;
-void deleteRain(Raindrop *node);
-void cleanupRaindrops(void);
-//
-#define UMBRELLA_FLAT  0
-#define UMBRELLA_ROUND 1
-typedef struct t_umbrella {
-    int shape;
-    Vec pos;
-    Vec lastpos;
-    float width;
-    float width2;
-    float radius;
-} Umbrella;
-Umbrella umbrella;
-int showUmbrella=0;
-int deflection=0;
-
-//Structures
-struct Vecs {
-    float x, y, z;
-};
-
-struct Shape {
-    float width, height;
-    float radius;
-    Vecs center;
-};
-
-struct Particle {
-    Shape s;
-    Vecs velocity;
-};
-
-struct Game {
-    Shape box[5];
-    Shape circle[2];
-    Particle particle[MAX_PARTICLES];
-    int n;
-    int lastMousex;
-    int lastMousey;
-};
-
-//function prototypes
-void initXWindows(void);
-void initOpengl(void);
-void cleanupXWindows(void);
-void checkResize(XEvent *e);
-void checkMouse(XEvent *e);
-void checkKeys(XEvent *e);
-void init();
-void physics(void);
-void render(Game *game);
-int check_Gamekeys(XEvent *e, Game *game);
-void movement(Game *game);
+#include "header.h"
 
 int main(void)
 {
@@ -397,10 +225,12 @@ void initOpengl(void)
     //load the images file into a ppm structure.
     //
     bigfootImage     = ppm6GetImage("./images/runner/runner_sheet2.ppm");
+    jumpImage     = ppm6GetImage("./images/runner/jump_sheet.ppm");
     forestImage      = ppm6GetImage("./images/gamebackground.ppm");
     //
     //create opengl texture elements
     glGenTextures(1, &bigfootTexture);
+    glGenTextures(1, &jumpTexture);
     glGenTextures(1, &silhouetteTexture);
     glGenTextures(1, &forestTexture);
     //-------------------------------------------------------------------------
@@ -415,6 +245,12 @@ void initOpengl(void)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
 	    GL_RGB, GL_UNSIGNED_BYTE, bigfootImage->data);
+    glBindTexture(GL_TEXTURE_2D, jumpTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+	    GL_RGB, GL_UNSIGNED_BYTE, jumpImage->data);
     //-------------------------------------------------------------------------
     //
     //silhouette
@@ -466,12 +302,6 @@ void initSounds(void)
     //Fmod is not allowed.
     //OpenAL sound only.
     //Look for the openalTest folder under code.
-
-
-
-
-
-
 
 
 }
@@ -945,33 +775,57 @@ void render(Game *game)
     }
     backgroundx-=.005;
     /*if(jump == 1) {
-	bigfootImage = ppm6GetImage("./images/runner/jump_sheet.ppm");
-	spritesheetx = 0;
-    }*/
+      bigfootImage = ppm6GetImage("./images/runner/jump_sheet.ppm");
+      spritesheetx = 0;
+      }*/
     if (showBigfoot) {
 	glPushMatrix();
 	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
+    }
+    if (!silhouette) {
+	glBindTexture(GL_TEXTURE_2D, bigfootTexture);
+    } else {
+	glBindTexture(GL_TEXTURE_2D, silhouetteTexture);
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
+	glColor4ub(255,255,255,255);
+    }
+    glBegin(GL_QUADS);
+    //sleep(.9);
+
+    if(jump){
+	glPushMatrix();
+	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
 	if (!silhouette) {
-	    glBindTexture(GL_TEXTURE_2D, bigfootTexture);
+	    glBindTexture(GL_TEXTURE_2D, jumpTexture);
 	} else {
 	    glBindTexture(GL_TEXTURE_2D, silhouetteTexture);
 	    glEnable(GL_ALPHA_TEST);
 	    glAlphaFunc(GL_GREATER, 0.0f);
 	    glColor4ub(255,255,255,255);
 	}
-	glBegin(GL_QUADS);
-	sleep(.9);
-	/*if(jump < 12 && jump > 0) {
+
+	if(jump == 1)
+	    spritesheetx=0;
+	if(jump < 32 && jump > 0) {
 	    sprite_y += 3;
 	    jump++;
-	}
-	if(jump >= 12 && jump < 23) {
+	    //cout << "jump = " << jump <<endl;
+	} else if(jump >= 32 && jump < 62 ) {
 	    sprite_y -= 3;
 	    jump ++;
-	}
-	if(jump == 23)
+	    //cout << "jump = " << jump <<endl;
+	} else{
 	    jump = 0;
-	*/
+	    sprite_y = 75;
+	    spritesheetx=0;
+	    //cout << "jump = " << jump <<endl;
+	    //cout << "in jump end" <<endl;
+	}
+	Jumping(spritesheetx, wid);
+    }
+
+    if(!jump) {
 	if (bigfoot.vel[0] > 0.0) {
 	    glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
 	    glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
@@ -985,8 +839,9 @@ void render(Game *game)
 	}
 	glEnd();
 	glPopMatrix();
-	//
     }
+
+
     spritesheetx += .11111111111;
 
 
@@ -1058,7 +913,9 @@ void render(Game *game)
     ggprint8b(&r, 16, 0, "R - Rain");
     ggprint8b(&r, 16, 0, "D - Deflection");
     ggprint8b(&r, 16, 0, "N - Sounds");
+
 }
+
 void movement(Game *game)
 {
     Particle *p;
@@ -1069,19 +926,19 @@ void movement(Game *game)
     game->box[1].center.x = box_x -= 3;
     game->box[1].center.y = box_y;
 
-    if (jump > 0) {
-	game->box[2].center.y += 2;
-	jump++;
-	if (jump == 51)
-	    jump = -50;
-    } 
-    else {
-	if(game->box[2].center.y > sprite_y) {
-	    game->box[2].center.y -= 2;
-	    sleep(.8);
-	    jump ++;
-	}
-    }
+    /*   if (jump > 0) {
+	 game->box[2].center.y += 2;
+	 jump++;
+	 if (jump == 51)
+	 jump = -50;
+	 } 
+	 else {
+	 if(game->box[2].center.y > sprite_y) {
+	 game->box[2].center.y -= 2;
+	 sleep(.8);
+	 jump ++;
+	 }
+	 }*/
     /*if (val == 0 ) { 
       box_y += 60;
       }
