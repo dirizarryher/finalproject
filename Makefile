@@ -1,5 +1,5 @@
 # cs335 hw1
-# Ty Morrell CS335  
+# Ryan Frapwelll CS335  
 # to compile your project, type make and press enter
 #CFLAGS = -I ./include
 VPATH   = src include
@@ -11,8 +11,8 @@ LFLAGS = -lrt -lX11 -lGLU -lGL -pthread -lm #-lXrandr
 
 all: campusrun
 
-campusrun: campusrun.cpp
-	g++ $(CFLAGS) campusrun.cpp ppm.cpp log.cpp libggfonts.a -Wall -Wextra $(LFLAGS) -o campusrun
+campusrun: campusrun.cpp davidH.cpp
+	g++ $(CFLAGS) campusrun.cpp ppm.cpp log.cpp Sprite.h SOIL.h davidH.cpp libSOIL.a libggfonts.a -Wall -Wextra $(LFLAGS) -o campusrun
 clean:
 	rm -f campusrun
 	rm -f *.o
