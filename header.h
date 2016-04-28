@@ -1,5 +1,5 @@
-//Created and idead by Ryan Frapwell
-
+//
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,6 +18,8 @@ extern "C" {
 #include "fonts.h"
 }
 
+using namespace std;
+
 #define WINDOW_WIDTH  2000
 #define WINDOW_HEIGHT 1000
 #define SEGMENTS 60
@@ -28,6 +30,7 @@ extern "C" {
 int set = 0, direction = -1, jump = 0, slide = 0, counter = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
     sprite_x = 140, sprite_y = 75;
+int tmp = 2;
 
 
 //defined types
@@ -49,6 +52,8 @@ double backgroundx = 0, spritesheetx = 0;
 const float timeslice = 1.0f;
 const float gravity = -0.2f;
 #define ALPHA 1
+
+//X Windows variables
 Display *dpy;
 Window win;
 
@@ -148,6 +153,7 @@ struct Particle {
     Shape s;
     Vecs velocity;
 };
+
 struct Game {
     Shape box[5];
     Shape circle[2];
@@ -169,6 +175,5 @@ void physics(void);
 void render(Game *game);
 int check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
-
-extern void sliding(int slide, int sprite_y);
-extern void Jumpint(double spreadsheetx, float wid);
+void Jumping(double spritesheetx, float wid);
+void sliding(double spritesheetx, float wid);
