@@ -11,8 +11,8 @@ LFLAGS = -lrt -lX11 -lGLU -lGL -pthread -lm #-lXrandr
 
 all: campusrun
 
-campusrun: campusrun.cpp
-	g++ $(CFLAGS) campusrun.cpp ppm.cpp log.cpp libggfonts.a -Wall -Wextra $(LFLAGS) -o campusrun
+campusrun: campusrun.cpp tyM.cpp
+	g++ $(CFLAGS)  campusrun.cpp tyM.cpp ppm.cpp log.cpp libggfonts.a -Wall -Wextra $(LFLAGS) -o campusrun
 clean:
 	rm -f campusrun
 	rm -f *.o

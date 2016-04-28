@@ -105,12 +105,13 @@ typedef struct t_bigfoot {
 } Bigfoot;
 Bigfoot bigfoot;
 
-Ppmimage *bigfootImage;
+Ppmimage *runningImage, *deathImage;
 Ppmimage *forestImage=NULL;
-GLuint bigfootTexture;
-GLuint silhouetteTexture;
+GLuint bigfootTexture, bigfootTexture2;
+GLuint silhouetteTexture, DeathsilhouetteTexture;
 GLuint forestTexture;
-int showBigfoot=1;
+int showRunner=1;
+int dead=0;
 int forest=1;
 int silhouette=1;
 int trees=1;
@@ -177,6 +178,7 @@ struct Game {
 };
 
 //function prototypes
+void runnerDeath (Bigfoot &b, double s);
 void initXWindows(void);
 void initOpengl(void);
 void cleanupXWindows(void);
@@ -188,7 +190,6 @@ void physics(void);
 void render(Game *game);
 int check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
-
 int main(void)
 {
     //int keys = 0;
@@ -263,7 +264,7 @@ int main(void)
     return 0;
 }
 
-void makeParticle(Game *game, int x, int y) {
+/*void makeParticle(Game *game, int x, int y) {
     if (game->n >= MAX_PARTICLES)
 	return;
     //position of particle
@@ -273,7 +274,7 @@ void makeParticle(Game *game, int x, int y) {
     p->velocity.y = rnd()*0.1 - 0.5;
     p->velocity.x = direction;
     game->n++;
-}
+}*/
 
 
 void cleanupXWindows(void)
@@ -395,7 +396,8 @@ void initOpengl(void)
     //
     //load the images file into a ppm structure.
     //
-    bigfootImage     = ppm6GetImage("./images/runner/runner_sheet2.ppm");
+    runningImage     = ppm6GetImage("./images/runner/runner_sheet2.ppm");
+    deathImage     = ppm6GetImage("./images/runner/runnerdeath_sheet.ppm");
     forestImage      = ppm6GetImage("./images/gamebackground.ppm");
     //
     //create opengl texture elements
@@ -403,17 +405,17 @@ void initOpengl(void)
     glGenTextures(1, &silhouetteTexture);
     glGenTextures(1, &forestTexture);
     //-------------------------------------------------------------------------
-    //bigfoot
+    //running
     //
-    int w = bigfootImage->width;
-    int h = bigfootImage->height;
+    int w = runningImage->width;
+    int h = runningImage->height;
     //
     glBindTexture(GL_TEXTURE_2D, bigfootTexture);
     //
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-	    GL_RGB, GL_UNSIGNED_BYTE, bigfootImage->data);
+	    GL_RGB, GL_UNSIGNED_BYTE, runningImage->data);
     //-------------------------------------------------------------------------
     //
     //silhouette
@@ -425,17 +427,45 @@ void initOpengl(void)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     //
     //must build a new set of data...
-    unsigned char *silhouetteData = buildAlphaData(bigfootImage);	
+    unsigned char *silhouetteData = buildAlphaData(runningImage);	
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
 	    GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
     free(silhouetteData);
     //glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
     //	GL_RGB, GL_UNSIGNED_BYTE, bigfootImage->data);
     //-------------------------------------------------------------------------
+    //death
+    //
+    int death_w = deathImage->width;
+    int death_h = deathImage->height;
+    //
+    glBindTexture(GL_TEXTURE_2D, bigfootTexture2);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+	    GL_RGB, GL_UNSIGNED_BYTE, deathImage->data);
+    //-------------------------------------------------------------------------
+    //Death silhouette
+    //this is similar to a sprite graphic
+    //
+    glBindTexture(GL_TEXTURE_2D, DeathsilhouetteTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *DeathsilhouetteData = buildAlphaData(deathImage);	
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, death_w, death_h, 0,
+	    GL_RGBA, GL_UNSIGNED_BYTE, DeathsilhouetteData);
+    free(DeathsilhouetteData);
+    //glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
+    //	GL_RGB, GL_UNSIGNED_BYTE, bigfootImage->data);
+    //-------------------------------------------------------------------------
     //
     //forest
-    int forest_w = WINDOW_WIDTH * 2;
-    int forest_h = WINDOW_HEIGHT;
+    //int forest_w = WINDOW_WIDTH * 2;
+    //int forest_h = WINDOW_HEIGHT;
     glBindTexture(GL_TEXTURE_2D, forestTexture);
     //
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
@@ -554,13 +584,13 @@ void checkKeys(XEvent *e)
     }
     switch(key) {
 	case XK_b:
-	    showBigfoot ^= 1;
-	    if (showBigfoot) {
+	    showRunner^= 1;
+	    if (showRunner) {
 		bigfoot.pos[0] = -250.0;
 	    }
 	    break;
 	case XK_d:
-	    deflection ^= 1;
+	    dead ^= 1;
 	    break;
 	case XK_f:
 	    forest ^= 1;
@@ -861,7 +891,7 @@ void checkRaindrops()
 
 void physics(void)
 {
-    if (showBigfoot)
+    if (showRunner)
 	moveBigfoot();
     if (showRain)
 	checkRaindrops();
@@ -943,7 +973,22 @@ void render(Game *game)
 	glEnd();
     }
     backgroundx-=.005;
-    if (showBigfoot) {
+    if(dead) {
+	glPushMatrix();
+	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
+	if (!silhouette) {
+	    glBindTexture(GL_TEXTURE_2D, DeathsilhouetteTexture);
+	} else {
+	    glBindTexture(GL_TEXTURE_2D, DeathsilhouetteTexture);
+	    glEnable(GL_ALPHA_TEST);
+	    glAlphaFunc(GL_GREATER, 0.0f);
+	    glColor4ub(255,255,255,255);
+	}
+	runnerDeath(bigfoot, spritesheetx);
+	glEnd();
+	glPopMatrix();
+    }
+    if (showRunner) {
 	glPushMatrix();
 	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
 	if (!silhouette) {
@@ -972,6 +1017,7 @@ void render(Game *game)
 	//
     }
     spritesheetx += .11111111111;
+
 
 
     float w, h;
@@ -1078,8 +1124,8 @@ void movement(Game *game)
     game->lastMousex = 445;
     game->lastMousey = 540;
     if(set){
-	for(int i = 0; i < 10; i++)
-	    makeParticle(game, game->lastMousex, game->lastMousey);
+	//for(int i = 0; i < 10; i++)
+	    //makeParticle(game, game->lastMousex, game->lastMousey);
     }
     if (game->n <= 0)
 	return;
