@@ -877,7 +877,7 @@ void checkRaindrops()
 		float d1 = node->pos[1] - umbrella.pos[1];
 		float distance = sqrt((d0*d0)+(d1*d1));
 		//Log("distance: %f  umbrella.radius: %f\n",
-		//							distance,umbrella.radius);
+		//	distance,umbrella.radius);
 		if (distance <= umbrella.radius &&
 			node->pos[1] > umbrella.pos[1]) {
 		    if (node->linewidth > 1) {
@@ -1037,8 +1037,8 @@ void render(Game *game)
         if (bigfoot.vel[0] > 0.0) {
             glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
             glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
-            glTexCoord2f(0.111111111f+spritesheetx, 0.0f); glVertex2i( wid,wid);
-            glTexCoord2f(0.111111111f+spritesheetx, 1.0f); glVertex2i( wid,-wid);
+            glTexCoord2f(0.111111111f+spritesheetx,0.0f);glVertex2i( wid,wid);
+            glTexCoord2f(0.111111111f+spritesheetx,1.0f);glVertex2i( wid,-wid);
         } else {
             glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
             glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
@@ -1081,8 +1081,8 @@ void render(Game *game)
 	if (bigfoot.vel[0] > 0.0) {
 	    glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
 	    glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
-	    glTexCoord2f(0.111111111f+spritesheetx, 0.0f); glVertex2i( wid,wid);
-	    glTexCoord2f(0.111111111f+spritesheetx, 1.0f); glVertex2i( wid,-wid);
+	    glTexCoord2f(0.111111111f+spritesheetx, 0.0f);glVertex2i(wid,wid);
+	    glTexCoord2f(0.111111111f+spritesheetx, 1.0f);glVertex2i(wid,-wid);
 	} else {
 	    glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
 	    glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
