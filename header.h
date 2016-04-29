@@ -1,5 +1,21 @@
+//cs335
 //
-#include <iostream>
+//program: rainforest
+//author:  Gordon Griesel
+//date:    2013 to present
+//
+//This program demonstrates the use of OpenGL and XWindows
+//
+//Texture maps are displayed.
+//Press B to see bigfoot roaming his forest.
+//
+//The rain builds up like snow on the ground.
+//Fix it by removing each raindrop for the rain linked list.
+//look for the 
+//
+//
+//
+//
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,8 +34,6 @@ extern "C" {
 #include "fonts.h"
 }
 
-using namespace std;
-
 #define WINDOW_WIDTH  2000
 #define WINDOW_HEIGHT 1000
 #define SEGMENTS 60
@@ -27,17 +41,16 @@ using namespace std;
 #define MAX_PARTICLES 5000
 #define GRAVITY 0.1
 
-int set = 0, direction = -1, jump = 0, slide = 0, counter = 0;
+int set = 0, direction = -1, jump = 0, counter = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
     sprite_x = 140, sprite_y = 75;
-int tmp = 2;
 
 
 //defined types
 typedef double Flt;
 typedef double Vec[3];
 typedef Flt     Matrix[4][4];
-double backgroundx = 0, spritesheetx = 0;
+double backgroundx = 0, spritesheetx = 0, deathsheetx = 0;
 
 //macros
 #define rnd() (((Flt)rand())/(Flt)RAND_MAX)
@@ -92,14 +105,13 @@ typedef struct t_bigfoot {
 } Bigfoot;
 Bigfoot bigfoot;
 
-Ppmimage *bigfootImage;
-Ppmimage *jumpImage;
+Ppmimage *runningImage, *deathImage, *jumpImage;
 Ppmimage *forestImage=NULL;
-GLuint bigfootTexture;
-GLuint jumpTexture;
-GLuint silhouetteTexture;
-GLuint forestTexture;
-int showBigfoot=1;
+GLuint bigfootTexture, bigfootTexture2, bigfootTexture3;
+GLuint silhouetteTexture, DeathsilhouetteTexture, jumpTexture;
+GLuint forestTexture, jumpsilhouetteTexture;
+int showRunner=1;
+int dead=0;
 int forest=1;
 int silhouette=1;
 int trees=1;
@@ -166,6 +178,8 @@ struct Game {
 };
 
 //function prototypes
+void Jumping(double spritesheetx, float wid);
+void runnerDeath (Bigfoot &b, double s);
 void initXWindows(void);
 void initOpengl(void);
 void cleanupXWindows(void);
@@ -178,5 +192,3 @@ void render(Game *game);
 int check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
 
-void Jumping(double spritesheetx, float wid);
-void sliding(double spritesheetx, float wid);
