@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <string>
+#include <cstring>
 #include <unistd.h>
 #include <time.h>
 #include <math.h>
@@ -30,9 +31,11 @@ typedef struct t_bigfoot {
 string convertImage(string filename, string path, string filetype)
 {
     string oldfile = path + filename + filetype;
-    string newfile = filename + ".ppm";
-    filename = system("convert path newfilename");
-//    system(convert  strcat(filename, ".ppm"));
+    string newfile = path + filename + ".ppm";
+
+    //convert ./images/runner/runner_sheet2.ppm ./images/runner/runner_sheet2.png
+    string newstuff =  "convert " + oldfile + " " + newfile;
+    filename = system(newstuff.data());
     return filename;
 
 }
