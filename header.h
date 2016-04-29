@@ -178,7 +178,7 @@ struct Game {
 };
 
 //function prototypes
-void Jumping(double spritesheetx, float wid);
+//void Jumping(Bigfoot &bigfoot,double spritesheetx, float wid);
 void runnerDeath (Bigfoot &b, double s);
 void initXWindows(void);
 void initOpengl(void);

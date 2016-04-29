@@ -802,18 +802,6 @@ void render(Game *game)
     glBegin(GL_QUADS);
     //sleep(.9);
     if(jump){
-/*	glPushMatrix();
-	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
-	if (!silhouette) {
-	    glBindTexture(GL_TEXTURE_2D, jumpsilhouetteTexture);
-	} else {
-	    glBindTexture(GL_TEXTURE_2D, jumpTexture);
-	    glEnable(GL_ALPHA_TEST);
-	    glAlphaFunc(GL_GREATER, 0.0f);
-	    glColor4ub(255,255,255,255);
-	}
-	glEnd();
-	glPopMatrix();*/
 	
 	if(jump == 1){
 	    spritesheetx=0;
@@ -829,7 +817,19 @@ void render(Game *game)
 	    sprite_y = 75;
 	    spritesheetx=0;
 	}
-	Jumping(spritesheetx, wid);
+        glPushMatrix();
+        glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
+        if (!silhouette) {
+            glBindTexture(GL_TEXTURE_2D, jumpsilhouetteTexture);
+        } else {
+            glBindTexture(GL_TEXTURE_2D, DeathsilhouetteTexture);
+            glEnable(GL_ALPHA_TEST);
+            glAlphaFunc(GL_GREATER, 0.0f);
+            glColor4ub(255,255,255,255);
+        }
+	Jumping(bigfoot, spritesheetx, wid);
+        glEnd();
+        glPopMatrix();
     }
 
     if(!jump) {
