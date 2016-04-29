@@ -17,6 +17,7 @@
 //
 //
 #include <stdio.h>
+#include <string>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -33,7 +34,7 @@
 extern "C" {
 #include "fonts.h"
 }
-#include "SOIL.h"
+using namespace std;
 
 
 #define WINDOW_WIDTH  2000
@@ -193,12 +194,8 @@ void physics(void);
 void render(Game *game);
 int check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
-<<<<<<< HEAD
-const bool LoadTextures();
+string convertImage(string f, string p, string ft);
 
-
-=======
->>>>>>> 52e43724015a1bc5b1cee00f76312d5fffb6a720
 int main(void)
 {
     //int keys = 0;
@@ -404,9 +401,17 @@ void initOpengl(void)
     initialize_fonts();
     //
     //load the images file into a ppm structure.
-    //
+    // convertImage(String string) {
+    //  system("convert ./images/runner/jump_sheet.png ./images/runner/jump_sheet.ppm");
+    // }
+    // string = "/images/runner/filename";
+    // jumpImage = convert(string);
+    // convert(string filename.ppm)
+    string path = "images/runner/", filename = "Idle__000", filetype = ".png";
+    convertImage(filename, path, filetype);
+
     jumpImage     = ppm6GetImage("./images/runner/jump_sheet.ppm");
-    runningImage     = ppm6GetImage("./images/runner/runner_sheet2.ppm");
+    //runningImage     = ppm6GetImage("./images/runner/runner_sheet2.ppm");
     deathImage     = ppm6GetImage("./images/runner/runnerdeath_sheet.ppm");
     forestImage      = ppm6GetImage("./images/gamebackground.ppm");
     //
@@ -418,7 +423,7 @@ void initOpengl(void)
     //-------------------------------------------------------------------------
     //death
     //
-    int jump_w = jumpImage->width;
+    int jump_w = jumpImage->width;;
     int jump_h = jumpImage->height;
     //
     glBindTexture(GL_TEXTURE_2D, bigfootTexture3);
