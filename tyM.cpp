@@ -1,4 +1,9 @@
 // TyAnthoney Morrell CMPS 356
+/* This file will perform the animation of the runner dying and will dispaly an 
+   animation the death once the sprite sheet is completely finished. It will 
+   work now however. 
+*/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -27,7 +32,7 @@ typedef struct t_bigfoot {
 
 void runnerDeath (Bigfoot &bigfoot, double spritesheetx) {
     float wid = 60.0f;
-
+    sleep(.99);
     glBegin(GL_QUADS);
     if (bigfoot.vel[0] > 0.0) {
 	glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
@@ -40,5 +45,4 @@ void runnerDeath (Bigfoot &bigfoot, double spritesheetx) {
 	glTexCoord2f(0.1f, 1.0f); glVertex2i( wid, wid);
 	glTexCoord2f(0.1f, 0.0f); glVertex2i( wid,-wid);
     }
-    spritesheetx += .11111111111;
 }
