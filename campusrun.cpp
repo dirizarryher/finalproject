@@ -111,12 +111,13 @@ GLuint bigfootTexture, bigfootTexture2, bigfootTexture3;
 GLuint silhouetteTexture, DeathsilhouetteTexture, jumpTexture;
 GLuint forestTexture;
 int showRunner=1;
-int runnerSpeed = 10000;
+int runnerSpeed = 80000;
 int dead=0;
 int forest=1;
 int silhouette=1;
 int trees=1;
 int showRain=0;
+int deathCounter = 0;
 //
 typedef struct t_raindrop {
     int type;
@@ -199,7 +200,7 @@ int main(void)
     game.n=0;	
 
     //declare a box shape
-    int x = 400, y = 10, length = 4000;
+    /*int x = 400, y = 10, length = 4000;
     //declare a box shape
     game.box[0].width = length;
     game.box[0].height = 10;
@@ -207,7 +208,7 @@ int main(void)
     game.box[0].center.y = y;
     game.circle[0].center.x = 10;
     game.circle[0].center.y = -20;
-    game.circle[0].radius = 100;
+    game.circle[0].radius = 100;*/
 
 
     //game.box[2].width = 10;
@@ -239,7 +240,7 @@ int main(void)
 	//3. Save the current time as our new starting time.
 	timeCopy(&timeStart, &timeCurrent);
 	//4. Add time-span to our countdown amount.
-	physicsCountdown = 80000;
+	physicsCountdown = runnerSpeed;
 	//5. Has countdown gone beyond our physics rate? 
 	//       if yes,
 	//           In a loop...
@@ -621,6 +622,7 @@ void checkKeys(XEvent *e)
 	case XK_d:
 	    dead ^= 1;
 	    showRunner = 0;
+	    runnerSpeed = 1000000;
 	    break;
 	case XK_f:
 	    forest ^= 1;
@@ -1064,8 +1066,11 @@ void render(Game *game)
 	runnerDeath(bigfoot, deathsheetx);
 	glEnd();
 	glPopMatrix();
+	deathCounter++;
+	if (deathCounter == 10)
+	    dead = 0;
     }
-    deathsheetx += .11111111111;
+    deathsheetx += .1111;
     if (showRunner) {
 	glPushMatrix();
 	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
@@ -1172,10 +1177,10 @@ void movement(Game *game)
     Particle *p;
 
     //declare a box shape
-    game->box[1].width = box_length;
+    /*game->box[1].width = box_length;
     game->box[1].height = 40;
     game->box[1].center.x = box_x -= 3;
-    game->box[1].center.y = box_y;
+    game->box[1].center.y = box_y;*/
 
     if (jump > 0) {
 	game->box[2].center.y += 2;
