@@ -1,7 +1,8 @@
 // TyAnthoney Morrell CMPS 356
 /* This file will perform the animation of the runner dying and will dispaly an 
    animation the death once the sprite sheet is completely finished. It will 
-   work now however. 
+   work now however. To run this function execute the file and the hit d to
+   simulate the death.  
 */
 
 #include <stdio.h>

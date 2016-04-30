@@ -111,6 +111,7 @@ GLuint bigfootTexture, bigfootTexture2, bigfootTexture3;
 GLuint silhouetteTexture, DeathsilhouetteTexture, jumpTexture;
 GLuint forestTexture;
 int showRunner=1;
+int runnerSpeed = 10000;
 int dead=0;
 int forest=1;
 int silhouette=1;
@@ -238,7 +239,7 @@ int main(void)
 	//3. Save the current time as our new starting time.
 	timeCopy(&timeStart, &timeCurrent);
 	//4. Add time-span to our countdown amount.
-	physicsCountdown += timeSpan;
+	physicsCountdown = 80000;
 	//5. Has countdown gone beyond our physics rate? 
 	//       if yes,
 	//           In a loop...
