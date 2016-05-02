@@ -1,6 +1,7 @@
 //Ryan Frapwell
-//Final Project Code
-//This code gets called when the sprite jumps. It updates the y axis of the sprite.
+// First created ~4/25/16
+// Last modified 5/2/16
+//This code gets called when the sprite jumps. It updates the y axis of the sprite to make it look like it is jumping.
 
 #include <iostream>
 #include <stdio.h>
@@ -10,9 +11,6 @@
 #include <time.h>
 #include <math.h>
 #include <X11/Xlib.h>
-//#include <X11/Xutil.h>
-//#include <GL/gl.h>
-//#include <GL/glu.h>
 #include <X11/keysym.h>
 #include <GL/glx.h>
 #include "log.h"

@@ -49,7 +49,7 @@ int box_x = 400, box_y = 60, box_length = 40, val = 0,
 typedef double Flt;
 typedef double Vec[3];
 typedef Flt	Matrix[4][4];
-double backgroundx = 0, spritesheetx = 0, deathsheetx = 0;
+double backgroundx = 0, spritesheetx = 0, deathsheetx = 0, jumpsheetx = 0;
 
 //macros
 #define rnd() (((Flt)rand())/(Flt)RAND_MAX)

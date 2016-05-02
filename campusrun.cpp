@@ -1,4 +1,3 @@
-//main stuff
 #include "header.h"
 
 int main(void)
@@ -8,7 +7,7 @@ int main(void)
     game.n=0;	
 
     //declare a box shape
-    int x = 400, y = 10, length = 4000;
+    /*int x = 400, y = 10, length = 4000;
     //declare a box shape
     game.box[0].width = length;
     game.box[0].height = 10;
@@ -16,7 +15,7 @@ int main(void)
     game.box[0].center.y = y;
     game.circle[0].center.x = 10;
     game.circle[0].center.y = -20;
-    game.circle[0].radius = 100;
+    game.circle[0].radius = 100;*/
 
 
     //game.box[2].width = 10;
@@ -48,7 +47,7 @@ int main(void)
 	//3. Save the current time as our new starting time.
 	timeCopy(&timeStart, &timeCurrent);
 	//4. Add time-span to our countdown amount.
-	physicsCountdown += timeSpan;
+	physicsCountdown = runnerSpeed;
 	//5. Has countdown gone beyond our physics rate? 
 	//       if yes,
 	//           In a loop...
@@ -214,7 +213,7 @@ void initOpengl(void)
     //
     //create opengl texture elements
     glGenTextures(1, &bigfootTexture);
-    glGenTextures(1, &jumpTexture);
+    //glGenTextures(1, &jumpTexture);
     glGenTextures(1, &silhouetteTexture);
     glGenTextures(1, &forestTexture);
     //-------------------------------------------------------------------------
@@ -223,17 +222,17 @@ void initOpengl(void)
     int jump_w = jumpImage->width;
     int jump_h = jumpImage->height;
     //
-    glBindTexture(GL_TEXTURE_2D, jumpTexture);
+    glBindTexture(GL_TEXTURE_2D, bigfootTexture3);
     //
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, jump_w, jump_h, 0,
 	    GL_RGB, GL_UNSIGNED_BYTE, jumpImage->data);
     //-------------------------------------------------------------------------
-    //jump silhouette
+    //Death silhouette
     //this is similar to a sprite graphic
     //
-    glBindTexture(GL_TEXTURE_2D, jumpsilhouetteTexture);
+    glBindTexture(GL_TEXTURE_2D, jumpTexture);
     //
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -242,7 +241,6 @@ void initOpengl(void)
     unsigned char *JumpsilhouetteData = buildAlphaData(jumpImage);	
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, jump_w, jump_h, 0,
 	    GL_RGBA, GL_UNSIGNED_BYTE, JumpsilhouetteData);
-    free(JumpsilhouetteData);
     //-------------------------------------------------------------------------
     //running
     //
@@ -381,6 +379,26 @@ void checkMouse(XEvent *e)
     }
 }
 
+/*int check_Gamekeys(XEvent *e, Game *game) {
+  if (e->type == KeyPress) {
+  int key = XLookupKeysym(&e->xkey, 0);
+  if (key == XK_Escape) {
+  return 1;
+  }
+//You may check other keys here
+if (key == XK_s) {
+set ^= 1 ;
+return 0; 
+}
+if (key == XK_Up) {
+if(jump == 0)
+jump = 1;
+return 0; 
+}
+}
+return 0;
+}*/
+
 void checkKeys(XEvent *e)
 {
     //keyboard input?
@@ -409,6 +427,7 @@ void checkKeys(XEvent *e)
 	case XK_d:
 	    dead ^= 1;
 	    showRunner = 0;
+	    runnerSpeed = 1000000;
 	    break;
 	case XK_f:
 	    forest ^= 1;
@@ -467,7 +486,7 @@ void checkKeys(XEvent *e)
 	    break;
 	case XK_Up:
 	    if(jump == 0)
-		jump ^= 1;
+		jump = 1;
 	    break;
 	case XK_Escape:
 	    done=1;
@@ -786,67 +805,64 @@ void render(Game *game)
 	glTexCoord2f(1.0f-backgroundx, 1.0f); glVertex2i(xres, 0);
 	glEnd();
     }
-
-    if (showRunner) {
-	glPushMatrix();
-	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
-    }
-    if (!silhouette) {
-	glBindTexture(GL_TEXTURE_2D, bigfootTexture);
-    } else {
-	glBindTexture(GL_TEXTURE_2D, silhouetteTexture);
-	glEnable(GL_ALPHA_TEST);
-	glAlphaFunc(GL_GREATER, 0.0f);
-	glColor4ub(255,255,255,255);
-    }
-    glBegin(GL_QUADS);
-    //sleep(.9);
     if(jump){
-	
-	if(jump == 1){
 	    spritesheetx=0;
+	if(jump == 1){
+	    showRunner = 0;
+	    //jumpsheetx+= .11111111;
 	}
 	if(jump < 32 && jump > 0) {
-	    sprite_y += 3;
+	    //sprite_y += 3;
+	    bigfoot.pos[1] +=3;
 	    jump++;
+	    //jumpsheetx+= .11111111;
+	    //cout << "jump = " << jump <<endl;
 	} else if(jump >= 32 && jump < 62 ) {
-	    sprite_y -= 3;
+	    //sprite_y -= 3;
+	    bigfoot.pos[1] -=3;
 	    jump ++;
+	    //jumpsheetx += .11111111;
+	    //cout << "jump = " << jump <<endl;
 	} else{
 	    jump = 0;
-	    sprite_y = 75;
+	    //sprite_y = 75;
+	    bigfoot.pos[1] = 75;
+	    jumpsheetx = 0;
 	    spritesheetx=0;
+	    showRunner = 1;
+	    //cout << "jump = " << jump <<endl;
+	    //cout << "in jump end" <<endl;
 	}
-        glPushMatrix();
-        glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
-        if (!silhouette) {
-            glBindTexture(GL_TEXTURE_2D, jumpsilhouetteTexture);
-        } else {
-            glBindTexture(GL_TEXTURE_2D, DeathsilhouetteTexture);
-            glEnable(GL_ALPHA_TEST);
-            glAlphaFunc(GL_GREATER, 0.0f);
-            glColor4ub(255,255,255,255);
-        }
-	Jumping(spritesheetx, wid);
-        glEnd();
-        glPopMatrix();
-    }
-
-    if(!jump) {
-	if (bigfoot.vel[0] > 0.0) {
-	    glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
-	    glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
-	    glTexCoord2f(0.111111111f+spritesheetx,0.0f);glVertex2i( wid,wid);
-	    glTexCoord2f(0.111111111f+spritesheetx,1.0f);glVertex2i( wid,-wid);
+	glPushMatrix();
+	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
+	if (!silhouette) {
+	    glBindTexture(GL_TEXTURE_2D, jumpTexture);
 	} else {
-	    glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
-	    glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
-	    glTexCoord2f(0.1f, 1.0f); glVertex2i( wid, wid);
-	    glTexCoord2f(0.1f, 0.0f); glVertex2i( wid,-wid);
+	    glBindTexture(GL_TEXTURE_2D, silhouetteTexture);
+	    glEnable(GL_ALPHA_TEST);
+	    glAlphaFunc(GL_GREATER, 0.0f);
+	    glColor4ub(255,255,255,255);
 	}
+	Jumping(jumpsheetx, wid);
 	glEnd();
 	glPopMatrix();
     }
+
+    /*if(!jump) {
+      if (bigfoot.vel[0] > 0.0) {
+      glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
+      glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
+      glTexCoord2f(0.111111111f+spritesheetx,0.0f);glVertex2i( wid,wid);
+      glTexCoord2f(0.111111111f+spritesheetx,1.0f);glVertex2i( wid,-wid);
+      } else {
+      glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
+      glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+      glTexCoord2f(0.1f, 1.0f); glVertex2i( wid, wid);
+      glTexCoord2f(0.1f, 0.0f); glVertex2i( wid,-wid);
+      }
+      glEnd();
+      glPopMatrix();
+      }*/
     backgroundx-=.005;
     if(dead) {
 	glPushMatrix();
@@ -862,8 +878,39 @@ void render(Game *game)
 	runnerDeath(bigfoot, deathsheetx);
 	glEnd();
 	glPopMatrix();
+	deathCounter++;
+	if (deathCounter == 10)
+	    dead = 0;
     }
-    deathsheetx += .11111111111;
+    deathsheetx += .1111;
+    if (showRunner) {
+	glPushMatrix();
+	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
+	if (!silhouette) {
+	    glBindTexture(GL_TEXTURE_2D, bigfootTexture);
+	} else {
+	    glBindTexture(GL_TEXTURE_2D, silhouetteTexture);
+	    glEnable(GL_ALPHA_TEST);
+	    glAlphaFunc(GL_GREATER, 0.0f);
+	    glColor4ub(255,255,255,255);
+	}
+	glBegin(GL_QUADS);
+	sleep(.9);
+	if (bigfoot.vel[0] > 0.0) {
+	    glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
+	    glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
+	    glTexCoord2f(0.111111111f+spritesheetx, 0.0f);glVertex2i(wid,wid);
+	    glTexCoord2f(0.111111111f+spritesheetx, 1.0f);glVertex2i(wid,-wid);
+	} else {
+	    glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
+	    glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+	    glTexCoord2f(0.1f, 1.0f); glVertex2i( wid, wid);
+	    glTexCoord2f(0.1f, 0.0f); glVertex2i( wid,-wid);
+	}
+	glEnd();
+	glPopMatrix();
+	//
+    }
     spritesheetx += .11111111111;
 
 
@@ -942,10 +989,30 @@ void movement(Game *game)
     Particle *p;
 
     //declare a box shape
-    game->box[1].width = box_length;
-    game->box[1].height = 40;
-    game->box[1].center.x = box_x -= 3;
-    game->box[1].center.y = box_y;
+    /*game->box[1].width = box_length;
+      game->box[1].height = 40;
+      game->box[1].center.x = box_x -= 3;
+      game->box[1].center.y = box_y;*/
+
+    /*   if (jump > 0) {
+	 game->box[2].center.y += 2;
+	 jump++;
+	 if (jump == 51)
+	 jump = -50;
+	 } 
+	 else {
+	 if(game->box[2].center.y > sprite_y) {
+	 game->box[2].center.y -= 2;
+	 sleep(.8);
+	 jump ++;
+	 }
+	 }
+	 if (val == 0 ) { 
+	 box_y += 60;
+	 }
+	 else { 
+	 box_y -= 60;
+	 }*/
 
     if ( game->box[1].center.x < -40)
 	box_x = 1500;
