@@ -827,7 +827,7 @@ void render(Game *game)
             glAlphaFunc(GL_GREATER, 0.0f);
             glColor4ub(255,255,255,255);
         }
-	Jumping(bigfoot, spritesheetx, wid);
+	Jumping(spritesheetx, wid);
         glEnd();
         glPopMatrix();
     }

@@ -15,7 +15,6 @@
 //
 //
 //
-//
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -49,7 +48,7 @@ int box_x = 400, box_y = 60, box_length = 40, val = 0,
 //defined types
 typedef double Flt;
 typedef double Vec[3];
-typedef Flt     Matrix[4][4];
+typedef Flt	Matrix[4][4];
 double backgroundx = 0, spritesheetx = 0, deathsheetx = 0;
 
 //macros
@@ -57,9 +56,9 @@ double backgroundx = 0, spritesheetx = 0, deathsheetx = 0;
 #define random(a) (rand()%a)
 #define MakeVector(x, y, z, v) (v)[0]=(x),(v)[1]=(y),(v)[2]=(z)
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
-#define VecDot(a,b)     ((a)[0]*(b)[0]+(a)[1]*(b)[1]+(a)[2]*(b)[2])
+#define VecDot(a,b)	((a)[0]*(b)[0]+(a)[1]*(b)[1]+(a)[2]*(b)[2])
 #define VecSub(a,b,c) (c)[0]=(a)[0]-(b)[0]; \
-                             (c)[1]=(a)[1]-(b)[1]; \
+			     (c)[1]=(a)[1]-(b)[1]; \
 (c)[2]=(a)[2]-(b)[2]
 //constants
 const float timeslice = 1.0f;
@@ -82,7 +81,7 @@ double timeSpan=0.0;
 unsigned int upause=0;
 double timeDiff(struct timespec *start, struct timespec *end) {
     return (double)(end->tv_sec - start->tv_sec ) +
-        (double)(end->tv_nsec - start->tv_nsec) * oobillion;
+	(double)(end->tv_nsec - start->tv_nsec) * oobillion;
 }
 void timeCopy(struct timespec *dest, struct timespec *source) {
     memcpy(dest, source, sizeof(struct timespec));
@@ -109,13 +108,15 @@ Ppmimage *runningImage, *deathImage, *jumpImage;
 Ppmimage *forestImage=NULL;
 GLuint bigfootTexture, bigfootTexture2, bigfootTexture3;
 GLuint silhouetteTexture, DeathsilhouetteTexture, jumpTexture;
-GLuint forestTexture, jumpsilhouetteTexture;
+GLuint forestTexture;
 int showRunner=1;
+int runnerSpeed = 80000;
 int dead=0;
 int forest=1;
 int silhouette=1;
 int trees=1;
 int showRain=0;
+int deathCounter = 0;
 //
 typedef struct t_raindrop {
     int type;
@@ -178,7 +179,7 @@ struct Game {
 };
 
 //function prototypes
-//void Jumping(Bigfoot &bigfoot,double spritesheetx, float wid);
+void Jumping(double spritesheetx, float wid);
 void runnerDeath (Bigfoot &b, double s);
 void initXWindows(void);
 void initOpengl(void);
@@ -191,4 +192,3 @@ void physics(void);
 void render(Game *game);
 int check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
-
