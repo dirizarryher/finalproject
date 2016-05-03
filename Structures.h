@@ -15,10 +15,9 @@
 //#include <GL/gl.h>
 //#include <GL/glu.h>
 #include <X11/keysym.h>
-#include <gl/glx.h>
+#include <GL/glx.h>
 #include "ppm.h"
 #include "log.h"
-#include "Structures.h"
 extern "C" {
 #include "fonts.h"
 }
@@ -58,7 +57,7 @@ struct Runner
 	Vec vel;
 	float angle;
 	float color[3];
-	bool damaged;
+	bool dead;
 	Runner() {
 		/*VecZero(dir);
 		pos[0] = (Flt) (xres / 2);

@@ -1,74 +1,143 @@
 // David A. Hernandez II CS335
+#include "davidH.h"
 #include "Structures.h"
 #include <cstdio>
 //#include <FMOD/fmod.h>
 //#include <FMOD/wincompat.h>
-#include <fmod.h>
+//#include <fmod.h>
 extern "C" {
 #include "fonts.h"
 }
 
+Ppmimage *idleImage = NULL;
 Ppmimage *runningImage = NULL;
 Ppmimage *jumpImage = NULL;
 Ppmimage *deathImage = NULL;
-GLuint runnerTexture, jumpTexture, deathTexture;
+GLuint runnerTexture, jumpTexture, deathTexture, idleTexture;
 
-void getRunnerTexture(void);
-void setRunnerTexture(Game *g);
+unsigned char *buildAlphaData(Ppmimage *img);
 
 void getRunnerTexture(void)
 {
-	runningImage = ppm6GetImage("./images/runner/runner_sheet2.ppm");
-	jumpImage = ppm6GetImage("./images/runner/runner_sheet2.ppm");
-	deathImage = ppm6GetImage("./images/runner/runner_sheet2.ppm");
-	runningImage = ppm6GetImage("./images/runner/runner_sheet2.ppm");
+    //Loading the images file into a PPM structure
+    idleImage = ppm6GetImage("./images/runner/idle_sheet.ppm");
+    runningImage = ppm6GetImage("./images/runner/runner_sheet2.ppm");
+    jumpImage = ppm6GetImage("./images/runner/jump_sheet.ppm");
+    deathImage = ppm6GetImage("./images/runner/runner_sheet2.ppm");
 
-	glGenTextures(1, &runnerTexture);
-	glGenTextures(1, &jumpTexture);
-	glGenTextures(1, &deathTexture);
+    //Creating OPGL texture elements
+    glGenTextures(1, &idleTexture);
+    glGenTextures(1, &runnerTexture);
+    glGenTextures(1, &jumpTexture);
+    glGenTextures(1, &deathTexture);
 
-	glBindTexture(GL_TEXTURE_2D, runnerTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER_GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER_GL_NEAREST);
-	glTexImage2d(GL_TEXTURE_2D, 0, 3, runningImage->w, runningImage->h,
-		0, GL_RGB, GL_UNSIGNED_BYTE, runningImage->data);
+//------------------------------------------------------------------------
+//idleTexture
+    //TextureImage for runner when running
+    glBindTexture(GL_TEXTURE_2D, idleTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, idleImage->width, idleImage->height,
+            0, GL_RGB, GL_UNSIGNED_BYTE, idleImage->data);
 
-	glBindTexture(GL_TEXTURE_2D, jumpTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER_GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER_GL_NEAREST);
-	glTexImage2d(GL_TEXTURE_2D, 0, 3, jumpImage->w, jumpImage->h,
-		0, GL_RGB, GL_UNSIGNED_BYTE, jumpImage->data);
+    //Silhouettetexture for Running
+    glBindTexture(GL_TEXTURE_2D, idleTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-	glBindTexture(GL_TEXTURE_2D, deathTexture);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER_GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER_GL_NEAREST);
-	glTexImage2d(GL_TEXTURE_2D, 0, 3, deathImage->w, deathImage->h,
-		0, GL_RGB, GL_UNSIGNED_BYTE, deathImage->data);
+    unsigned char *idleSilhouetteData = buildAlphaData(idleImage);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, idleImage->width, 
+            idleImage->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 
+            idleSilhouetteData);
+
+
+//------------------------------------------------------------------------
+//runnerTexture
+    //TextureImage for runner when running
+    glBindTexture(GL_TEXTURE_2D, runnerTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, runningImage->width, 
+            runningImage->height, 0, GL_RGB, GL_UNSIGNED_BYTE,
+            runningImage->data);
+
+    //Silhouettetexture for Running
+    glBindTexture(GL_TEXTURE_2D, runnerTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    unsigned char *runnerSilhouetteData = buildAlphaData(runningImage);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, runningImage->width,
+            runningImage->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+            runnerSilhouetteData);
+
+
+//------------------------------------------------------------------------
+//jumpTexture
+    //TextureImage when Runner jumps
+    glBindTexture(GL_TEXTURE_2D, jumpTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, jumpImage->width, jumpImage->height,
+            0, GL_RGB, GL_UNSIGNED_BYTE, jumpImage->data);
+
+    //Silhouettetexture for Running
+    glBindTexture(GL_TEXTURE_2D, runnerTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    unsigned char *jumpSilhouetteData = buildAlphaData(jumpImage);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, jumpImage->width,
+            jumpImage->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+            jumpSilhouetteData);
+
+
+//------------------------------------------------------------------------
+    //SilhouetteTexture for dying
+    glBindTexture(GL_TEXTURE_2D, deathTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    unsigned char *deathSilhouetteData = buildAlphaData(deathImage);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, deathImage->width,
+            deathImage->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+            deathSilhouetteData);
+
+    //TextureImage when Runner dies
+    glBindTexture(GL_TEXTURE_2D, deathTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, deathImage->width, deathImage->height,
+            0, GL_RGB, GL_UNSIGNED_BYTE, deathImage->data);
 }
 
-void init_sounds(void)
-{
-	if (fmod_init()) {
-		printf("ERROR");
-		return;
-	}
-	if (fmod_createsound((char *)"./sounds/untitled.mp3", 0)) {
-		printf("ERROR");
-		return;
-	}
-	if (fmod_createsound((char *)"./sounds/untitled2.mp3", 1)) {
-		printf("ERROR");
-		return;
-	}
-	fmod_setmode(0, FMOD_LOOP_NORMAL);
-	fmod_setmode(1, FMOD_LOOP_NORMAL);
-}
+/*
+   void init_sounds(void)
+   {
+   if (fmod_init()) {
+   printf("ERROR");
+   return;
+   }
+   if (fmod_createsound((char *)"./sounds/untitled.mp3", 0)) {
+   printf("ERROR");
+   return;
+   }
+   if (fmod_createsound((char *)"./sounds/untitled2.mp3", 1)) {
+   printf("ERROR");
+   return;
+   }
+   fmod_setmode(0, FMOD_LOOP_NORMAL);
+   fmod_setmode(1, FMOD_LOOP_NORMAL);
+   }
 
-void play_music(int a)
-{
-	fmod_playsound(a);
-}
+   void play_music(int a)
+   {
+   fmod_playsound(a);
+   }
+   */
 
+//Converts an image with any file extension imported into 
+//images/runner/ directory into a ppm image
 string convertImage(string filename, string path, string filetype)
 {
     string oldfile = path + filename + filetype;
@@ -80,29 +149,32 @@ string convertImage(string filename, string path, string filetype)
     return filename;
 }
 
-bool endGame(Game *g)
+//Boolean value to determine if runner touched an obstacle
+/*bool endGame(Game *g)
 {
-	//If runner dies, game over
-	if (g->runner.dead >= 100)
-		return true;
-	else
-		return false;
+    //If runner dies, game over
+    if (runner.dead == 1)
+        return true;
+    else
+        return false;
 }
+*/
 
+//Game Over Menu if runner dies
 void endMenu(Game *g)
 {
-	int yellow = 0x00ffff00;
-	int redd = 0x00ff0000;
+    int yellow = 0x00ffff00;
+    int red = 0x00ff0000;
 
-	Rect r;
-	r.bot = yres - 300;
-	r.left = 600;
-	ggprint16(&r, 50, red, "GAME OVER");
-	ggprint16(&r, 50, red, "You died!");
-	ggprint16(&r, 50, yellow, "Your Score: %i", g->score);
-	ggprint16(&r, 50, yellow, "Your Time: %i seconds", g->gameTimer); 
-	
+    Rect r;
+    r.bot = yres - 300;
+    r.left = 600;
+    ggprint16(&r, 50, red, "GAME OVER");
+    ggprint16(&r, 50, red, "You died!");
+    ggprint16(&r, 50, yellow, "Your Score: %i", g->score);
+    ggprint16(&r, 50, yellow, "Your Time: %i seconds", g->gameTimer); 
+
     r.bot = yres - 600;
-	ggprint16(&r, 50, yellow, "Press ESC to Exit");
+    ggprint16(&r, 50, yellow, "Press ESC to Exit");
 }
 

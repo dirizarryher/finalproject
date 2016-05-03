@@ -30,6 +30,7 @@
 #include <GL/glx.h>
 #include "log.h"
 #include "ppm.h"
+#include "Structures.h"
 extern "C" {
 #include "fonts.h"
 }
@@ -105,10 +106,10 @@ typedef struct t_bigfoot {
 } Bigfoot;
 Bigfoot bigfoot;
 
-Ppmimage *runningImage, *deathImage, *jumpImage;
+//Ppmimage *runningImage, *deathImage, *jumpImage;
 Ppmimage *forestImage=NULL;
-GLuint bigfootTexture, bigfootTexture2, bigfootTexture3;
-GLuint silhouetteTexture, DeathsilhouetteTexture, jumpTexture;
+//GLuint bigfootTexture, bigfootTexture2, bigfootTexture3;
+//GLuint silhouetteTexture, DeathsilhouetteTexture, jumpTexture;
 GLuint forestTexture;
 int showRunner=1;
 int runnerSpeed = 80000;
@@ -205,9 +206,10 @@ void initXWindows(void);
 void initOpengl(void);
 void cleanupXWindows(void);
 void checkResize(XEvent *e);
+void checkMouse(XEvent *e, Game *g);
 void checkMouse(XEvent *e);
 void checkKeys(XEvent *e);
-void init();
+void init(Game *g);
 void physics(void);
 void render(Game *game);
 int check_Gamekeys(XEvent *e, Game *game);
@@ -252,7 +254,7 @@ int main(void)
 			checkMouse(&e, &game);
 			checkKeys(&e);
 			//keys = check_Gamekeys(&e, &game);
-			if (argc > 1) {
+/*      	if (argc > 1) {
 				string skip = argv[1];
 				transform(skip.begin(), skip.end(), skip.begin(), ::tolower);
 				if (skip == "skip") {
@@ -268,7 +270,7 @@ int main(void)
 				cout << "You can also skip the start menu with: " << argv[0] << " skip " << endl;
 			}
 		}
-		Rect r;
+*/		Rect r;
 		r.bot = yres - 100;
 		r.left = 500;
 		r.center = 0;
@@ -287,17 +289,14 @@ int main(void)
 		if (done == 5) {
 			r.bot = yres - 200;
 			r.left = 675;
-			ggprint16(&r, 36, 0xffffffff, "Race against other users 
-				for the highest score!");
-					ggprint16(&r, 36, 0xffffffff, "Jump or slide under obstacles
-						to continue running!");
+			ggprint16(&r, 36, 0xffffffff, "Race against other users for the highest score!");
+					ggprint16(&r, 36, 0xffffffff, "Jump or slide under obstacles to continue running!");
 						ggprint16(&r, 36, 0xffffffff, "Watch out for that tree, George!");
-			ggprint16(&r, 36, 0xffffffff, "Idk what other instructions to give you. 
-				It's pretty straightforward.");
+			ggprint16(&r, 36, 0xffffffff, "Idk what other instructions to give you. It's pretty straightforward.");
 		}
 		//If user selects Start Game
 		if (done == 3) {
-			play_music(0);
+			//play_music(0);
 			init(&game);
 			break;
 		}
@@ -311,7 +310,7 @@ int main(void)
 			XEvent e;
 			XNextEvent(dpy, &e);
 			checkResize(&e);
-			checkMouse(&e);
+			checkMouse(&e, &game);
 			done = checkKeys(&e);
 			//keys = check_Gamekeys(&e, &game);
 		}
@@ -479,7 +478,7 @@ void initOpengl(void)
 	initialize_fonts();
 	//load_background();
 
-	
+	/*
 	//load the images file into a ppm structure.
 	//
 	jumpImage     = ppm6GetImage("./images/runner/jump_sheet.ppm");
@@ -587,6 +586,7 @@ void initOpengl(void)
 			forestImage->width, forestImage->height,
 			0, GL_RGB, GL_UNSIGNED_BYTE, forestImage->data);
 	//-------------------------------------------------------------------------
+    */
 }
 void checkResize(XEvent *e)
 {
@@ -606,15 +606,10 @@ void initSounds(void)
 	//Fmod is not allowed.
 	//OpenAL sound only.
 	//Look for the openalTest folder under code.
-
-
-
-
-
-
-
-
 }
+
+
+
 void init() {
 	//Initialize boxes here
 	for (int i = 0; i < 5; j++) {
@@ -624,6 +619,7 @@ void init() {
 		ob->height = 50;
 
 	}
+
 
 
 
@@ -797,7 +793,6 @@ Flt VecNormalize(Vec vec)
 	vec[2] = zlen * tlen;
 	return(len);
 }
-
 void cleanupRaindrops(void)
 {
 	Raindrop *s;
@@ -808,32 +803,23 @@ void cleanupRaindrops(void)
 	}
 	ihead=NULL;
 }
-
 void deleteRain(Raindrop *node)
 {
 	//remove a node from linked list
 	//this line keeps the compiler happy for now.
 	if (node) {}
-
-
 	//hints:
 	//check for some special cases:
 	//1. only 1 node in list (it is also the head node)
 	//2. node at beginning of list (it is also the head node)
 	//3. node at end of list.
 	//4. node somewhere else in list.
-
 	//if (node->prev == NULL) <--- node at beginning of list.
-
-
-
-
-
-
-
 	//At the end of this function, free the node's memory,
 	//and set the node to NULL.
 }
+
+
 
 void moveBigfoot()
 {
@@ -857,7 +843,6 @@ void moveBigfoot()
 	if (addgrav)
 		bigfoot.vel[1] -= 0.75;
 }
-
 
 void createRaindrop(const int n)
 {
@@ -937,9 +922,6 @@ void checkRaindrops()
 				int r = random(50);
 				if (r==1) {
 					//play sound here...
-
-
-
 				}
 				//sound plays once per raindrop
 				node->sound=1;
