@@ -1,37 +1,15 @@
 // TyAnthoney Morrell CMPS 356
 /* This file will perform the animation of the runner dying and will dispaly an 
-   animation the death once the sprite sheet is completely finished. It will 
-   work now however. To run this function execute the file and the hit d to
-   simulate the death.  
+   animation of the death once the sprite sheet is completely finished. The 
+   sprite sheet will need to be adjusted since something happened to the size
+   but this will dispaly an animation for the time being. To end the game hit
+   escape  
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-#include <time.h>
-#include <math.h>
-#include <X11/Xlib.h>
-//#include <X11/Xutil.h>
-////#include <GL/gl.h>
-////#include <GL/glu.h>
-#include <X11/keysym.h>
-#include <GL/glx.h>
-#include "log.h"
-#include "ppm.h"
+#include "tyM.h"
 
-//defined types
-typedef double Flt;
-typedef double Vec[3];
-typedef Flt     Matrix[4][4];
-//double backgroundx = 0, spritesheetx = 0;
-
-typedef struct t_bigfoot {
-        Vec pos;
-	Vec vel;
-} Bigfoot;
-
-void runnerDeath (Bigfoot &bigfoot, double spritesheetx) {
+void runnerDeath (Bigfoot &bigfoot, double spritesheetx) 
+{
     float wid = 60.0f;
     glBegin(GL_QUADS);
     if (bigfoot.vel[0] > 0.0) {

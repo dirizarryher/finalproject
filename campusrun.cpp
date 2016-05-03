@@ -118,6 +118,7 @@ int silhouette=1;
 int trees=1;
 int showRain=0;
 int deathCounter = 0;
+char user[20];
 //
 typedef struct t_raindrop {
     int type;
@@ -180,6 +181,7 @@ struct Game {
 };
 
 //function prototypes
+void saveData(char *u_Name, int score);
 void Jumping(double spritesheetx, float wid);
 void runnerDeath (Bigfoot &b, double s);
 void initXWindows(void);
@@ -195,6 +197,7 @@ int check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
 int main(void)
 {
+    memcpy(user, "temp", 5);
     //int keys = 0;
     Game game;
     game.n=0;	
@@ -268,15 +271,15 @@ int main(void)
 }
 
 /*void makeParticle(Game *game, int x, int y) {
-    if (game->n >= MAX_PARTICLES)
-	return;
-    //position of particle
-    Particle *p = &game->particle[game->n];
-    p->s.center.x = rand() % 51 + 380;
-    p->s.center.y = y;
-    p->velocity.y = rnd()*0.1 - 0.5;
-    p->velocity.x = direction;
-    game->n++;
+  if (game->n >= MAX_PARTICLES)
+  return;
+//position of particle
+Particle *p = &game->particle[game->n];
+p->s.center.x = rand() % 51 + 380;
+p->s.center.y = y;
+p->velocity.y = rnd()*0.1 - 0.5;
+p->velocity.x = direction;
+game->n++;
 }*/
 
 
@@ -623,6 +626,7 @@ void checkKeys(XEvent *e)
 	    dead ^= 1;
 	    showRunner = 0;
 	    runnerSpeed = 1000000;
+	    saveData(user, 505);
 	    break;
 	case XK_f:
 	    forest ^= 1;
@@ -1005,51 +1009,51 @@ void render(Game *game)
 	glEnd();
     }
     if(jump){
-        glPushMatrix();
-        glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
-        if (!silhouette) {
-            glBindTexture(GL_TEXTURE_2D, jumpTexture);
-        } else {
-            glBindTexture(GL_TEXTURE_2D, silhouetteTexture);
-            glEnable(GL_ALPHA_TEST);
-            glAlphaFunc(GL_GREATER, 0.0f);
-            glColor4ub(255,255,255,255);
-        }
+	glPushMatrix();
+	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
+	if (!silhouette) {
+	    glBindTexture(GL_TEXTURE_2D, jumpTexture);
+	} else {
+	    glBindTexture(GL_TEXTURE_2D, silhouetteTexture);
+	    glEnable(GL_ALPHA_TEST);
+	    glAlphaFunc(GL_GREATER, 0.0f);
+	    glColor4ub(255,255,255,255);
+	}
 
-        if(jump == 1)
-            spritesheetx=0;
-        if(jump < 32 && jump > 0) {
-            sprite_y += 3;
-            jump++;
-            //cout << "jump = " << jump <<endl;
-        } else if(jump >= 32 && jump < 62 ) {
-            sprite_y -= 3;
-            jump ++;
-            //cout << "jump = " << jump <<endl;
-        } else{
-            jump = 0;
-            sprite_y = 75;
-            spritesheetx=0;
-            //cout << "jump = " << jump <<endl;
-            //cout << "in jump end" <<endl;
-        }
-        Jumping(spritesheetx, wid);
+	if(jump == 1)
+	    spritesheetx=0;
+	if(jump < 32 && jump > 0) {
+	    sprite_y += 3;
+	    jump++;
+	    //cout << "jump = " << jump <<endl;
+	} else if(jump >= 32 && jump < 62 ) {
+	    sprite_y -= 3;
+	    jump ++;
+	    //cout << "jump = " << jump <<endl;
+	} else{
+	    jump = 0;
+	    sprite_y = 75;
+	    spritesheetx=0;
+	    //cout << "jump = " << jump <<endl;
+	    //cout << "in jump end" <<endl;
+	}
+	Jumping(spritesheetx, wid);
     }
 
     if(!jump) {
-        if (bigfoot.vel[0] > 0.0) {
-            glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
-            glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
-            glTexCoord2f(0.111111111f+spritesheetx,0.0f);glVertex2i( wid,wid);
-            glTexCoord2f(0.111111111f+spritesheetx,1.0f);glVertex2i( wid,-wid);
-        } else {
-            glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
-            glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
-            glTexCoord2f(0.1f, 1.0f); glVertex2i( wid, wid);
-            glTexCoord2f(0.1f, 0.0f); glVertex2i( wid,-wid);
-        }
-        glEnd();
-        glPopMatrix();
+	if (bigfoot.vel[0] > 0.0) {
+	    glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
+	    glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
+	    glTexCoord2f(0.111111111f+spritesheetx,0.0f);glVertex2i( wid,wid);
+	    glTexCoord2f(0.111111111f+spritesheetx,1.0f);glVertex2i( wid,-wid);
+	} else {
+	    glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
+	    glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+	    glTexCoord2f(0.1f, 1.0f); glVertex2i( wid, wid);
+	    glTexCoord2f(0.1f, 0.0f); glVertex2i( wid,-wid);
+	}
+	glEnd();
+	glPopMatrix();
     }
     backgroundx-=.005;
     if(dead) {
@@ -1067,8 +1071,10 @@ void render(Game *game)
 	glEnd();
 	glPopMatrix();
 	deathCounter++;
-	if (deathCounter == 10)
-	    dead = 0;
+	if (deathCounter == 0) {
+	    //dead = 0;
+	}
+	deathCounter++;
     }
     deathsheetx += .1111;
     if (showRunner) {
@@ -1178,9 +1184,9 @@ void movement(Game *game)
 
     //declare a box shape
     /*game->box[1].width = box_length;
-    game->box[1].height = 40;
-    game->box[1].center.x = box_x -= 3;
-    game->box[1].center.y = box_y;*/
+      game->box[1].height = 40;
+      game->box[1].center.x = box_x -= 3;
+      game->box[1].center.y = box_y;*/
 
     if (jump > 0) {
 	game->box[2].center.y += 2;
@@ -1208,7 +1214,7 @@ void movement(Game *game)
     game->lastMousey = 540;
     if(set){
 	//for(int i = 0; i < 10; i++)
-	    //makeParticle(game, game->lastMousex, game->lastMousey);
+	//makeParticle(game, game->lastMousex, game->lastMousey);
     }
     if (game->n <= 0)
 	return;
