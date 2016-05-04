@@ -1,7 +1,210 @@
-#include "header.h"
+//cs335
+//
+//program: rainforest
+//author:  Gordon Griesel
+//date:    2013 to present
+//
+//This program demonstrates the use of OpenGL and XWindows
+//
+//Texture maps are displayed.
+//Press B to see bigfoot roaming his forest.
+//
+//The rain builds up like snow on the ground.
+//Fix it by removing each raindrop for the rain linked list.
+//look for the 
+//
+//
+//
+//
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unistd.h>
+#include <time.h>
+#include <math.h>
+#include <X11/Xlib.h>
+//#include <X11/Xutil.h>
+//#include <GL/gl.h>
+//#include <GL/glu.h>
+#include <X11/keysym.h>
+#include <GL/glx.h>
+#include "log.h"
+#include "ppm.h"
+extern "C" {
+#include "fonts.h"
+}
+
+#define WINDOW_WIDTH  2000
+#define WINDOW_HEIGHT 1000
+#define SEGMENTS 60
+#define ADJUST (3.14159 * 2.0) / (float)SEGMENTS
+#define MAX_PARTICLES 5000
+#define GRAVITY 0.1
+
+int jump = 0;
+int set = 0, direction = -1, counter = 0, jumpcount = 0;
+int box_x = 400, box_y = 60, box_length = 40, val = 0,
+    sprite_x = 140, sprite_y = 75;
+float x = 400, y = 75, z = 1;
+
+//defined types
+typedef double Flt;
+typedef double Vec[3];
+typedef Flt	Matrix[4][4];
+double backgroundx = 0, spritesheetx = 0, deathsheetx = 0; 
+double jumpsheetx = 0;
+
+//macros
+#define rnd() (((Flt)rand())/(Flt)RAND_MAX)
+#define random(a) (rand()%a)
+#define MakeVector(x, y, z, v) (v)[0]=(x),(v)[1]=(y),(v)[2]=(z)
+#define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
+#define VecDot(a,b)	((a)[0]*(b)[0]+(a)[1]*(b)[1]+(a)[2]*(b)[2])
+#define VecSub(a,b,c) (c)[0]=(a)[0]-(b)[0]; \
+			     (c)[1]=(a)[1]-(b)[1]; \
+(c)[2]=(a)[2]-(b)[2]
+//constants
+const float timeslice = 1.0f;
+const float gravity = -0.2f;
+#define ALPHA 1
+
+//X Windows variables
+Display *dpy;
+Window win;
+
+
+//-----------------------------------------------------------------------------
+//Setup timers
+const double physicsRate = 1.0 / 30.0;
+const double oobillion = 1.0 / 1e9;
+struct timespec timeStart, timeCurrent;
+struct timespec timePause;
+double physicsCountdown=0.0;
+double timeSpan=0.0;
+unsigned int upause=0;
+double timeDiff(struct timespec *start, struct timespec *end) {
+    return (double)(end->tv_sec - start->tv_sec ) +
+	(double)(end->tv_nsec - start->tv_nsec) * oobillion;
+}
+void timeCopy(struct timespec *dest, struct timespec *source) {
+    memcpy(dest, source, sizeof(struct timespec));
+}
+//-----------------------------------------------------------------------------
+
+int tmp = 0;
+int done=0;
+int xres=800, yres=600;
+
+typedef struct t_background {
+    Vec pos;
+    Vec vel;
+} Background;
+Background background;
+
+typedef struct t_bigfoot {
+    Vec pos;
+    Vec vel;
+} Bigfoot;
+Bigfoot bigfoot;
+
+Ppmimage *runningImage, *deathImage, *jumpImage, *boostImage;
+Ppmimage *forestImage=NULL;
+GLuint runningTexture, deathTexture, jumpTexture, speedTexture;
+GLuint silhouetteTexture, DeathsilhouetteTexture, JumpsilhouetteTexture;
+GLuint forestTexture;
+char cScore[400];
+int score = 0;
+int distance = 0;
+int showRunner=1;
+int runnerSpeed = 80000;
+int dead=0;
+int forest=1;
+int silhouette=1;
+int trees=1;
+int showRain=0;
+int deathCounter = 0;
+char user[20];
+//
+typedef struct t_raindrop {
+    int type;
+    int linewidth;
+    int sound;
+    Vec pos;
+    Vec lastpos;
+    Vec vel;
+    Vec maxvel;
+    Vec force;
+    float length;
+    float color[4];
+    struct t_raindrop *prev;
+    struct t_raindrop *next;
+} Raindrop;
+Raindrop *ihead=NULL;
+int ndrops=1;
+int totrain=0;
+int maxrain=0;
+void deleteRain(Raindrop *node);
+void cleanupRaindrops(void);
+//
+#define UMBRELLA_FLAT  0
+#define UMBRELLA_ROUND 1
+typedef struct t_umbrella {
+    int shape;
+    Vec pos;
+    Vec lastpos;
+    float width;
+    float width2;
+    float radius;
+} Umbrella;
+Umbrella umbrella;
+int showUmbrella=0;
+int deflection=0;
+
+//Structures
+struct Vecs {
+    float x, y, z;
+};
+
+struct Shape {
+    float width, height;
+    float radius;
+    Vecs center;
+};
+
+struct Particle {
+    Shape s;
+    Vecs velocity;
+};
+
+struct Game {
+    Shape box[5];
+    Shape circle[2];
+    Particle particle[MAX_PARTICLES];
+    int n;
+    int lastMousex;
+    int lastMousey;
+};
+
+//function prototypes
+void saveData(char *u_Name, int score);
+int Jumping (double spritesheetx, float wid, int jump, Bigfoot &bigfoot, GLuint jumpTexture);
+void runnerDeath (Bigfoot &b, double s);
+void initXWindows(void);
+void initOpengl(void);
+void cleanupXWindows(void);
+void checkResize(XEvent *e);
+void checkMouse(XEvent *e);
+void checkKeys(XEvent *e);
+void init();
+void physics(void);
+void render(Game *game);
+int check_Gamekeys(XEvent *e, Game *game);
+void movement(Game *game);
+void projectImage(float x, float y, float z, GLuint texture);
 
 int main(void)
 {
+    memcpy(user, "temp", 5);
     //int keys = 0;
     Game game;
     game.n=0;	
@@ -63,7 +266,7 @@ int main(void)
 	    physicsCountdown -= physicsRate;
 	}
 	//Always render every frame.
-	counter++;
+	score++;
 	movement(&game);
 	render(&game);
 	glXSwapBuffers(dpy, win);
@@ -75,15 +278,15 @@ int main(void)
 }
 
 /*void makeParticle(Game *game, int x, int y) {
-    if (game->n >= MAX_PARTICLES)
-	return;
-    //position of particle
-    Particle *p = &game->particle[game->n];
-    p->s.center.x = rand() % 51 + 380;
-    p->s.center.y = y;
-    p->velocity.y = rnd()*0.1 - 0.5;
-    p->velocity.x = direction;
-    game->n++;
+  if (game->n >= MAX_PARTICLES)
+  return;
+//position of particle
+Particle *p = &game->particle[game->n];
+p->s.center.x = rand() % 51 + 380;
+p->s.center.y = y;
+p->velocity.y = rnd()*0.1 - 0.5;
+p->velocity.x = direction;
+game->n++;
 }*/
 
 
@@ -206,33 +409,62 @@ void initOpengl(void)
     //
     //load the images file into a ppm structure.
     //
-    jumpImage     = ppm6GetImage("./images/runner/jump_sheet.ppm");
-    runningImage     = ppm6GetImage("./images/runner/runner_sheet2.ppm");
+    jumpImage      = ppm6GetImage("./images/runner/jump_sheet.ppm");
+    runningImage   = ppm6GetImage("./images/runner/runner_sheet2.ppm");
     deathImage     = ppm6GetImage("./images/runner/runnerdeath_sheet.ppm");
-    forestImage      = ppm6GetImage("./images/gamebackground.ppm");
+    forestImage    = ppm6GetImage("./images/gamebackground.ppm");
+    boostImage     = ppm6GetImage("./images/speedboost.ppm");
     //
     //create opengl texture elements
-    glGenTextures(1, &bigfootTexture);
+   // glGenTextures(1, &bigfootTexture);
     //glGenTextures(1, &jumpTexture);
+    glGenTextures(1, &runningTexture);
+    glGenTextures(1, &jumpTexture);
+    glGenTextures(1, &speedTexture);
     glGenTextures(1, &silhouetteTexture);
     glGenTextures(1, &forestTexture);
     //-------------------------------------------------------------------------
-    //death
+    //speedboost
+    //
+    int boost_w = boostImage->width;
+    int boost_h = boostImage->height;
+    //
+    glBindTexture(GL_TEXTURE_2D, speedTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, boost_w, boost_h, 0,
+	    GL_RGB, GL_UNSIGNED_BYTE, boostImage->data);
+    //-------------------------------------------------------------------------
+    //speedboost silhouette
+    //this is similar to a sprite graphic
+    //
+    glBindTexture(GL_TEXTURE_2D, speedTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *BoostsilhouetteData = buildAlphaData(jumpImage);	
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, boost_w, boost_h, 0,
+	    GL_RGBA, GL_UNSIGNED_BYTE, BoostsilhouetteData);
+    //-------------------------------------------------------------------------
+    //jump
     //
     int jump_w = jumpImage->width;
     int jump_h = jumpImage->height;
     //
-    glBindTexture(GL_TEXTURE_2D, bigfootTexture3);
+    glBindTexture(GL_TEXTURE_2D, jumpTexture);
     //
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, jump_w, jump_h, 0,
 	    GL_RGB, GL_UNSIGNED_BYTE, jumpImage->data);
     //-------------------------------------------------------------------------
-    //Death silhouette
+    //jump silhouette
     //this is similar to a sprite graphic
     //
-    glBindTexture(GL_TEXTURE_2D, jumpTexture);
+    glBindTexture(GL_TEXTURE_2D, JumpsilhouetteTexture);
     //
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -247,7 +479,7 @@ void initOpengl(void)
     int w = runningImage->width;
     int h = runningImage->height;
     //
-    glBindTexture(GL_TEXTURE_2D, bigfootTexture);
+    glBindTexture(GL_TEXTURE_2D, runningTexture);
     //
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -276,7 +508,7 @@ void initOpengl(void)
     int death_w = deathImage->width;
     int death_h = deathImage->height;
     //
-    glBindTexture(GL_TEXTURE_2D, bigfootTexture2);
+    glBindTexture(GL_TEXTURE_2D, deathTexture);
     //
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -428,6 +660,7 @@ void checkKeys(XEvent *e)
 	    dead ^= 1;
 	    showRunner = 0;
 	    runnerSpeed = 1000000;
+	    saveData(user, score);
 	    break;
 	case XK_f:
 	    forest ^= 1;
@@ -786,7 +1019,7 @@ void drawRaindrops(void)
 
 void render(Game *game)
 {
-    Rect r;
+    Rect r, b;
 
     //Clear the screen
     glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -806,63 +1039,20 @@ void render(Game *game)
 	glEnd();
     }
     if(jump){
-	    spritesheetx=0;
-	if(jump == 1){
-	    showRunner = 0;
-	    //jumpsheetx+= .11111111;
+	showRunner = 0;
+	jump = Jumping(jumpsheetx, wid, jump, bigfoot, jumpTexture);
+	jumpcount++;
+	if(jumpcount == 4) {
+	    jumpsheetx += .1;
+	    jumpcount = 0;
 	}
-	if(jump < 32 && jump > 0) {
-	    //sprite_y += 3;
-	    bigfoot.pos[1] +=3;
-	    jump++;
-	    //jumpsheetx+= .11111111;
-	    //cout << "jump = " << jump <<endl;
-	} else if(jump >= 32 && jump < 62 ) {
-	    //sprite_y -= 3;
-	    bigfoot.pos[1] -=3;
-	    jump ++;
-	    //jumpsheetx += .11111111;
-	    //cout << "jump = " << jump <<endl;
-	} else{
-	    jump = 0;
-	    //sprite_y = 75;
-	    bigfoot.pos[1] = 75;
-	    jumpsheetx = 0;
-	    spritesheetx=0;
-	    showRunner = 1;
-	    //cout << "jump = " << jump <<endl;
-	    //cout << "in jump end" <<endl;
-	}
-	glPushMatrix();
-	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
-	if (!silhouette) {
-	    glBindTexture(GL_TEXTURE_2D, jumpTexture);
-	} else {
-	    glBindTexture(GL_TEXTURE_2D, silhouetteTexture);
-	    glEnable(GL_ALPHA_TEST);
-	    glAlphaFunc(GL_GREATER, 0.0f);
-	    glColor4ub(255,255,255,255);
-	}
-	Jumping(jumpsheetx, wid);
-	glEnd();
-	glPopMatrix();
+
+    }else {
+	showRunner = 1;
+	jumpcount = 0;
+	jumpsheetx = 0;
     }
 
-    /*if(!jump) {
-      if (bigfoot.vel[0] > 0.0) {
-      glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
-      glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
-      glTexCoord2f(0.111111111f+spritesheetx,0.0f);glVertex2i( wid,wid);
-      glTexCoord2f(0.111111111f+spritesheetx,1.0f);glVertex2i( wid,-wid);
-      } else {
-      glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
-      glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
-      glTexCoord2f(0.1f, 1.0f); glVertex2i( wid, wid);
-      glTexCoord2f(0.1f, 0.0f); glVertex2i( wid,-wid);
-      }
-      glEnd();
-      glPopMatrix();
-      }*/
     backgroundx-=.005;
     if(dead) {
 	glPushMatrix();
@@ -879,15 +1069,17 @@ void render(Game *game)
 	glEnd();
 	glPopMatrix();
 	deathCounter++;
-	if (deathCounter == 10)
-	    dead = 0;
+	if (deathCounter == 0) {
+	    //dead = 0;
+	}
+	deathCounter++;
     }
     deathsheetx += .1111;
     if (showRunner) {
 	glPushMatrix();
 	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
 	if (!silhouette) {
-	    glBindTexture(GL_TEXTURE_2D, bigfootTexture);
+	    glBindTexture(GL_TEXTURE_2D, runningTexture);
 	} else {
 	    glBindTexture(GL_TEXTURE_2D, silhouetteTexture);
 	    glEnable(GL_ALPHA_TEST);
@@ -912,6 +1104,16 @@ void render(Game *game)
 	//
     }
     spritesheetx += .11111111111;
+
+    if(tmp < 20)
+    {
+	tmp++;
+    }
+    if(tmp == 20) {
+	projectImage(x, y, z, speedTexture);
+	x -= 1;
+    }
+
 
 
 
@@ -975,6 +1177,10 @@ void render(Game *game)
     r.bot = yres - 20;
     r.left = 10;
     r.center = 0;
+    b.bot = yres - 20;
+    b.left = 550;
+    b.center = 0;
+    sprintf(cScore, "SCORE: %d", score); 
     ggprint8b(&r, 16, 0, "B - Bigfoot");
     ggprint8b(&r, 16, 0, "F - Forest");
     ggprint8b(&r, 16, 0, "S - Silhouette");
@@ -983,6 +1189,7 @@ void render(Game *game)
     ggprint8b(&r, 16, 0, "R - Rain");
     ggprint8b(&r, 16, 0, "D - Deflection");
     ggprint8b(&r, 16, 0, "N - Sounds");
+    ggprint8b(&b, 26, 0, cScore);
 }
 void movement(Game *game)
 {
@@ -993,7 +1200,6 @@ void movement(Game *game)
       game->box[1].height = 40;
       game->box[1].center.x = box_x -= 3;
       game->box[1].center.y = box_y;*/
-
     /*   if (jump > 0) {
 	 game->box[2].center.y += 2;
 	 jump++;
