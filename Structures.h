@@ -93,6 +93,7 @@ struct Particle
 
 struct Obstacle
 {
+    Shape s;
 	Vec pos;
 	int nverts;
 	Flt radius;

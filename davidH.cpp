@@ -14,18 +14,21 @@ Ppmimage *runningImage = NULL;
 Ppmimage *jumpImage = NULL;
 Ppmimage *deathImage = NULL;
 GLuint runnerTexture, jumpTexture, deathTexture, idleTexture;
+GLuint runnerSilhouetteTexture, jumpSilhouetteTexture, 
+       deathSilhouetteTexture, idleSilhouetteTexture;
 
 unsigned char *buildAlphaData(Ppmimage *img);
 
 void getRunnerTexture(void)
 {
-    //Loading the images file into a PPM structure
+    //Loading the image files into a PPM structure
     idleImage = ppm6GetImage("./images/runner/idle_sheet.ppm");
     runningImage = ppm6GetImage("./images/runner/runner_sheet2.ppm");
     jumpImage = ppm6GetImage("./images/runner/jump_sheet.ppm");
     deathImage = ppm6GetImage("./images/runner/runner_sheet2.ppm");
 
-    //Creating OPGL texture elements
+    //Creating OPGL texture elements for runner when he's idle, 
+    //running, jumping, or when he dies
     glGenTextures(1, &idleTexture);
     glGenTextures(1, &runnerTexture);
     glGenTextures(1, &jumpTexture);
@@ -33,14 +36,14 @@ void getRunnerTexture(void)
 
 //------------------------------------------------------------------------
 //idleTexture
-    //TextureImage for runner when running
+    //TextureImage for runner when idle
     glBindTexture(GL_TEXTURE_2D, idleTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, idleImage->width, idleImage->height,
             0, GL_RGB, GL_UNSIGNED_BYTE, idleImage->data);
 
-    //Silhouettetexture for Running
+    //Silhouettetexture for when runner is idle
     glBindTexture(GL_TEXTURE_2D, idleTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -81,8 +84,8 @@ void getRunnerTexture(void)
     glTexImage2D(GL_TEXTURE_2D, 0, 3, jumpImage->width, jumpImage->height,
             0, GL_RGB, GL_UNSIGNED_BYTE, jumpImage->data);
 
-    //Silhouettetexture for Running
-    glBindTexture(GL_TEXTURE_2D, runnerTexture);
+    //Silhouettetexture for jumping
+    glBindTexture(GL_TEXTURE_2D, jumpTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
@@ -98,17 +101,17 @@ void getRunnerTexture(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
-    unsigned char *deathSilhouetteData = buildAlphaData(deathImage);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, deathImage->width,
-            deathImage->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-            deathSilhouetteData);
-
     //TextureImage when Runner dies
     glBindTexture(GL_TEXTURE_2D, deathTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, deathImage->width, deathImage->height,
             0, GL_RGB, GL_UNSIGNED_BYTE, deathImage->data);
+
+    unsigned char *deathSilhouetteData = buildAlphaData(deathImage);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, deathImage->width,
+            deathImage->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
+            deathSilhouetteData);
 }
 
 /*

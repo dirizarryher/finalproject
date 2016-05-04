@@ -31,6 +31,7 @@
 #include "log.h"
 #include "ppm.h"
 #include "Structures.h"
+#include "davidH.cpp"
 extern "C" {
 #include "fonts.h"
 }
@@ -53,7 +54,7 @@ typedef double Vec[3];
 typedef Flt	Matrix[4][4];
 double backgroundx = 0, spritesheetx = 0, deathsheetx = 0;
 
-//macros
+/*//macros
 #define rnd() (((Flt)rand())/(Flt)RAND_MAX)
 #define random(a) (rand()%a)
 #define MakeVector(x, y, z, v) (v)[0]=(x),(v)[1]=(y),(v)[2]=(z)
@@ -66,7 +67,7 @@ double backgroundx = 0, spritesheetx = 0, deathsheetx = 0;
 const float timeslice = 1.0f;
 const float gravity = -0.2f;
 #define ALPHA 1
-
+*/
 //X Windows variables
 Display *dpy;
 Window win;
@@ -168,6 +169,7 @@ struct Shape {
 
 struct Obstacle
 {
+    Shape s;
 	Vec pos;
 	int nverts;
 	Flt radius;
@@ -212,7 +214,7 @@ void checkKeys(XEvent *e);
 void init(Game *g);
 void physics(void);
 void render(Game *game);
-int check_Gamekeys(XEvent *e, Game *game);
+bool check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
 int main(void)
 {
@@ -269,8 +271,9 @@ int main(void)
 				done = check_keys(&e);
 				cout << "You can also skip the start menu with: " << argv[0] << " skip " << endl;
 			}
+            */
 		}
-*/		Rect r;
+		Rect r;
 		r.bot = yres - 100;
 		r.left = 500;
 		r.center = 0;
@@ -311,7 +314,8 @@ int main(void)
 			XNextEvent(dpy, &e);
 			checkResize(&e);
 			checkMouse(&e, &game);
-			done = checkKeys(&e);
+            checkKeys(&e);
+			//done = checkKeys(&e);
 			//keys = check_Gamekeys(&e, &game);
 		}
 		-//Below is a process to apply physics at a consistent rate.
@@ -476,6 +480,7 @@ void initOpengl(void)
 	//glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	initialize_fonts();
+    getRunnerTexture();
 	//load_background();
 
 	/*
@@ -522,7 +527,7 @@ void initOpengl(void)
 	int w = runningImage->width;
 	int h = runningImage->height;
 	//
-	glBindTexture(GL_TEXTURE_2D, bigfootTexture);
+	glBindTexture(GL_TEXTURE_2D, runnerTexture);
 	//
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
 	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -612,11 +617,11 @@ void initSounds(void)
 
 void init() {
 	//Initialize boxes here
-	for (int i = 0; i < 5; j++) {
+	for (int i = 0; i < 5; i++) {
 		Obstacle *ob = new Obstacle;
 		ob->nverts = 4;	
-		ob->width = 50;
-		ob->height = 50;
+		ob->s.width = 50;
+		ob->s.height = 50;
 
 	}
 
@@ -658,7 +663,7 @@ void checkMouse(XEvent *e)
 	}
 }
 
-/*int check_Gamekeys(XEvent *e, Game *game) {
+/*bool check_Gamekeys(XEvent *e, Game *game) {
   if (e->type == KeyPress) {
   int key = XLookupKeysym(&e->xkey, 0);
   if (key == XK_Escape) {
@@ -889,7 +894,7 @@ void checkRaindrops()
 	Raindrop *node = ihead;
 	while (node) {
 		//force is toward the ground
-		node->vel[1] += gravity;
+		node->vel[1] += GRAVITY;
 		VecCopy(node->pos, node->lastpos);
 
 		//----------------------------------------------------------------
@@ -899,11 +904,6 @@ void checkRaindrops()
 		float test = rnd() * 100.0;
 		if (node->pos[1] > test)
 		{
-			node->pos[0] += node->vel[0] * timeslice;
-			node->pos[1] += node->vel[1] * timeslice;
-			if (fabs(node->vel[1]) > node->maxvel[1])
-				node->vel[1] *= 0.96;
-			node->vel[0] *= 0.999;
 		}
 		//
 		node = node->next;
@@ -1082,7 +1082,8 @@ void render(Game *game)
 	glClear(GL_COLOR_BUFFER_BIT);
 	//
 	//
-	//draw a quad with texture
+
+    //draw a quad with texture
 	float wid = 60.0f;
 	glColor3f(1.0, 1.0, 1.0);
 	if (forest) {
@@ -1104,7 +1105,7 @@ void render(Game *game)
 		if (!silhouette) {
 			glBindTexture(GL_TEXTURE_2D, jumpTexture);
 		} else {
-			glBindTexture(GL_TEXTURE_2D, silhouetteTexture);
+			glBindTexture(GL_TEXTURE_2D, jumpSilhouetteTexture);
 			glEnable(GL_ALPHA_TEST);
 			glAlphaFunc(GL_GREATER, 0.0f);
 			glColor4ub(255,255,255,255);
@@ -1150,9 +1151,9 @@ void render(Game *game)
 		glPushMatrix();
 		glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
 		if (!silhouette) {
-			glBindTexture(GL_TEXTURE_2D, DeathsilhouetteTexture);
+			glBindTexture(GL_TEXTURE_2D, deathSilhouetteTexture);
 		} else {
-			glBindTexture(GL_TEXTURE_2D, DeathsilhouetteTexture);
+			glBindTexture(GL_TEXTURE_2D, deathSilhouetteTexture);
 			glEnable(GL_ALPHA_TEST);
 			glAlphaFunc(GL_GREATER, 0.0f);
 			glColor4ub(255,255,255,255);
@@ -1169,9 +1170,9 @@ void render(Game *game)
 		glPushMatrix();
 		glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
 		if (!silhouette) {
-			glBindTexture(GL_TEXTURE_2D, bigfootTexture);
+			glBindTexture(GL_TEXTURE_2D, runnerTexture);
 		} else {
-			glBindTexture(GL_TEXTURE_2D, silhouetteTexture);
+			glBindTexture(GL_TEXTURE_2D, runnerSilhouetteTexture);
 			glEnable(GL_ALPHA_TEST);
 			glAlphaFunc(GL_GREATER, 0.0f);
 			glColor4ub(255,255,255,255);
