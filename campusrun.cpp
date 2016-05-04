@@ -105,11 +105,14 @@ typedef struct t_bigfoot {
 } Bigfoot;
 Bigfoot bigfoot;
 
-Ppmimage *runningImage, *deathImage, *jumpImage;
+Ppmimage *runningImage, *deathImage, *jumpImage, *boostImage;
 Ppmimage *forestImage=NULL;
-GLuint bigfootTexture, bigfootTexture2, bigfootTexture3;
-GLuint silhouetteTexture, DeathsilhouetteTexture, jumpTexture;
+GLuint runningTexture, deathTexture, jumpTexture, speedTexture;
+GLuint silhouetteTexture, DeathsilhouetteTexture, JumpsilhouetteTexture;
 GLuint forestTexture;
+char cScore[400];
+int score = 0;
+int distance = 0;
 int showRunner=1;
 int runnerSpeed = 80000;
 int dead=0;
@@ -259,7 +262,7 @@ int main(void)
 	    physicsCountdown -= physicsRate;
 	}
 	//Always render every frame.
-	counter++;
+	score++;
 	movement(&game);
 	render(&game);
 	glXSwapBuffers(dpy, win);
@@ -402,33 +405,59 @@ void initOpengl(void)
     //
     //load the images file into a ppm structure.
     //
-    jumpImage     = ppm6GetImage("./images/runner/jump_sheet.ppm");
-    runningImage     = ppm6GetImage("./images/runner/runner_sheet2.ppm");
+    jumpImage      = ppm6GetImage("./images/runner/jump_sheet.ppm");
+    runningImage   = ppm6GetImage("./images/runner/runner_sheet2.ppm");
     deathImage     = ppm6GetImage("./images/runner/runnerdeath_sheet.ppm");
-    forestImage      = ppm6GetImage("./images/gamebackground.ppm");
+    forestImage    = ppm6GetImage("./images/gamebackground.ppm");
+    boostImage     = ppm6GetImage("./images/speedboost.ppm");
     //
     //create opengl texture elements
-    glGenTextures(1, &bigfootTexture);
+    glGenTextures(1, &runningTexture);
     glGenTextures(1, &jumpTexture);
     glGenTextures(1, &silhouetteTexture);
     glGenTextures(1, &forestTexture);
     //-------------------------------------------------------------------------
-    //death
+    //speedboost
+    //
+    int boost_w = boostImage->width;
+    int boost_h = boostImage->height;
+    //
+    glBindTexture(GL_TEXTURE_2D, speedTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, boost_w, boost_h, 0,
+	    GL_RGB, GL_UNSIGNED_BYTE, boostImage->data);
+    //-------------------------------------------------------------------------
+    //speedboost silhouette
+    //this is similar to a sprite graphic
+    //
+    glBindTexture(GL_TEXTURE_2D, speedTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *BoostsilhouetteData = buildAlphaData(jumpImage);	
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, boost_w, boost_h, 0,
+	    GL_RGBA, GL_UNSIGNED_BYTE, BoostsilhouetteData);
+    //-------------------------------------------------------------------------
+    //jump
     //
     int jump_w = jumpImage->width;
     int jump_h = jumpImage->height;
     //
-    glBindTexture(GL_TEXTURE_2D, bigfootTexture3);
+    glBindTexture(GL_TEXTURE_2D, jumpTexture);
     //
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, jump_w, jump_h, 0,
 	    GL_RGB, GL_UNSIGNED_BYTE, jumpImage->data);
     //-------------------------------------------------------------------------
-    //Death silhouette
+    //jump silhouette
     //this is similar to a sprite graphic
     //
-    glBindTexture(GL_TEXTURE_2D, jumpTexture);
+    glBindTexture(GL_TEXTURE_2D, JumpsilhouetteTexture);
     //
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -443,7 +472,7 @@ void initOpengl(void)
     int w = runningImage->width;
     int h = runningImage->height;
     //
-    glBindTexture(GL_TEXTURE_2D, bigfootTexture);
+    glBindTexture(GL_TEXTURE_2D, runningTexture);
     //
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -472,7 +501,7 @@ void initOpengl(void)
     int death_w = deathImage->width;
     int death_h = deathImage->height;
     //
-    glBindTexture(GL_TEXTURE_2D, bigfootTexture2);
+    glBindTexture(GL_TEXTURE_2D, deathTexture);
     //
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
@@ -626,7 +655,7 @@ void checkKeys(XEvent *e)
 	    dead ^= 1;
 	    showRunner = 0;
 	    runnerSpeed = 1000000;
-	    saveData(user, 505);
+	    saveData(user, score);
 	    break;
 	case XK_f:
 	    forest ^= 1;
@@ -985,7 +1014,7 @@ void drawRaindrops(void)
 
 void render(Game *game)
 {
-    Rect r;
+    Rect r, b;
 
     //Clear the screen
     glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -1081,7 +1110,7 @@ void render(Game *game)
 	glPushMatrix();
 	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
 	if (!silhouette) {
-	    glBindTexture(GL_TEXTURE_2D, bigfootTexture);
+	    glBindTexture(GL_TEXTURE_2D, runningTexture);
 	} else {
 	    glBindTexture(GL_TEXTURE_2D, silhouetteTexture);
 	    glEnable(GL_ALPHA_TEST);
@@ -1169,6 +1198,10 @@ void render(Game *game)
     r.bot = yres - 20;
     r.left = 10;
     r.center = 0;
+    b.bot = yres - 20;
+    b.left = 550;
+    b.center = 0;
+    sprintf(cScore, "SCORE: %d", score); 
     ggprint8b(&r, 16, 0, "B - Bigfoot");
     ggprint8b(&r, 16, 0, "F - Forest");
     ggprint8b(&r, 16, 0, "S - Silhouette");
@@ -1177,6 +1210,7 @@ void render(Game *game)
     ggprint8b(&r, 16, 0, "R - Rain");
     ggprint8b(&r, 16, 0, "D - Deflection");
     ggprint8b(&r, 16, 0, "N - Sounds");
+    ggprint8b(&b, 26, 0, cScore);
 }
 void movement(Game *game)
 {
