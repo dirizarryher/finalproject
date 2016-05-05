@@ -13,11 +13,9 @@ Ppmimage *idleImage = NULL;
 Ppmimage *runningImage = NULL;
 Ppmimage *jumpImage = NULL;
 Ppmimage *deathImage = NULL;
-GLuint runnerTexture, jumpTexture, deathTexture, idleTexture;
-GLuint runnerSilhouetteTexture, jumpSilhouetteTexture, 
-       deathSilhouetteTexture, idleSilhouetteTexture;
-
-unsigned char *buildAlphaData(Ppmimage *img);
+GLuint idleTexture, runnerTexture, jumpTexture, deathTexture;
+GLuint idleSilhouetteTexture, runnerSilhouetteTexture, 
+       jumpSilhouetteTexture, deathSilhouetteTexture;
 
 void getRunnerTexture(void)
 {
@@ -43,8 +41,8 @@ void getRunnerTexture(void)
     glTexImage2D(GL_TEXTURE_2D, 0, 3, idleImage->width, idleImage->height,
             0, GL_RGB, GL_UNSIGNED_BYTE, idleImage->data);
 
-    //Silhouettetexture for when runner is idle
-    glBindTexture(GL_TEXTURE_2D, idleTexture);
+/*    //Silhouettetexture for when runner is idle
+    glBindTexture(GL_TEXTURE_2D, idleSilhouetteTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
@@ -52,7 +50,7 @@ void getRunnerTexture(void)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, idleImage->width, 
             idleImage->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 
             idleSilhouetteData);
-
+*/
 
 //------------------------------------------------------------------------
 //runnerTexture
@@ -64,8 +62,8 @@ void getRunnerTexture(void)
             runningImage->height, 0, GL_RGB, GL_UNSIGNED_BYTE,
             runningImage->data);
 
-    //Silhouettetexture for Running
-    glBindTexture(GL_TEXTURE_2D, runnerTexture);
+/*    //Silhouettetexture for Running
+    glBindTexture(GL_TEXTURE_2D, runnerSilhouetteTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
@@ -73,7 +71,7 @@ void getRunnerTexture(void)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, runningImage->width,
             runningImage->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
             runnerSilhouetteData);
-
+*/
 
 //------------------------------------------------------------------------
 //jumpTexture
@@ -85,7 +83,7 @@ void getRunnerTexture(void)
             0, GL_RGB, GL_UNSIGNED_BYTE, jumpImage->data);
 
     //Silhouettetexture for jumping
-    glBindTexture(GL_TEXTURE_2D, jumpTexture);
+    glBindTexture(GL_TEXTURE_2D, jumpSilhouetteTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
@@ -102,7 +100,7 @@ void getRunnerTexture(void)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
 
     //TextureImage when Runner dies
-    glBindTexture(GL_TEXTURE_2D, deathTexture);
+    glBindTexture(GL_TEXTURE_2D, deathSilhouetteTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, deathImage->width, deathImage->height,
@@ -112,6 +110,28 @@ void getRunnerTexture(void)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, deathImage->width,
             deathImage->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
             deathSilhouetteData);
+}
+
+void showMyName()
+{
+    Rect r;
+    
+    glColor3ub(255, 0, 255);
+    glPushMatrix();
+    glTranslatef(350, 400, 0);
+    float w = 200;
+    float h = 100;
+    r.left = w;
+    r.bot = h;
+    glBegin(GL_QUADS);
+    glVertex2i(-w,-h);
+    glVertex2i(-w, h);
+    glVertex2i( w, h);
+    glVertex2i( w,-h);
+    glEnd();
+    ggprint8b(&r, 32, 0x00ff0000, "David A. Hernandez II");
+    glPopMatrix();
+
 }
 
 /*
@@ -137,7 +157,7 @@ void getRunnerTexture(void)
    {
    fmod_playsound(a);
    }
-   */
+
 
 //Converts an image with any file extension imported into 
 //images/runner/ directory into a ppm image
@@ -153,7 +173,7 @@ string convertImage(string filename, string path, string filetype)
 }
 
 //Boolean value to determine if runner touched an obstacle
-/*bool endGame(Game *g)
+bool endGame(Game *g)
 {
     //If runner dies, game over
     if (runner.dead == 1)

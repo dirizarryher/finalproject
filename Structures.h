@@ -51,27 +51,11 @@ extern Display *dpy;
 extern Window win;
 extern XEvent *e;
 
-struct Runner
-{
+typedef struct Runner {
 	Vec pos;
 	Vec vel;
-	float angle;
-	float color[3];
-	bool dead;
-	Runner() {
-		/*VecZero(dir);
-		pos[0] = (Flt) (xres / 2);
-		pos[1] = (Flt) (yres / 2);
-		pos[2] = 0.0f;
-		VecZero(vel);
-		angle = 0.0;
-		color[0] = 1.0;
-		color[1] = 1.0;
-		color[2] = 1.0;
-		superMode = 0;
-		damageTaken = 0;*/
-	}
-};
+} Runner;
+Runner runner;
 
 struct Vecs
 {
@@ -122,17 +106,12 @@ struct Game
 	Obstacle *obhead;
 	int nobstacles;
 	int gameTimer;
-	
-	bool jump;
+
+    bool showName;
+	bool jumped;
 	bool gameOver;
 	unsigned long int score;
 
-/*	struct timespec rTimer;
-	struct timespec obsTimer;
-	struct timespec jTimer;
-	struct timespec sTimer;
-	struct timespec dTimer;
-*/
 	Game()
 	{
 		n = 0;
@@ -140,7 +119,8 @@ struct Game
 		nobstacles = 0;
 		gameTimer = 0;
 		score = 0;
-		jump = false;
+        showName = false;
+		jumped = false;
 		gameOver = false;
 	}
 };
