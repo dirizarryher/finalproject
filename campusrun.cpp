@@ -41,16 +41,18 @@ extern "C" {
 #define MAX_PARTICLES 5000
 #define GRAVITY 0.1
 
-int set = 0, direction = -1, jump = 0, counter = 0;
+int jump = 0;
+int set = 0, direction = -1, counter = 0, jumpcount = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
     sprite_x = 140, sprite_y = 75;
-
+float x = 400, y = 75, z = 1;
 
 //defined types
 typedef double Flt;
 typedef double Vec[3];
 typedef Flt	Matrix[4][4];
-double backgroundx = 0, spritesheetx = 0, deathsheetx = 0;
+double backgroundx = 0, spritesheetx = 0, deathsheetx = 0; 
+double jumpsheetx = 0;
 
 //macros
 #define rnd() (((Flt)rand())/(Flt)RAND_MAX)
@@ -89,7 +91,7 @@ void timeCopy(struct timespec *dest, struct timespec *source) {
 }
 //-----------------------------------------------------------------------------
 
-
+int tmp = 0;
 int done=0;
 int xres=800, yres=600;
 
@@ -185,7 +187,7 @@ struct Game {
 
 //function prototypes
 void saveData(char *u_Name, int score);
-void Jumping(double spritesheetx, float wid);
+int Jumping (double spritesheetx, float wid, int jump, Bigfoot &bigfoot, GLuint jumpTexture);
 void runnerDeath (Bigfoot &b, double s);
 void initXWindows(void);
 void initOpengl(void);
@@ -198,6 +200,8 @@ void physics(void);
 void render(Game *game);
 int check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
+void projectImage(float x, float y, float z, GLuint texture);
+
 int main(void)
 {
     memcpy(user, "temp", 5);
@@ -412,8 +416,11 @@ void initOpengl(void)
     boostImage     = ppm6GetImage("./images/speedboost.ppm");
     //
     //create opengl texture elements
+   // glGenTextures(1, &bigfootTexture);
+    //glGenTextures(1, &jumpTexture);
     glGenTextures(1, &runningTexture);
     glGenTextures(1, &jumpTexture);
+    glGenTextures(1, &speedTexture);
     glGenTextures(1, &silhouetteTexture);
     glGenTextures(1, &forestTexture);
     //-------------------------------------------------------------------------
@@ -615,13 +622,11 @@ if (key == XK_s) {
 set ^= 1 ;
 return 0; 
 }
-
 if (key == XK_Up) {
 if(jump == 0)
 jump = 1;
 return 0; 
 }
-
 }
 return 0;
 }*/
@@ -1027,10 +1032,6 @@ void render(Game *game)
     if (forest) {
 	glBindTexture(GL_TEXTURE_2D, forestTexture);
 	glBegin(GL_QUADS);
-	/*glTexCoord2f(0.0f, 1.0f); glVertex2i(backgroundx, 0);
-	  glTexCoord2f(0.0f, 0.0f); glVertex2i(backgroundx, yres);
-	  glTexCoord2f(1.0f, 0.0f); glVertex2i((xres*2)+backgroundx, yres);
-	  glTexCoord2f(1.0f, 1.0f); glVertex2i((xres*2)+backgroundx, 0);*/
 	glTexCoord2f(0.0f-backgroundx, 1.0f); glVertex2i(0, 0);
 	glTexCoord2f(0.0f-backgroundx, 0.0f); glVertex2i(0, yres);
 	glTexCoord2f(1.0f-backgroundx, 0.0f); glVertex2i(xres, yres);
@@ -1038,52 +1039,20 @@ void render(Game *game)
 	glEnd();
     }
     if(jump){
-	glPushMatrix();
-	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
-	if (!silhouette) {
-	    glBindTexture(GL_TEXTURE_2D, jumpTexture);
-	} else {
-	    glBindTexture(GL_TEXTURE_2D, silhouetteTexture);
-	    glEnable(GL_ALPHA_TEST);
-	    glAlphaFunc(GL_GREATER, 0.0f);
-	    glColor4ub(255,255,255,255);
+	showRunner = 0;
+	jump = Jumping(jumpsheetx, wid, jump, bigfoot, jumpTexture);
+	jumpcount++;
+	if(jumpcount == 4) {
+	    jumpsheetx += .1;
+	    jumpcount = 0;
 	}
 
-	if(jump == 1)
-	    spritesheetx=0;
-	if(jump < 32 && jump > 0) {
-	    sprite_y += 3;
-	    jump++;
-	    //cout << "jump = " << jump <<endl;
-	} else if(jump >= 32 && jump < 62 ) {
-	    sprite_y -= 3;
-	    jump ++;
-	    //cout << "jump = " << jump <<endl;
-	} else{
-	    jump = 0;
-	    sprite_y = 75;
-	    spritesheetx=0;
-	    //cout << "jump = " << jump <<endl;
-	    //cout << "in jump end" <<endl;
-	}
-	Jumping(spritesheetx, wid);
+    }else {
+	showRunner = 1;
+	jumpcount = 0;
+	jumpsheetx = 0;
     }
 
-    if(!jump) {
-	if (bigfoot.vel[0] > 0.0) {
-	    glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
-	    glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
-	    glTexCoord2f(0.111111111f+spritesheetx,0.0f);glVertex2i( wid,wid);
-	    glTexCoord2f(0.111111111f+spritesheetx,1.0f);glVertex2i( wid,-wid);
-	} else {
-	    glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
-	    glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
-	    glTexCoord2f(0.1f, 1.0f); glVertex2i( wid, wid);
-	    glTexCoord2f(0.1f, 0.0f); glVertex2i( wid,-wid);
-	}
-	glEnd();
-	glPopMatrix();
-    }
     backgroundx-=.005;
     if(dead) {
 	glPushMatrix();
@@ -1135,6 +1104,16 @@ void render(Game *game)
 	//
     }
     spritesheetx += .11111111111;
+
+    if(tmp < 20)
+    {
+	tmp++;
+    }
+    if(tmp == 20) {
+	projectImage(x, y, z, speedTexture);
+	x -= 1;
+    }
+
 
 
 
@@ -1221,26 +1200,25 @@ void movement(Game *game)
       game->box[1].height = 40;
       game->box[1].center.x = box_x -= 3;
       game->box[1].center.y = box_y;*/
-
-    if (jump > 0) {
-	game->box[2].center.y += 2;
-	jump++;
-	if (jump == 51)
-	    jump = -50;
-    } 
-    else {
-	if(game->box[2].center.y > sprite_y) {
-	    game->box[2].center.y -= 2;
-	    sleep(.8);
-	    jump ++;
-	}
-    }
-    /*if (val == 0 ) { 
-      box_y += 60;
-      }
-      else { 
-      box_y -= 60;
-      }*/
+    /*   if (jump > 0) {
+	 game->box[2].center.y += 2;
+	 jump++;
+	 if (jump == 51)
+	 jump = -50;
+	 } 
+	 else {
+	 if(game->box[2].center.y > sprite_y) {
+	 game->box[2].center.y -= 2;
+	 sleep(.8);
+	 jump ++;
+	 }
+	 }
+	 if (val == 0 ) { 
+	 box_y += 60;
+	 }
+	 else { 
+	 box_y -= 60;
+	 }*/
 
     if ( game->box[1].center.x < -40)
 	box_x = 1500;
