@@ -45,7 +45,7 @@ int jump = 0;
 int set = 0, direction = -1, counter = 0, jumpcount = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
     sprite_x = 140, sprite_y = 75;
-float x = 400, y = 75, z = 1;
+float x = 600, y = 75, z = 1;
 
 //defined types
 typedef double Flt;
@@ -1030,6 +1030,7 @@ void render(Game *game)
     //draw a quad with texture
     float wid = 60.0f;
     glColor3f(1.0, 1.0, 1.0);
+    //drawing background via .ppm file
     if (forest) {
 	glBindTexture(GL_TEXTURE_2D, forestTexture);
 	glBegin(GL_QUADS);
@@ -1039,6 +1040,9 @@ void render(Game *game)
 	glTexCoord2f(1.0f-backgroundx, 1.0f); glVertex2i(xres, 0);
 	glEnd();
     }
+    backgroundx-=.005;
+
+    //this makes sure the player can't double jump and does a loose aproximation of phyics for the jump
     if(jump){
 	showRunner = 0;
 	jump = Jumping(jumpsheetx, wid, jump, bigfoot, jumpTexture);
@@ -1054,7 +1058,6 @@ void render(Game *game)
 	jumpsheetx = 0;
     }
 
-    backgroundx-=.005;
     if(dead) {
 	glPushMatrix();
 	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
@@ -1114,9 +1117,11 @@ void render(Game *game)
 	glEnd();
 	glPopMatrix();
 	projectImage(x, y, z, speedTexture);
-	x -= 1;
-	if(x < 0)
-	    imagecounter = 0;
+	x -= 2;
+	if(x == -600) {
+	    image_counter = 0;
+	    x = 600;
+	}
     }
 
 
