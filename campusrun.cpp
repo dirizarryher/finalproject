@@ -43,7 +43,7 @@ extern "C" {
 
 int jump = 0;
 int set = 0, direction = -1, counter = 0, jumpcount = 0;
-int box_x = 400, box_y = 60, box_length = 40, val = 0,
+int box_x = 380, box_y = 385, box_length = 40, val = 0,
     sprite_x = 140, sprite_y = 75;
 float x = 400, y = 75, z = 1;
 
@@ -113,6 +113,7 @@ GLuint runningTexture, deathTexture, jumpTexture, speedTexture;
 GLuint silhouetteTexture, DeathsilhouetteTexture, JumpsilhouetteTexture;
 GLuint forestTexture;
 char cScore[400];
+int name = 0;
 int score = 0;
 int distance = 0;
 int showRunner=1;
@@ -186,6 +187,7 @@ struct Game {
 };
 
 //function prototypes
+Rect displayName(int move);
 void saveData(char *u_Name, int score);
 int Jumping (double spritesheetx, float wid, int jump, Bigfoot &bigfoot, GLuint jumpTexture);
 void runnerDeath (Bigfoot &b, double s);
@@ -678,6 +680,9 @@ void checkKeys(XEvent *e)
 	case XK_p:
 	    umbrella.shape ^= 1;
 	    break;
+	case XK_z:
+	    name ^= 1;
+	    break;
 	case XK_r:
 	    showRain ^= 1;
 	    //if (!show_rain)
@@ -1019,7 +1024,7 @@ void drawRaindrops(void)
 
 void render(Game *game)
 {
-    Rect r, b;
+    Rect b, nameText; // will add r to diplay game instruction when the time comes
 
     //Clear the screen
     glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -1174,22 +1179,35 @@ void render(Game *game)
     glBindTexture(GL_TEXTURE_2D, 0);
     //
     //
-    r.bot = yres - 20;
-    r.left = 10;
-    r.center = 0;
+    //r.bot = yres - 20;
+    //r.left = 10;
+    //r.center = 0;
     b.bot = yres - 20;
     b.left = 550;
     b.center = 0;
     sprintf(cScore, "SCORE: %d", score); 
-    ggprint8b(&r, 16, 0, "B - Bigfoot");
+    /*ggprint8b(&r, 16, 0, "B - Bigfoot");
     ggprint8b(&r, 16, 0, "F - Forest");
     ggprint8b(&r, 16, 0, "S - Silhouette");
     ggprint8b(&r, 16, 0, "T - Trees");
     ggprint8b(&r, 16, 0, "U - Umbrella");
     ggprint8b(&r, 16, 0, "R - Rain");
     ggprint8b(&r, 16, 0, "D - Deflection");
-    ggprint8b(&r, 16, 0, "N - Sounds");
+    ggprint8b(&r, 16, 0, "N - Sounds");*/
     ggprint8b(&b, 26, 0, cScore);
+
+    if (name) {
+        nameText = displayName(box_x - 30);
+	ggprint8b(&nameText, 26, 0, "Ty Morrell");
+
+        game->box[0].width = box_length;
+        game->box[0].height = 10;
+        game->box[0].center.x = box_x -= 2;
+        game->box[0].center.y = box_y;
+        
+	if (box_x < -30)
+	    box_x = 800;
+    }
 }
 void movement(Game *game)
 {

@@ -17,6 +17,9 @@
 #include <GL/glx.h>
 #include "log.h"
 #include "ppm.h"
+extern "C" {
+#include "fonts.h"
+}
 using namespace std;
 
 

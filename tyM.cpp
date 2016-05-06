@@ -1,9 +1,12 @@
 // TyAnthoney Morrell CMPS 356
-/* This file will perform the animation of the runner dying and will display an 
+/* This file will perform the animation of the runner dying and will display an
    animation of the death.
 
    The saveData funtion will save the player name and score to the database 
-   once the player dies. 
+   once the player dies.
+
+   displayName will return an object to display text to the main function
+   where it will be displayed in a moving box that will loop around forever.  
    */
 
 #include "tyM.h"
@@ -169,4 +172,13 @@ void runnerDeath (Bigfoot &bigfoot, double spritesheetx)
         glTexCoord2f(0.1f, 1.0f); glVertex2i( wid, wid);
         glTexCoord2f(0.1f, 0.0f); glVertex2i( wid,-wid);
     }
+}
+
+Rect displayName(int location) 
+{
+   Rect nameBox;
+   nameBox.bot = 380;
+   nameBox.left = location;
+   nameBox.center = 0; 
+   return nameBox; 
 }
