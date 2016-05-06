@@ -91,7 +91,7 @@ void timeCopy(struct timespec *dest, struct timespec *source) {
 }
 //-----------------------------------------------------------------------------
 
-int tmp = 0;
+int image_counter = 0;
 int done=0;
 int xres=800, yres=600;
 
@@ -200,7 +200,7 @@ void physics(void);
 void render(Game *game);
 int check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
-void projectImage(float x, float y, float z, GLuint texture);
+void projectImage(float x, float y, float z, GLuint speedTexture);
 
 int main(void)
 {
@@ -414,6 +414,7 @@ void initOpengl(void)
     deathImage     = ppm6GetImage("./images/runner/runnerdeath_sheet.ppm");
     forestImage    = ppm6GetImage("./images/gamebackground.ppm");
     boostImage     = ppm6GetImage("./images/speedboost.ppm");
+    //boostImage     = ppm6GetImage("./images/runner/speed_boost.ppm");
     //
     //create opengl texture elements
    // glGenTextures(1, &bigfootTexture);
@@ -445,7 +446,7 @@ void initOpengl(void)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     //
     //must build a new set of data...
-    unsigned char *BoostsilhouetteData = buildAlphaData(jumpImage);	
+    unsigned char *BoostsilhouetteData = buildAlphaData(boostImage);	
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, boost_w, boost_h, 0,
 	    GL_RGBA, GL_UNSIGNED_BYTE, BoostsilhouetteData);
     //-------------------------------------------------------------------------
@@ -1042,7 +1043,7 @@ void render(Game *game)
 	showRunner = 0;
 	jump = Jumping(jumpsheetx, wid, jump, bigfoot, jumpTexture);
 	jumpcount++;
-	if(jumpcount == 4) {
+	if(jumpcount == 5) {
 	    jumpsheetx += .1;
 	    jumpcount = 0;
 	}
@@ -1105,13 +1106,17 @@ void render(Game *game)
     }
     spritesheetx += .11111111111;
 
-    if(tmp < 20)
+    if(image_counter < 20)
     {
-	tmp++;
+	image_counter++;
     }
-    if(tmp == 20) {
+    if(image_counter == 20) {
+	glEnd();
+	glPopMatrix();
 	projectImage(x, y, z, speedTexture);
 	x -= 1;
+	if(x < 0)
+	    imagecounter = 0;
     }
 
 
