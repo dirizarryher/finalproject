@@ -49,3 +49,11 @@ void projectImage(float x, float y, float z, GLuint speedTexture)
     glPopMatrix();
 
 }
+
+bool checkcollison(Bigfoot &bigfoot, float x, float y, float wid)
+{
+    if(x-30 <= bigfoot.pos[1])
+    	return true;
+    else
+	return false;
+}

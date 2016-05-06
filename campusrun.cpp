@@ -14,8 +14,7 @@
 //look for the 
 //
 //
-//
-//
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -34,6 +33,7 @@ extern "C" {
 #include "fonts.h"
 }
 
+using namespace std;
 #define WINDOW_WIDTH  2000
 #define WINDOW_HEIGHT 1000
 #define SEGMENTS 60
@@ -201,6 +201,7 @@ void render(Game *game);
 int check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
 void projectImage(float x, float y, float z, GLuint speedTexture);
+bool checkcollison(Bigfoot &bigfoot, float x, float y, float wid);
 
 int main(void)
 {
@@ -1200,6 +1201,9 @@ void render(Game *game)
     ggprint8b(&r, 16, 0, "D - Deflection");
     ggprint8b(&r, 16, 0, "N - Sounds");
     ggprint8b(&b, 26, 0, cScore);
+
+    if(checkcollison(bigfoot, x, y, wid))
+	cout << "collison detected" << endl;
 }
 void movement(Game *game)
 {
