@@ -1,7 +1,12 @@
+#include <iostream> // for cout
+#include <unistd.h> // for close
+#include <sys/socket.h>
+#include <arpa/inet.h>
+#include <netdb.h>
+#include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>
 #include <time.h>
 #include <math.h>
 #include <X11/Xlib.h>
@@ -12,8 +17,18 @@
 #include <GL/glx.h>
 #include "log.h"
 #include "ppm.h"
+using namespace std;
 
 
+#define HOST "sleipnir.cs.csubak.edu"
+#define PAGE "~tmorrell/335/templerun/Users.php"
+#define PORT 80
+#define USERAGENT "HTMLGET 1.0"
+
+int create_tcp_socket();
+char *get_ip(char *host);
+char *build_get_query(char *host, char *page);
+void usage();
 //defined types
 typedef double Flt;
 typedef double Vec[3];
