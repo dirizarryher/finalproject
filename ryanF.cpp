@@ -4,20 +4,34 @@
 
 #include "tyM.h"
 
-//This code gets called when the sprite jumps. It updates the y axis of the sprite to make it look like it is jumping.
-int Jumping (double spritesheetx, float wid, int jump, Bigfoot &bigfoot, GLuint jumpTexture)
+extern "C" {
+#include "fonts.h"
+}
+
+
+//This code gets called when the sprite jumps. 
+//It updates the y axis of the sprite to make it look like it is jumping.
+int Jumping (double spritesheetx, float wid, int jump, 
+	Bigfoot &bigfoot, GLuint jumpTexture, int stuff)
 {
-    if(jump < 32 && jump > 0) {
+    if (!stuff) {
+	if (jump < 32 && jump > 0) {
+	    bigfoot.pos[1] +=3;
+	    jump++;
+	} else if(jump >= 32 && jump < 62 ) {
+	    bigfoot.pos[1] -=3;
+	    jump ++;
+	} else{
+	    jump = 0;
+	    bigfoot.pos[1] = 75;
+	    spritesheetx=0;
+	}
+    }
+    if (stuff) {
 	bigfoot.pos[1] +=3;
 	jump++;
-    } else if(jump >= 32 && jump < 62 ) {
-	bigfoot.pos[1] -=3;
-	jump ++;
-    } else{
-	jump = 0;
-	bigfoot.pos[1] = 75;
-	spritesheetx=0;
     }
+
     glPushMatrix();
     glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
     glBindTexture(GL_TEXTURE_2D, jumpTexture);
@@ -52,8 +66,26 @@ void projectImage(float x, float y, float z, GLuint speedTexture)
 
 bool checkcollison(Bigfoot &bigfoot, float x, float y, float wid)
 {
-    if(x-30 <= bigfoot.pos[1])
-    	return true;
+    if(x == bigfoot.pos[0])
+	return true;
     else
 	return false;
+}
+
+void funnystuff(int stuff_counter)
+{
+    Rect r;
+    glPushMatrix();
+    glTranslatef(100, 200, 0);
+    glEnd();
+    glPopMatrix();
+    r.bot =  400;
+    r.left = 300;
+    if (stuff_counter < 81)
+	ggprint8b(&r, 16, 0, "Why did you listen to me?");
+    if (stuff_counter < 161 && stuff_counter > 80)
+	ggprint8b(&r, 16, 0, "Now look what you've done! Happy?");
+    if (stuff_counter > 160)
+	ggprint8b(&r, 16, 0, "He's flown away from all of your bulls***!");
+
 }

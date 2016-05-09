@@ -42,6 +42,7 @@ using namespace std;
 #define GRAVITY 0.1
 
 int jump = 0;
+int stuff_counter = 0;
 int set = 0, direction = -1, counter = 0, jumpcount = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
     sprite_x = 140, sprite_y = 75;
@@ -53,6 +54,11 @@ typedef double Vec[3];
 typedef Flt	Matrix[4][4];
 double backgroundx = 0, spritesheetx = 0, deathsheetx = 0; 
 double jumpsheetx = 0;
+
+double skyx = 0;
+double farbackgroundx = 0;
+double groundx = 0;
+double grassx = 0;
 
 //macros
 #define rnd() (((Flt)rand())/(Flt)RAND_MAX)
@@ -108,9 +114,11 @@ typedef struct t_bigfoot {
 Bigfoot bigfoot;
 
 Ppmimage *runningImage, *deathImage, *jumpImage, *boostImage;
+Ppmimage *grassImage, *groundImage, *skyImage, *farbackgroundImage;
 Ppmimage *forestImage=NULL;
 GLuint runningTexture, deathTexture, jumpTexture, speedTexture;
 GLuint silhouetteTexture, DeathsilhouetteTexture, JumpsilhouetteTexture;
+GLuint grassTexture, groundTexture, skyTexture, farbackgroundTexture;
 GLuint forestTexture;
 char cScore[400];
 int score = 0;
@@ -118,6 +126,7 @@ int distance = 0;
 int showRunner=1;
 int runnerSpeed = 80000;
 int dead=0;
+int stuff=0;
 int forest=1;
 int silhouette=1;
 int trees=1;
@@ -187,7 +196,7 @@ struct Game {
 
 //function prototypes
 void saveData(char *u_Name, int score);
-int Jumping (double spritesheetx, float wid, int jump, Bigfoot &bigfoot, GLuint jumpTexture);
+int Jumping (double spritesheetx, float wid, int jump, Bigfoot &bigfoot, GLuint jumpTexture, int stuff);
 void runnerDeath (Bigfoot &b, double s);
 void initXWindows(void);
 void initOpengl(void);
@@ -202,6 +211,7 @@ int check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
 void projectImage(float x, float y, float z, GLuint speedTexture);
 bool checkcollison(Bigfoot &bigfoot, float x, float y, float wid);
+void funnystuff(int stuff_counter);
 
 int main(void)
 {
@@ -415,6 +425,11 @@ void initOpengl(void)
     deathImage     = ppm6GetImage("./images/runner/runnerdeath_sheet.ppm");
     forestImage    = ppm6GetImage("./images/gamebackground.ppm");
     boostImage     = ppm6GetImage("./images/speedboost.ppm");
+    
+    farbackgroundImage = ppm6GetImage("./images/farbackground1.ppm");
+    grassImage         = ppm6GetImage("./images/grass.ppm");
+    groundImage        = ppm6GetImage("./images/ground.ppm");
+    skyImage           = ppm6GetImage("./images/sky.ppm");
     //boostImage     = ppm6GetImage("./images/runner/speed_boost.ppm");
     //
     //create opengl texture elements
@@ -425,6 +440,12 @@ void initOpengl(void)
     glGenTextures(1, &speedTexture);
     glGenTextures(1, &silhouetteTexture);
     glGenTextures(1, &forestTexture);
+    
+    glGenTextures(1, &skyTexture);
+    glGenTextures(1, &farbackgroundTexture);
+    glGenTextures(1, &groundTexture);
+    glGenTextures(1, &grassTexture);
+
     //-------------------------------------------------------------------------
     //speedboost
     //
@@ -544,6 +565,54 @@ void initOpengl(void)
     glTexImage2D(GL_TEXTURE_2D, 0, 3,
 	    forestImage->width, forestImage->height,
 	    0, GL_RGB, GL_UNSIGNED_BYTE, forestImage->data);
+    //-------------------------------------------------------------------------
+    //
+    //Sky
+    //int forest_w = WINDOW_WIDTH * 2;
+    //int forest_h = WINDOW_HEIGHT;
+    glBindTexture(GL_TEXTURE_2D, skyTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3,
+	    skyImage->width, skyImage->height,
+	    0, GL_RGB, GL_UNSIGNED_BYTE, skyImage->data);
+    //-------------------------------------------------------------------------
+    //
+    //far background
+    //int forest_w = WINDOW_WIDTH * 2;
+    //int forest_h = WINDOW_HEIGHT;
+    glBindTexture(GL_TEXTURE_2D, farbackgroundTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3,
+	    farbackgroundImage->width, farbackgroundImage->height,
+	    0, GL_RGB, GL_UNSIGNED_BYTE, farbackgroundImage->data);
+    //-------------------------------------------------------------------------
+    //
+    //ground
+    //int forest_w = WINDOW_WIDTH * 2;
+    //int forest_h = WINDOW_HEIGHT;
+    glBindTexture(GL_TEXTURE_2D, groundTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3,
+	    groundImage->width, groundImage->height,
+	    0, GL_RGB, GL_UNSIGNED_BYTE, groundImage->data);
+    //-------------------------------------------------------------------------
+    //
+    //grass
+    //int forest_w = WINDOW_WIDTH * 2;
+    //int forest_h = WINDOW_HEIGHT;
+    glBindTexture(GL_TEXTURE_2D, grassTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3,
+	    grassImage->width, grassImage->height,
+	    0, GL_RGB, GL_UNSIGNED_BYTE, grassImage->data);
     //-------------------------------------------------------------------------
 }
 
@@ -665,7 +734,7 @@ void checkKeys(XEvent *e)
 	    saveData(user, score);
 	    break;
 	case XK_f:
-	    forest ^= 1;
+	    stuff ^= 1;
 	    break;
 	case XK_s:
 	    silhouette ^= 1;
@@ -1033,20 +1102,48 @@ void render(Game *game)
     glColor3f(1.0, 1.0, 1.0);
     //drawing background via .ppm file
     if (forest) {
-	glBindTexture(GL_TEXTURE_2D, forestTexture);
+	//sky
+	glBindTexture(GL_TEXTURE_2D, skyTexture);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0f-skyx, 1.0f); glVertex2i(0, 0);
+	glTexCoord2f(0.0f-skyx, 0.0f); glVertex2i(0, yres);
+	glTexCoord2f(1.0f-skyx, 0.0f); glVertex2i(xres, yres);
+	glTexCoord2f(1.0f-skyx, 1.0f); glVertex2i(xres, 0);
+	glEnd();
+	//far background
+	glBindTexture(GL_TEXTURE_2D, farbackgroundTexture);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0f-farbackgroundx, 1.0f); glVertex2i(0, 0);
+	glTexCoord2f(0.0f-farbackgroundx, 0.0f); glVertex2i(0, (yres/2)+100);
+	glTexCoord2f(0.5f-farbackgroundx, 0.0f); glVertex2i(xres, (yres/2)+100);
+	glTexCoord2f(0.5f-farbackgroundx, 1.0f); glVertex2i(xres, 0);
+	glEnd();
+	//ground
+	glBindTexture(GL_TEXTURE_2D, groundTexture);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0f-groundx, 1.0f); glVertex2i(0, 0);
+	glTexCoord2f(0.0f-groundx, 0.0f); glVertex2i(0, yres/10);
+	glTexCoord2f(1.0f-groundx, 0.0f); glVertex2i(xres, yres/10);
+	glTexCoord2f(1.0f-groundx, 1.0f); glVertex2i(xres, 0);
+	glEnd();
+	//grass
+	glBindTexture(GL_TEXTURE_2D, grassTexture);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0.0f-backgroundx, 1.0f); glVertex2i(0, 0);
-	glTexCoord2f(0.0f-backgroundx, 0.0f); glVertex2i(0, yres);
-	glTexCoord2f(1.0f-backgroundx, 0.0f); glVertex2i(xres, yres);
+	glTexCoord2f(0.0f-backgroundx, 0.0f); glVertex2i(0, (yres/10)+10);
+	glTexCoord2f(1.0f-backgroundx, 0.0f); glVertex2i(xres, (yres/10)+10);
 	glTexCoord2f(1.0f-backgroundx, 1.0f); glVertex2i(xres, 0);
 	glEnd();
     }
-    backgroundx-=.005;
+    farbackgroundx-=.0001;
+    skyx-=.00005;
+    grassx-=.05;
+    groundx-=.005;
 
     //this makes sure the player can't double jump and does a loose aproximation of phyics for the jump
-    if(jump){
+    if(jump || stuff){
 	showRunner = 0;
-	jump = Jumping(jumpsheetx, wid, jump, bigfoot, jumpTexture);
+	jump = Jumping(jumpsheetx, wid, jump, bigfoot, jumpTexture, stuff);
 	jumpcount++;
 	if(jumpcount == 5) {
 	    jumpsheetx += .1;
@@ -1124,8 +1221,10 @@ void render(Game *game)
 	    x = 600;
 	}
     }
-
-
+    if (stuff) {
+	funnystuff(stuff_counter);
+	stuff_counter++;
+    }
 
 
     float w, h;
