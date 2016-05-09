@@ -1,21 +1,3 @@
-//cs335
-//
-//program: rainforest
-//author:  Gordon Griesel
-//date:    2013 to present
-//
-//This program demonstrates the use of OpenGL and XWindows
-//
-//Texture maps are displayed.
-//Press B to see bigfoot roaming his forest.
-//
-//The rain builds up like snow on the ground.
-//Fix it by removing each raindrop for the rain linked list.
-//look for the 
-//
-//
-//
-//
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -31,7 +13,6 @@
 #include "log.h"
 #include "ppm.h"
 #include "Structures.h"
-#include "davidH.cpp"
 extern "C" {
 #include "fonts.h"
 }
@@ -46,32 +27,12 @@ extern "C" {
 int set = 0, direction = -1, jump = 0, counter = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
     sprite_x = 140, sprite_y = 75;
-
-
-//defined types
-typedef double Flt;
-typedef double Vec[3];
-typedef Flt	Matrix[4][4];
 double backgroundx = 0, spritesheetx = 0, deathsheetx = 0;
+double jumpsheetx = 0;
 
-/*//macros
-#define rnd() (((Flt)rand())/(Flt)RAND_MAX)
-#define random(a) (rand()%a)
-#define MakeVector(x, y, z, v) (v)[0]=(x),(v)[1]=(y),(v)[2]=(z)
-#define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
-#define VecDot(a,b)	((a)[0]*(b)[0]+(a)[1]*(b)[1]+(a)[2]*(b)[2])
-#define VecSub(a,b,c) (c)[0]=(a)[0]-(b)[0]; \
-			     (c)[1]=(a)[1]-(b)[1]; \
-(c)[2]=(a)[2]-(b)[2]
-//constants
-const float timeslice = 1.0f;
-const float gravity = -0.2f;
-#define ALPHA 1
-*/
 //X Windows variables
 Display *dpy;
 Window win;
-
 
 //-----------------------------------------------------------------------------
 //Setup timers
@@ -91,27 +52,23 @@ void timeCopy(struct timespec *dest, struct timespec *source) {
 }
 //-----------------------------------------------------------------------------
 
-
+int tmp = 0;
 int done=0;
 int xres=800, yres=600;
+
 
 typedef struct t_background {
 	Vec pos;
 	Vec vel;
 } Background;
 Background background;
-
-typedef struct t_bigfoot {
-	Vec pos;
-	Vec vel;
-} Bigfoot;
-Bigfoot bigfoot;
-
-//Ppmimage *runningImage, *deathImage, *jumpImage;
-Ppmimage *forestImage=NULL;
-//GLuint bigfootTexture, bigfootTexture2, bigfootTexture3;
-//GLuint silhouetteTexture, DeathsilhouetteTexture, jumpTexture;
 GLuint forestTexture;
+Runner runner;
+
+char cScore[400];
+int name = 0;
+int score = 0;
+int distance = 0;
 int showRunner=1;
 int runnerSpeed = 80000;
 int dead=0;
@@ -120,90 +77,16 @@ int silhouette=1;
 int trees=1;
 int showRain=0;
 int deathCounter = 0;
-//
-typedef struct t_raindrop {
-	int type;
-	int linewidth;
-	int sound;
-	Vec pos;
-	Vec lastpos;
-	Vec vel;
-	Vec maxvel;
-	Vec force;
-	float length;
-	float color[4];
-	struct t_raindrop *prev;
-	struct t_raindrop *next;
-} Raindrop;
-Raindrop *ihead=NULL;
-int ndrops=1;
-int totrain=0;
-int maxrain=0;
-void deleteRain(Raindrop *node);
-void cleanupRaindrops(void);
-//
-#define UMBRELLA_FLAT  0
-#define UMBRELLA_ROUND 1
-typedef struct t_umbrella {
-	int shape;
-	Vec pos;
-	Vec lastpos;
-	float width;
-	float width2;
-	float radius;
-} Umbrella;
-Umbrella umbrella;
-int showUmbrella=0;
-int deflection=0;
-/*:
-//Structures
-struct Vecs {
-	float x, y, z;
-};
+char user[20];
 
-struct Shape {
-	float width, height;
-	float radius;
-	Vecs center;
-};
+Ppmimage *idleImage, *runningImage, *jumpImage, *deathImage, *boostImage;
+GLuint idleTexture, runnerTexture, jumpTexture, deathTexture, boostTexture;
+GLuint idleSilhouetteTexture, runnerSilhouetteTexture, jumpSilhouetteTexture,
+       deathSilhouetteTexture, boostSilhouetteTexture;
 
-struct Obstacle
-{
-    Shape s;
-	Vec pos;
-	int nverts;
-	Flt radius;
-	Vec vert[4];
-	float angle;
-	float rotate;
-	float color[3];
-	struct Obstacle *prev;
-	struct Obstacle *next;
-	Obstacle()
-	{
-		prev = NULL;
-		next = NULL;
-	}
-};
-
-struct Particle {
-	Shape s;
-	Vecs velocity;
-};
-
-struct Game {
-	Shape box[5];
-	Shape circle[2];
-	Particle particle[MAX_PARTICLES];
-	Obstacle *obhead;
-	int n;
-	int lastMousex;
-	int lastMousey;
-};
-*/
 //function prototypes
 void Jumping(double spritesheetx, float wid);
-void runnerDeath (Bigfoot &b, double s);
+//void runnerDeath (Runner &r, double s);
 void initXWindows(void);
 void initOpengl(void);
 void cleanupXWindows(void);
@@ -216,6 +99,7 @@ void physics(void);
 void render(Game *game);
 bool check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
+void getRunnerTexture();
 int main(void)
 {
 	initXWindows();
@@ -227,25 +111,6 @@ int main(void)
 	//srand(time(NULL));
 	Game game;
 	game.n=0;
-	int done = 0;
-	//int keys = 0;
-
-	//declare a box shape
-	/*int x = 400, y = 10, length = 4000;
-	//declare a box shape
-	game.box[0].width = length;
-	game.box[0].height = 10;
-	game.box[0].center.x = x;
-	game.box[0].center.y = y;
-	game.circle[0].center.x = 10;
-	game.circle[0].center.y = -20;
-	game.circle[0].radius = 100;*/
-
-
-	//game.box[2].width = 10;
-	//game.box[2].height = 20;
-	//game.box[2].center.x = sprite_x;
-	//game.box[2].center.y = sprite_y;
 
 	//Menu Loop?
 	while (done != 1) {
@@ -253,7 +118,7 @@ int main(void)
 			XEvent e;
 			XNextEvent(dpy, &e);
 			checkResize(&e);
-			checkMouse(&e, &game);
+			//checkMouse(&e, &game);
 			checkKeys(&e);
 			//keys = check_Gamekeys(&e, &game);
 /*      	if (argc > 1) {
@@ -300,25 +165,26 @@ int main(void)
 		//If user selects Start Game
 		if (done == 3) {
 			//play_music(0);
-			init(&game);
+			//init(&game);
 			break;
 		}
 		glXSwapBuffers(dpy, win);
 	}
 	clock_gettime(CLOCK_REALTIME, &timePause);
 	clock_gettime(CLOCK_REALTIME, &timeStart);
-	//Game Loop
+	
+    //Game Loop
 	while (done != 1) {
 		while (XPending(dpy)) {
 			XEvent e;
 			XNextEvent(dpy, &e);
 			checkResize(&e);
-			checkMouse(&e, &game);
+			//checkMouse(&e, &game);
             checkKeys(&e);
 			//done = checkKeys(&e);
 			//keys = check_Gamekeys(&e, &game);
 		}
-		-//Below is a process to apply physics at a consistent rate.
+		//Below is a process to apply physics at a consistent rate.
 		//1. Get the time right now.
 		clock_gettime(CLOCK_REALTIME, &timeCurrent);
 		//2. How long since we were here last?
@@ -352,19 +218,6 @@ int main(void)
 	logClose();
 	return 0;
 }
-
-/*void makeParticle(Game *game, int x, int y) {
-  if (game->n >= MAX_PARTICLES)
-  return;
-//position of particle
-Particle *p = &game->particle[game->n];
-p->s.center.x = rand() % 51 + 380;
-p->s.center.y = y;
-p->velocity.y = rnd()*0.1 - 0.5;
-p->velocity.x = direction;
-game->n++;
-}*/
-
 
 void cleanupXWindows(void)
 {
@@ -411,6 +264,7 @@ void initXWindows(void)
 	glXMakeCurrent(dpy, win, glc);
 	setTitle();
 }
+
 void reshapeWindow(int width, int height)
 {
 	//window has been resized.
@@ -422,6 +276,7 @@ void reshapeWindow(int width, int height)
 	glOrtho(0, xres, 0, yres, -1, 1);
 	setTitle();
 }
+
 unsigned char *buildAlphaData(Ppmimage *img)
 {
 	//add 4th component to RGB stream...
@@ -453,6 +308,7 @@ unsigned char *buildAlphaData(Ppmimage *img)
 	}
 	return newdata;
 }
+
 void initOpengl(void)
 {
 	//OpenGL initialization
@@ -483,103 +339,7 @@ void initOpengl(void)
     getRunnerTexture();
 	//load_background();
 
-	/*
-	//load the images file into a ppm structure.
-	//
-	jumpImage     = ppm6GetImage("./images/runner/jump_sheet.ppm");
-	runningImage     = ppm6GetImage("./images/runner/runner_sheet2.ppm");
-	deathImage     = ppm6GetImage("./images/runner/runnerdeath_sheet.ppm");
-	forestImage      = ppm6GetImage("./images/gamebackground.ppm");
-	//
-	//create opengl texture elements
-	glGenTextures(1, &bigfootTexture);
-	glGenTextures(1, &jumpTexture);
-	glGenTextures(1, &silhouetteTexture);
-	glGenTextures(1, &forestTexture);
-	//-------------------------------------------------------------------------
-	//death
-	//
-	int jump_w = jumpImage->width;
-	int jump_h = jumpImage->height;
-	//
-	glBindTexture(GL_TEXTURE_2D, bigfootTexture3);
-	//
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, jump_w, jump_h, 0,
-			GL_RGB, GL_UNSIGNED_BYTE, jumpImage->data);
-	//-------------------------------------------------------------------------
-	//Death silhouette
-	//this is similar to a sprite graphic
-	//
-	glBindTexture(GL_TEXTURE_2D, jumpTexture);
-	//
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	//
-	//must build a new set of data...
-	unsigned char *JumpsilhouetteData = buildAlphaData(jumpImage);	
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, jump_w, jump_h, 0,
-			GL_RGBA, GL_UNSIGNED_BYTE, JumpsilhouetteData);
-	//-------------------------------------------------------------------------
-	//running
-	//
-	int w = runningImage->width;
-	int h = runningImage->height;
-	//
-	glBindTexture(GL_TEXTURE_2D, runnerTexture);
-	//
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-			GL_RGB, GL_UNSIGNED_BYTE, runningImage->data);
-	//-------------------------------------------------------------------------
-	//
-	//silhouette
-	//this is similar to a sprite graphic
-	//
-	glBindTexture(GL_TEXTURE_2D, silhouetteTexture);
-	//
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	//
-	//must build a new set of data...
-	unsigned char *silhouetteData = buildAlphaData(runningImage);	
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
-			GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
-	free(silhouetteData);
-	//glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-	//	GL_RGB, GL_UNSIGNED_BYTE, bigfootImage->data);
-	//-------------------------------------------------------------------------
-	//death
-	//
-	int death_w = deathImage->width;
-	int death_h = deathImage->height;
-	//
-	glBindTexture(GL_TEXTURE_2D, bigfootTexture2);
-	//
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-			GL_RGB, GL_UNSIGNED_BYTE, deathImage->data);
-	//-------------------------------------------------------------------------
-	//Death silhouette
-	//this is similar to a sprite graphic
-	//
-	glBindTexture(GL_TEXTURE_2D, DeathsilhouetteTexture);
-	//
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-	//
-	//must build a new set of data...
-	unsigned char *DeathsilhouetteData = buildAlphaData(deathImage);	
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, death_w, death_h, 0,
-			GL_RGBA, GL_UNSIGNED_BYTE, DeathsilhouetteData);
-	free(DeathsilhouetteData);
-	//glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
-	//	GL_RGB, GL_UNSIGNED_BYTE, bigfootImage->data);
-	//-------------------------------------------------------------------------
-	//
+/*
 	//forest
 	//int forest_w = WINDOW_WIDTH * 2;
 	//int forest_h = WINDOW_HEIGHT;
@@ -628,15 +388,8 @@ void init() {
 
 
 
-	umbrella.pos[0] = 220.0;
-	umbrella.pos[1] = (double)(yres-200);
-	VecCopy(umbrella.pos, umbrella.lastpos);
-	umbrella.width = 200.0;
-	umbrella.width2 = umbrella.width * 0.5;
-	umbrella.radius = (float)umbrella.width2;
-	umbrella.shape = UMBRELLA_FLAT;
-	MakeVector(-150.0,180.0,0.0, bigfoot.pos);
-	MakeVector(6.0,0.0,0.0, bigfoot.vel);
+	MakeVector(-150.0,180.0,0.0, runner.pos);
+	MakeVector(6.0,0.0,0.0, runner.vel);
 }
 
 void checkMouse(XEvent *e)
@@ -707,7 +460,7 @@ void checkKeys(XEvent *e)
 		case XK_b:
 			showRunner^= 1;
 			if (showRunner) {
-				bigfoot.pos[0] = -250.0;
+				runner.pos[0] = -250.0;
 			}
 			break;
 		case XK_d:
@@ -726,49 +479,24 @@ void checkKeys(XEvent *e)
 			trees ^= 1;
 			break;
 		case XK_u:
-			showUmbrella ^= 1;
 			break;
 		case XK_p:
-			umbrella.shape ^= 1;
 			break;
 		case XK_r:
-			showRain ^= 1;
-			//if (!show_rain)
-			//	cleanup_raindrops();
 			break;
 		case XK_Left:
-			VecCopy(umbrella.pos, umbrella.lastpos);
-			umbrella.pos[0] -= 10.0;
 			break;
 		case XK_Right:
-			VecCopy(umbrella.pos, umbrella.lastpos);
-			umbrella.pos[0] += 10.0;
 			break;
 		case XK_Down:
-			VecCopy(umbrella.pos, umbrella.lastpos);
-			umbrella.pos[1] -= 10.0;
 			break;
 		case XK_equal:
-			if (++ndrops > 40)
-				ndrops=40;
 			break;
 		case XK_minus:
-			if (--ndrops < 0)
-				ndrops = 0;
 			break;
 		case XK_n:
 			break;
 		case XK_w:
-			if (shift) {
-				//shrink the umbrella
-				umbrella.width *= (1.0 / 1.05);
-			} else {
-				//enlarge the umbrella
-				umbrella.width *= 1.05;
-			}
-			//half the width
-			umbrella.width2 = umbrella.width * 0.5;
-			umbrella.radius = (float)umbrella.width2;
 			break;
 		case XK_Up:
 			if(jump == 0)
@@ -798,257 +526,34 @@ Flt VecNormalize(Vec vec)
 	vec[2] = zlen * tlen;
 	return(len);
 }
-void cleanupRaindrops(void)
-{
-	Raindrop *s;
-	while (ihead) {
-		s = ihead->next;
-		free(ihead);
-		ihead = s;
-	}
-	ihead=NULL;
-}
-void deleteRain(Raindrop *node)
-{
-	//remove a node from linked list
-	//this line keeps the compiler happy for now.
-	if (node) {}
-	//hints:
-	//check for some special cases:
-	//1. only 1 node in list (it is also the head node)
-	//2. node at beginning of list (it is also the head node)
-	//3. node at end of list.
-	//4. node somewhere else in list.
-	//if (node->prev == NULL) <--- node at beginning of list.
-	//At the end of this function, free the node's memory,
-	//and set the node to NULL.
-}
-
-
 
 void moveBigfoot()
 {
 	//move bigfoot...
 	int addgrav = 1;
 	//Update position
-	bigfoot.pos[0] = sprite_x;
-	bigfoot.pos[1] = sprite_y;
+	runner.pos[0] = sprite_x;
+	runner.pos[1] = sprite_y;
 	//Check for collision with window edges
-	if ((bigfoot.pos[0] < -140.0 && bigfoot.vel[0] < 0.0) ||
-			(bigfoot.pos[0] >= (float)xres+140.0 && bigfoot.vel[0] > 0.0)) {
-		bigfoot.vel[0] = -bigfoot.vel[0];
+	if ((runner.pos[0] < -140.0 && runner.vel[0] < 0.0) ||
+			(runner.pos[0] >= (float)xres+140.0 && runner.vel[0] > 0.0)) {
+		runner.vel[0] = -runner.vel[0];
 		addgrav = 0;
 	}
-	if ((bigfoot.pos[1] < 150.0 && bigfoot.vel[1] < 0.0) ||
-			(bigfoot.pos[1] >= (float)yres && bigfoot.vel[1] > 0.0)) {
-		bigfoot.vel[1] = -bigfoot.vel[1];
+	if ((runner.pos[1] < 150.0 && runner.vel[1] < 0.0) ||
+			(runner.pos[1] >= (float)yres && runner.vel[1] > 0.0)) {
+		runner.vel[1] = -runner.vel[1];
 		addgrav = 0;
 	}
 	//Gravity
 	if (addgrav)
-		bigfoot.vel[1] -= 0.75;
-}
-
-void createRaindrop(const int n)
-{
-	//create new rain drops...
-	int i;
-	for (i=0; i<n; i++) {
-		Raindrop *node = (Raindrop *)malloc(sizeof(Raindrop));
-		if (node == NULL) {
-			Log("error allocating node.\n");
-			exit(EXIT_FAILURE);
-		}
-		node->prev = NULL;
-		node->next = NULL;
-		node->sound=0;
-		node->pos[0] = rnd() * (float)xres;
-		node->pos[1] = rnd() * 100.0f + (float)yres;
-		VecCopy(node->pos, node->lastpos);
-		node->vel[0] = 
-			node->vel[1] = 0.0f;
-		node->color[0] = rnd() * 0.2f + 0.8f;
-		node->color[1] = rnd() * 0.2f + 0.8f;
-		node->color[2] = rnd() * 0.2f + 0.8f;
-		node->color[3] = rnd() * 0.5f + 0.3f; //alpha
-		node->linewidth = random(8)+1;
-		//larger linewidth = faster speed
-		node->maxvel[1] = (float)(node->linewidth*16);
-		node->length = node->maxvel[1] * 0.2f + rnd();
-		//put raindrop into linked list
-		node->next = ihead;
-		if (ihead != NULL)
-			ihead->prev = node;
-		ihead = node;
-		++totrain;
-	}
-}
-
-void checkRaindrops()
-{
-	if (random(100) < 50) {
-		createRaindrop(ndrops);
-	}
-	//
-	//move rain droplets
-	Raindrop *node = ihead;
-	while (node) {
-		//force is toward the ground
-		node->vel[1] += GRAVITY;
-		VecCopy(node->pos, node->lastpos);
-
-		//----------------------------------------------------------------
-		//The next 2 lines are temporary code just for this assignment.
-		//Comment them out, then fix the raindrop delet function.
-		//----------------------------------------------------------------
-		float test = rnd() * 100.0;
-		if (node->pos[1] > test)
-		{
-		}
-		//
-		node = node->next;
-	}
-	//
-	//check rain droplets
-	int n=0;
-	node = ihead;
-	while (node) {
-		n++;
-#ifdef USE_SOUND
-		if (node->pos[1] < 0.0f) {
-			//raindrop hit ground
-			if (!node->sound && play_sounds) {
-				//small chance that a sound will play
-				int r = random(50);
-				if (r==1) {
-					//play sound here...
-				}
-				//sound plays once per raindrop
-				node->sound=1;
-			}
-		}
-#endif //USE_SOUND
-		//collision detection for raindrop on umbrella
-		if (showUmbrella) {
-			if (umbrella.shape == UMBRELLA_FLAT) {
-				if (node->pos[0] >= (umbrella.pos[0] - umbrella.width2) &&
-						node->pos[0] <= (umbrella.pos[0] + umbrella.width2)) {
-					if (node->lastpos[1] > umbrella.lastpos[1] ||
-							node->lastpos[1] > umbrella.pos[1]) {
-						if (node->pos[1] <= umbrella.pos[1] ||
-								node->pos[1] <= umbrella.lastpos[1]) {
-							if (node->linewidth > 1) {
-								Raindrop *savenode = node->next;
-								deleteRain(node);
-								node = savenode;
-								continue;
-							}
-						}
-					}
-				}
-			}
-			if (umbrella.shape == UMBRELLA_ROUND) {
-				float d0 = node->pos[0] - umbrella.pos[0];
-				float d1 = node->pos[1] - umbrella.pos[1];
-				float distance = sqrt((d0*d0)+(d1*d1));
-				//Log("distance: %f  umbrella.radius: %f\n",
-				//	distance,umbrella.radius);
-				if (distance <= umbrella.radius &&
-						node->pos[1] > umbrella.pos[1]) {
-					if (node->linewidth > 1) {
-						if (deflection) {
-							//deflect raindrop
-							double dot;
-							Vec v, up = {0,1,0};
-							VecSub(node->pos, umbrella.pos, v);
-							VecNormalize(v);
-							node->pos[0] =
-								umbrella.pos[0] + v[0] * umbrella.radius;
-							node->pos[1] =
-								umbrella.pos[1] + v[1] * umbrella.radius;
-							dot = VecDot(v,up);
-							dot += 1.0;
-							node->vel[0] += v[0] * dot * 1.0;
-							node->vel[1] += v[1] * dot * 1.0;
-						} else {
-							Raindrop *savenode = node->next;
-							deleteRain(node);
-							node = savenode;
-							continue;
-						}
-					}
-				}
-			}
-		}
-		if (node->pos[1] < -20.0f) {
-			//rain drop is below the visible area
-			Raindrop *savenode = node->next;
-			deleteRain(node);
-			node = savenode;
-			continue;
-		}
-		node = node->next;
-	}
-	if (maxrain < n)
-		maxrain = n;
+		runner.vel[1] -= 0.75;
 }
 
 void physics(void)
 {
 	if (showRunner)
 		moveBigfoot();
-	if (showRain)
-		checkRaindrops();
-}
-
-void drawUmbrella(void)
-{
-	//Log("drawUmbrella()...\n");
-	if (umbrella.shape == UMBRELLA_FLAT) {
-		glColor4f(1.0f, 0.2f, 0.2f, 0.5f);
-		glLineWidth(8);
-		glBegin(GL_LINES);
-		glVertex2f(umbrella.pos[0]-umbrella.width2, umbrella.pos[1]);
-		glVertex2f(umbrella.pos[0]+umbrella.width2, umbrella.pos[1]);
-		glEnd();
-		glLineWidth(1);
-	} else {
-		glColor4f(1.0f, 1.0f, 1.0f, 0.8f);
-		glPushMatrix();
-		glTranslatef(umbrella.pos[0],umbrella.pos[1],umbrella.pos[2]);
-		glEnable(GL_ALPHA_TEST);
-		glAlphaFunc(GL_GREATER, 0.0f);
-		glBegin(GL_QUADS);
-		float w = umbrella.width2;
-		glTexCoord2f(0.0f, 0.0f); glVertex2f(-w,  w);
-		glTexCoord2f(1.0f, 0.0f); glVertex2f( w,  w);
-		glTexCoord2f(1.0f, 1.0f); glVertex2f( w, -w);
-		glTexCoord2f(0.0f, 1.0f); glVertex2f(-w, -w);
-		glEnd();
-		glBindTexture(GL_TEXTURE_2D, 0);
-		glDisable(GL_ALPHA_TEST);
-		glPopMatrix();
-	}
-}
-
-void drawRaindrops(void)
-{
-	//if (ihead) {
-	Raindrop *node = ihead;
-	while (node) {
-		glPushMatrix();
-		glTranslated(node->pos[0],node->pos[1],node->pos[2]);
-		glColor4fv(node->color);
-		glLineWidth(node->linewidth);
-		glBegin(GL_LINES);
-		glVertex2f(0.0f, 0.0f);
-		glVertex2f(0.0f, node->length);
-		glEnd();
-		glPopMatrix();
-		node = node->next;
-	}
-	//}
-	glLineWidth(1);
 }
 
 //Deletes obstacle when it moves off the screen
@@ -1101,7 +606,7 @@ void render(Game *game)
 	}
 	if(jump){
 		glPushMatrix();
-		glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
+		glTranslatef(runner.pos[0], runner.pos[1], runner.pos[2]);
 		if (!silhouette) {
 			glBindTexture(GL_TEXTURE_2D, jumpTexture);
 		} else {
@@ -1132,7 +637,7 @@ void render(Game *game)
 	}
 
 	if(!jump) {
-		if (bigfoot.vel[0] > 0.0) {
+		if (runner.vel[0] > 0.0) {
 			glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
 			glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
 			glTexCoord2f(0.111111111f+spritesheetx,0.0f);glVertex2i( wid,wid);
@@ -1149,7 +654,7 @@ void render(Game *game)
 	backgroundx-=.005;
 	if(dead) {
 		glPushMatrix();
-		glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
+		glTranslatef(runner.pos[0], runner.pos[1], runner.pos[2]);
 		if (!silhouette) {
 			glBindTexture(GL_TEXTURE_2D, deathSilhouetteTexture);
 		} else {
@@ -1158,7 +663,7 @@ void render(Game *game)
 			glAlphaFunc(GL_GREATER, 0.0f);
 			glColor4ub(255,255,255,255);
 		}
-		runnerDeath(bigfoot, deathsheetx);
+		//runnerDeath(runner, deathsheetx);
 		glEnd();
 		glPopMatrix();
 		deathCounter++;
@@ -1168,7 +673,7 @@ void render(Game *game)
 	deathsheetx += .1111;
 	if (showRunner) {
 		glPushMatrix();
-		glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
+		glTranslatef(runner.pos[0], runner.pos[1], runner.pos[2]);
 		if (!silhouette) {
 			glBindTexture(GL_TEXTURE_2D, runnerTexture);
 		} else {
@@ -1179,7 +684,7 @@ void render(Game *game)
 		}
 		glBegin(GL_QUADS);
 		sleep(.9);
-		if (bigfoot.vel[0] > 0.0) {
+		if (runner.vel[0] > 0.0) {
 			glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
 			glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
 			glTexCoord2f(0.111111111f+spritesheetx, 0.0f);glVertex2i(wid,wid);
@@ -1245,17 +750,8 @@ void render(Game *game)
 	//return;
 	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 	glEnable(GL_BLEND);
-	if (showRain)
-		drawRaindrops();
-	glDisable(GL_BLEND);
-	glEnable(GL_TEXTURE_2D);
-	//
-	if (showUmbrella)
-		drawUmbrella();
-	glBindTexture(GL_TEXTURE_2D, 0);
-	//
-	//
-	r.bot = yres - 20;
+	
+    r.bot = yres - 20;
 	r.left = 10;
 	r.center = 0;
 	ggprint8b(&r, 16, 0, "B - Bigfoot");

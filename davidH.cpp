@@ -1,7 +1,6 @@
 // David A. Hernandez II CS335
 #include "davidH.h"
 #include "Structures.h"
-#include <cstdio>
 //#include <FMOD/fmod.h>
 //#include <FMOD/wincompat.h>
 //#include <fmod.h>
@@ -9,21 +8,26 @@ extern "C" {
 #include "fonts.h"
 }
 
-Ppmimage *idleImage = NULL;
+/*Ppmimage *idleImage = NULL;
 Ppmimage *runningImage = NULL;
 Ppmimage *jumpImage = NULL;
 Ppmimage *deathImage = NULL;
-GLuint idleTexture, runnerTexture, jumpTexture, deathTexture;
+Ppmimage *boostImage = NULL;
+GLuint idleTexture, runnerTexture, jumpTexture, deathTexture, boostTexture;
 GLuint idleSilhouetteTexture, runnerSilhouetteTexture, 
-       jumpSilhouetteTexture, deathSilhouetteTexture;
+       jumpSilhouetteTexture, deathSilhouetteTexture,
+       boostSilhouetteTexture;
+*/
+unsigned char *buildAlphaData(Ppmimage *img);
 
 void getRunnerTexture(void)
 {
     //Loading the image files into a PPM structure
-    idleImage = ppm6GetImage("./images/runner/idle_sheet.ppm");
+    idleImage = ppm6GetImage("./images/runner/runner_sheet.ppm");
     runningImage = ppm6GetImage("./images/runner/runner_sheet2.ppm");
-    jumpImage = ppm6GetImage("./images/runner/jump_sheet.ppm");
-    deathImage = ppm6GetImage("./images/runner/runner_sheet2.ppm");
+//    jumpImage = ppm6GetImage("./images/runner/jump_sheet.ppm");
+    deathImage = ppm6GetImage("./images/runner/runnerdeath_sheet.ppm");
+  //  boostImage = ppm6GetImage("./images/jump_sheet.ppm");
 
     //Creating OPGL texture elements for runner when he's idle, 
     //running, jumping, or when he dies
@@ -31,6 +35,7 @@ void getRunnerTexture(void)
     glGenTextures(1, &runnerTexture);
     glGenTextures(1, &jumpTexture);
     glGenTextures(1, &deathTexture);
+    glGenTextures(1, &boostTexture);
 
 //------------------------------------------------------------------------
 //idleTexture
@@ -41,7 +46,7 @@ void getRunnerTexture(void)
     glTexImage2D(GL_TEXTURE_2D, 0, 3, idleImage->width, idleImage->height,
             0, GL_RGB, GL_UNSIGNED_BYTE, idleImage->data);
 
-/*    //Silhouettetexture for when runner is idle
+    //Silhouettetexture for when runner is idle
     glBindTexture(GL_TEXTURE_2D, idleSilhouetteTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -50,7 +55,7 @@ void getRunnerTexture(void)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, idleImage->width, 
             idleImage->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 
             idleSilhouetteData);
-*/
+
 
 //------------------------------------------------------------------------
 //runnerTexture
@@ -62,7 +67,7 @@ void getRunnerTexture(void)
             runningImage->height, 0, GL_RGB, GL_UNSIGNED_BYTE,
             runningImage->data);
 
-/*    //Silhouettetexture for Running
+    //Silhouettetexture for Running
     glBindTexture(GL_TEXTURE_2D, runnerSilhouetteTexture);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
@@ -71,7 +76,7 @@ void getRunnerTexture(void)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, runningImage->width,
             runningImage->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
             runnerSilhouetteData);
-*/
+
 
 //------------------------------------------------------------------------
 //jumpTexture
@@ -110,29 +115,30 @@ void getRunnerTexture(void)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, deathImage->width,
             deathImage->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
             deathSilhouetteData);
-}
+//------------------------------------------------------------------------
+//Speedboost Image and Texture
 
-void showMyName()
-{
-    Rect r;
+    int boost_w = boostImage->width;
+    int boost_h = boostImage->height;
+
+    glBindTexture(GL_TEXTURE_2D, boostTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, boost_w, boost_h, 0, GL_RGB, 
+            GL_UNSIGNED_BYTE, boostImage->data);
+
+    //Speedboost Silhouette
+    glBindTexture(GL_TEXTURE_2D, boostSilhouetteTexture);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     
-    glColor3ub(255, 0, 255);
-    glPushMatrix();
-    glTranslatef(350, 400, 0);
-    float w = 200;
-    float h = 100;
-    r.left = w;
-    r.bot = h;
-    glBegin(GL_QUADS);
-    glVertex2i(-w,-h);
-    glVertex2i(-w, h);
-    glVertex2i( w, h);
-    glVertex2i( w,-h);
-    glEnd();
-    ggprint8b(&r, 32, 0x00ff0000, "David A. Hernandez II");
-    glPopMatrix();
-
+    unsigned char *boostSilhouetteData = buildAlphaData(boostImage);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, boost_w, boost_h, 0, GL_RGBA, 
+            GL_UNSIGNED_BYTE, boostSilhouetteData);
 }
+
+
+
 
 /*
    void init_sounds(void)
