@@ -14,7 +14,8 @@
 //look for the 
 //
 //
-#include <iostream>
+//
+//
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -33,7 +34,6 @@ extern "C" {
 #include "fonts.h"
 }
 
-using namespace std;
 #define WINDOW_WIDTH  2000
 #define WINDOW_HEIGHT 1000
 #define SEGMENTS 60
@@ -43,9 +43,9 @@ using namespace std;
 
 int jump = 0;
 int set = 0, direction = -1, counter = 0, jumpcount = 0;
-int box_x = 400, box_y = 60, box_length = 40, val = 0,
-    sprite_x = 140, sprite_y = 75, boostMovement = 2;
-float x = 600, y = 75, z = 1;
+int box_x = 380, box_y = 385, box_length = 40, val = 0,
+    sprite_x = 140, sprite_y = 75;
+float x = 400, y = 75, z = 1;
 
 //defined types
 typedef double Flt;
@@ -91,7 +91,7 @@ void timeCopy(struct timespec *dest, struct timespec *source) {
 }
 //-----------------------------------------------------------------------------
 
-int image_counter = 0;
+int tmp = 0;
 int done=0;
 int xres=800, yres=600;
 
@@ -113,6 +113,7 @@ GLuint runningTexture, deathTexture, jumpTexture, speedTexture;
 GLuint silhouetteTexture, DeathsilhouetteTexture, JumpsilhouetteTexture;
 GLuint forestTexture;
 char cScore[400];
+int name = 0;
 int score = 0;
 int distance = 0;
 int showRunner=1;
@@ -186,6 +187,7 @@ struct Game {
 };
 
 //function prototypes
+Rect displayName(int move);
 void saveData(char *u_Name, int score);
 int Jumping (double spritesheetx, float wid, int jump, Bigfoot &bigfoot, GLuint jumpTexture);
 void runnerDeath (Bigfoot &b, double s);
@@ -200,8 +202,7 @@ void physics(void);
 void render(Game *game);
 int check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
-void projectImage(float x, float y, float z, GLuint speedTexture);
-bool checkcollison(int sprite, float x, float y, float wid);
+void projectImage(float x, float y, float z, GLuint texture);
 
 int main(void)
 {
@@ -415,7 +416,6 @@ void initOpengl(void)
     deathImage     = ppm6GetImage("./images/runner/runnerdeath_sheet.ppm");
     forestImage    = ppm6GetImage("./images/gamebackground.ppm");
     boostImage     = ppm6GetImage("./images/speedboost.ppm");
-    //boostImage     = ppm6GetImage("./images/runner/speed_boost.ppm");
     //
     //create opengl texture elements
    // glGenTextures(1, &bigfootTexture);
@@ -447,7 +447,7 @@ void initOpengl(void)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     //
     //must build a new set of data...
-    unsigned char *BoostsilhouetteData = buildAlphaData(boostImage);	
+    unsigned char *BoostsilhouetteData = buildAlphaData(jumpImage);	
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, boost_w, boost_h, 0,
 	    GL_RGBA, GL_UNSIGNED_BYTE, BoostsilhouetteData);
     //-------------------------------------------------------------------------
@@ -680,6 +680,9 @@ void checkKeys(XEvent *e)
 	case XK_p:
 	    umbrella.shape ^= 1;
 	    break;
+	case XK_z:
+	    name ^= 1;
+	    break;
 	case XK_r:
 	    showRain ^= 1;
 	    //if (!show_rain)
@@ -774,6 +777,13 @@ void deleteRain(Raindrop *node)
     //4. node somewhere else in list.
 
     //if (node->prev == NULL) <--- node at beginning of list.
+
+
+
+
+
+
+
     //At the end of this function, free the node's memory,
     //and set the node to NULL.
 }
@@ -1014,7 +1024,7 @@ void drawRaindrops(void)
 
 void render(Game *game)
 {
-    Rect r, b;
+    Rect b, nameText; // will add r to diplay game instruction when the time comes
 
     //Clear the screen
     glClearColor(1.0, 1.0, 1.0, 1.0);
@@ -1024,7 +1034,6 @@ void render(Game *game)
     //draw a quad with texture
     float wid = 60.0f;
     glColor3f(1.0, 1.0, 1.0);
-    //drawing background via .ppm file
     if (forest) {
 	glBindTexture(GL_TEXTURE_2D, forestTexture);
 	glBegin(GL_QUADS);
@@ -1034,14 +1043,11 @@ void render(Game *game)
 	glTexCoord2f(1.0f-backgroundx, 1.0f); glVertex2i(xres, 0);
 	glEnd();
     }
-    backgroundx-=.005;
-
-    //this makes sure the player can't double jump and does a loose aproximation of phyics for the jump
     if(jump){
 	showRunner = 0;
 	jump = Jumping(jumpsheetx, wid, jump, bigfoot, jumpTexture);
 	jumpcount++;
-	if(jumpcount == 5) {
+	if(jumpcount == 4) {
 	    jumpsheetx += .1;
 	    jumpcount = 0;
 	}
@@ -1052,6 +1058,7 @@ void render(Game *game)
 	jumpsheetx = 0;
     }
 
+    backgroundx-=.005;
     if(dead) {
 	glPushMatrix();
 	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
@@ -1103,24 +1110,17 @@ void render(Game *game)
     }
     spritesheetx += .11111111111;
 
-    if(image_counter < 200)
+    if(tmp < 20)
     {
-	boostMovement = 2;
-	image_counter++;
+	tmp++;
     }
-    else {
-	glEnd();
-	glPopMatrix();
-	//if(counter == somevalue)
+    if(tmp == 20) {
 	projectImage(x, y, z, speedTexture);
-	cout << "x is " << x << "\n";
-	x -= boostMovement;
-	if(x == -600 || checkcollison(sprite_x, x, y, wid)) {
-	    image_counter = 0;
-	    x = 900;
-	    boostMovement = 0;
-	}
+	x -= 1;
     }
+
+
+
 
     float w, h;
     //Draw shapes...
@@ -1157,6 +1157,7 @@ void render(Game *game)
 	glPopMatrix();
     }
 
+
     glDisable(GL_TEXTURE_2D);
     //glColor3f(1.0f, 0.0f, 0.0f);
     //glBegin(GL_QUADS);
@@ -1178,23 +1179,35 @@ void render(Game *game)
     glBindTexture(GL_TEXTURE_2D, 0);
     //
     //
-    r.bot = yres - 20;
-    r.left = 10;
-    r.center = 0;
+    //r.bot = yres - 20;
+    //r.left = 10;
+    //r.center = 0;
     b.bot = yres - 20;
     b.left = 550;
     b.center = 0;
     sprintf(cScore, "SCORE: %d", score); 
-    ggprint8b(&r, 16, 0, "B - Bigfoot");
+    /*ggprint8b(&r, 16, 0, "B - Bigfoot");
     ggprint8b(&r, 16, 0, "F - Forest");
     ggprint8b(&r, 16, 0, "S - Silhouette");
     ggprint8b(&r, 16, 0, "T - Trees");
     ggprint8b(&r, 16, 0, "U - Umbrella");
     ggprint8b(&r, 16, 0, "R - Rain");
     ggprint8b(&r, 16, 0, "D - Deflection");
-    ggprint8b(&r, 16, 0, "N - Sounds");
+    ggprint8b(&r, 16, 0, "N - Sounds");*/
     ggprint8b(&b, 26, 0, cScore);
 
+    if (name) {
+        nameText = displayName(box_x - 30);
+	ggprint8b(&nameText, 26, 0, "Ty Morrell");
+
+        game->box[0].width = box_length;
+        game->box[0].height = 10;
+        game->box[0].center.x = box_x -= 2;
+        game->box[0].center.y = box_y;
+        
+	if (box_x < -30)
+	    box_x = 800;
+    }
 }
 void movement(Game *game)
 {

@@ -34,12 +34,12 @@ int Jumping (double spritesheetx, float wid, int jump, Bigfoot &bigfoot, GLuint 
 }
 
 //This will project powerups onto the screen in front of the player
-void projectImage(float x, float y, float z, GLuint texture)
+void projectImage(float x, float y, float z, GLuint speedTexture)
 {
-    float wid = 60;
+    float wid = 30;
     glPushMatrix();
+    glBindTexture(GL_TEXTURE_2D, speedTexture);
     glTranslatef(x, y, z);
-    glBindTexture(GL_TEXTURE_2D, texture);
     glBegin(GL_QUADS);
     glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
     glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
@@ -48,4 +48,13 @@ void projectImage(float x, float y, float z, GLuint texture)
     glEnd();
     glPopMatrix();
 
+}
+
+int checkcollison(int sprite_x, float x, float y, float wid)
+{
+    
+    else if(x == sprite_x+20)
+    	return 1;
+    else
+	return 0;
 }
