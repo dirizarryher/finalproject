@@ -116,6 +116,7 @@ char cScore[400];
 int score = 0;
 int distance = 0;
 int showRunner=1;
+int slide = 0;
 int runnerSpeed = 80000;
 int dead=0;
 int forest=1;
@@ -187,6 +188,7 @@ struct Game {
 
 //function prototypes
 void saveData(char *u_Name, int score);
+void sliding(double spritesheetx, float wid);
 int Jumping (double spritesheetx, float wid, int jump, Bigfoot &bigfoot, GLuint jumpTexture);
 void runnerDeath (Bigfoot &b, double s);
 void initXWindows(void);
@@ -418,7 +420,7 @@ void initOpengl(void)
     //boostImage     = ppm6GetImage("./images/runner/speed_boost.ppm");
     //
     //create opengl texture elements
-   // glGenTextures(1, &bigfootTexture);
+    // glGenTextures(1, &bigfootTexture);
     //glGenTextures(1, &jumpTexture);
     glGenTextures(1, &runningTexture);
     glGenTextures(1, &jumpTexture);
@@ -694,8 +696,8 @@ void checkKeys(XEvent *e)
 	    umbrella.pos[0] += 10.0;
 	    break;
 	case XK_Down:
-	    VecCopy(umbrella.pos, umbrella.lastpos);
-	    umbrella.pos[1] -= 10.0;
+	    if(slide == 0)
+		slide = 1;
 	    break;
 	case XK_equal:
 	    if (++ndrops > 40)
@@ -1050,6 +1052,49 @@ void render(Game *game)
 	showRunner = 1;
 	jumpcount = 0;
 	jumpsheetx = 0;
+    }
+    if(slide){
+	glPushMatrix();
+	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
+	if (!silhouette) {
+	    glBindTexture(GL_TEXTURE_2D, slidesilhouetteTexture);
+	} else {
+	    glBindTexture(GL_TEXTURE_2D, silhouetteTexture);
+	    glEnable(GL_ALPHA_TEST);
+	    glAlphaFunc(GL_GREATER, 0.0f);
+	    glColor4ub(255,255,255,255);
+	}
+
+	if(slide == 1)
+	    spritesheetx=0;
+	if(slide < 32 && slide > 0) {
+	    sprite_y += 3;
+	    slide++;
+	} else if(slide >= 32 && slide < 62 ) {
+	    sprite_y -= 3;
+	    slide ++;
+	} else{
+	    slide = 0;
+	    sprite_y = 75;
+	    spritesheetx=0;
+	}
+	sliding(spritesheetx, wid);
+    }
+
+    if(!slide) {
+	if (bigfoot.vel[0] > 0.0) {
+	    glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
+	    glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
+	    glTexCoord2f(0.111111111f+spritesheetx,0.0f);glVertex2i( wid,wid);
+	    glTexCoord2f(0.111111111f+spritesheetx,1.0f);glVertex2i( wid,-wid);
+	} else {
+	    glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
+	    glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+	    glTexCoord2f(0.1f, 1.0f); glVertex2i( wid, wid);
+	    glTexCoord2f(0.1f, 0.0f); glVertex2i( wid,-wid);
+	}
+	glEnd();
+	glPopMatrix();
     }
 
     if(dead) {
