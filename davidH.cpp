@@ -1,170 +1,74 @@
 // David A. Hernandez II CS335
 #include "davidH.h"
-#include "Structures.h"
-//#include <FMOD/fmod.h>
-//#include <FMOD/wincompat.h>
-//#include <fmod.h>
-extern "C" {
-#include "fonts.h"
-}
+#include </usr/include/AL/alut.h>
 
-/*Ppmimage *idleImage = NULL;
-Ppmimage *runningImage = NULL;
-Ppmimage *jumpImage = NULL;
-Ppmimage *deathImage = NULL;
-Ppmimage *boostImage = NULL;
-GLuint idleTexture, runnerTexture, jumpTexture, deathTexture, boostTexture;
-GLuint idleSilhouetteTexture, runnerSilhouetteTexture, 
-       jumpSilhouetteTexture, deathSilhouetteTexture,
-       boostSilhouetteTexture;
-*/
-unsigned char *buildAlphaData(Ppmimage *img);
-
-void getRunnerTexture(void)
+void init_sounds(void)
 {
-    //Loading the image files into a PPM structure
-    idleImage = ppm6GetImage("./images/runner/runner_sheet.ppm");
-    runningImage = ppm6GetImage("./images/runner/runner_sheet2.ppm");
-//    jumpImage = ppm6GetImage("./images/runner/jump_sheet.ppm");
-    deathImage = ppm6GetImage("./images/runner/runnerdeath_sheet.ppm");
-  //  boostImage = ppm6GetImage("./images/jump_sheet.ppm");
+    alutInit(0, NULL);
+    if (alGetError() != AL_NO_ERROR) {
+        printf("Error: alutInit()\n");
+        return;
+    }
 
-    //Creating OPGL texture elements for runner when he's idle, 
-    //running, jumping, or when he dies
-    glGenTextures(1, &idleTexture);
-    glGenTextures(1, &runnerTexture);
-    glGenTextures(1, &jumpTexture);
-    glGenTextures(1, &deathTexture);
-    glGenTextures(1, &boostTexture);
-
-//------------------------------------------------------------------------
-//idleTexture
-    //TextureImage for runner when idle
-    glBindTexture(GL_TEXTURE_2D, idleTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, idleImage->width, idleImage->height,
-            0, GL_RGB, GL_UNSIGNED_BYTE, idleImage->data);
-
-    //Silhouettetexture for when runner is idle
-    glBindTexture(GL_TEXTURE_2D, idleSilhouetteTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-    unsigned char *idleSilhouetteData = buildAlphaData(idleImage);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, idleImage->width, 
-            idleImage->height, 0, GL_RGBA, GL_UNSIGNED_BYTE, 
-            idleSilhouetteData);
-
-
-//------------------------------------------------------------------------
-//runnerTexture
-    //TextureImage for runner when running
-    glBindTexture(GL_TEXTURE_2D, runnerTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, runningImage->width, 
-            runningImage->height, 0, GL_RGB, GL_UNSIGNED_BYTE,
-            runningImage->data);
-
-    //Silhouettetexture for Running
-    glBindTexture(GL_TEXTURE_2D, runnerSilhouetteTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-    unsigned char *runnerSilhouetteData = buildAlphaData(runningImage);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, runningImage->width,
-            runningImage->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-            runnerSilhouetteData);
-
-
-//------------------------------------------------------------------------
-//jumpTexture
-    //TextureImage when Runner jumps
-    glBindTexture(GL_TEXTURE_2D, jumpTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, jumpImage->width, jumpImage->height,
-            0, GL_RGB, GL_UNSIGNED_BYTE, jumpImage->data);
-
-    //Silhouettetexture for jumping
-    glBindTexture(GL_TEXTURE_2D, jumpSilhouetteTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-    unsigned char *jumpSilhouetteData = buildAlphaData(jumpImage);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, jumpImage->width,
-            jumpImage->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-            jumpSilhouetteData);
-
-
-//------------------------------------------------------------------------
-    //SilhouetteTexture for dying
-    glBindTexture(GL_TEXTURE_2D, deathTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-
-    //TextureImage when Runner dies
-    glBindTexture(GL_TEXTURE_2D, deathSilhouetteTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, deathImage->width, deathImage->height,
-            0, GL_RGB, GL_UNSIGNED_BYTE, deathImage->data);
-
-    unsigned char *deathSilhouetteData = buildAlphaData(deathImage);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, deathImage->width,
-            deathImage->height, 0, GL_RGBA, GL_UNSIGNED_BYTE,
-            deathSilhouetteData);
-//------------------------------------------------------------------------
-//Speedboost Image and Texture
-
-    int boost_w = boostImage->width;
-    int boost_h = boostImage->height;
-
-    glBindTexture(GL_TEXTURE_2D, boostTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, boost_w, boost_h, 0, GL_RGB, 
-            GL_UNSIGNED_BYTE, boostImage->data);
-
-    //Speedboost Silhouette
-    glBindTexture(GL_TEXTURE_2D, boostSilhouetteTexture);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    //Clear error state
+    alGetError();
     
-    unsigned char *boostSilhouetteData = buildAlphaData(boostImage);
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, boost_w, boost_h, 0, GL_RGBA, 
-            GL_UNSIGNED_BYTE, boostSilhouetteData);
+    //Setup Listener
+    float vec[6] = {0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f};
+    alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
+    alListenerfv(AL_ORIENTATION, vec);
+    alListenerf(AL_GAIN, 1.0f);
+
+    //Buffer holds the sound information
+    ALuint alBuffer;
+    alBuffer = alutCreateBufferFromFile("./test.wav");
+
+    //Source refers to the sound
+    ALuint alSource;
+    //Generate a source and store it into a buffer
+    alGenSources(1, &alSource);
+    alSourcei(alSource, AL_BUFFER, alBuffer);
+
+    //Set volume and pitch to normal, no looping of sound
+    alSourcef(alSource, AL_GAIN, 1.0f);
+    alSourcef(alSource, AL_PITCH, 1.0f);
+    alSourcei(alSource, AL_LOOPING, AL_FALSE);
+    if (alGetError() != AL_NO_ERROR) {
+        printf("Error: Setting Source\n");
+        return;
+    }
+    
+    for (int i = 0; i < 4; i++) {
+        alSourcePlay(alSource);
+        usleep(250000);
+    }
 }
 
+void play_music(ALuint alSource)
+{
+    alSourcePlay(alSource);
+}
 
+void cleanUpMusic(ALuint &alBuffer, ALuint alSource) 
+{
+    //First, delete the source
+    alDeleteSources(1, &alSource);
+    //Delete the buffer
+    alDeleteBuffers(1, &alBuffer);
 
-
+    //Close out OPAL itself
+    //Get active context
+    ALCcontext *Context = alcGetCurrentContext();
+    //Get device for active context
+    ALCdevice *Device = alcGetContextsDevice(Context);
+    //Disable Context
+    alcMakeContextCurrent(NULL);
+    //Release Context
+    alcDestroyContext(Context);
+    //Close Device
+    alcCloseDevice(Device);
+}
 /*
-   void init_sounds(void)
-   {
-   if (fmod_init()) {
-   printf("ERROR");
-   return;
-   }
-   if (fmod_createsound((char *)"./sounds/untitled.mp3", 0)) {
-   printf("ERROR");
-   return;
-   }
-   if (fmod_createsound((char *)"./sounds/untitled2.mp3", 1)) {
-   printf("ERROR");
-   return;
-   }
-   fmod_setmode(0, FMOD_LOOP_NORMAL);
-   fmod_setmode(1, FMOD_LOOP_NORMAL);
-   }
-
-   void play_music(int a)
-   {
-   fmod_playsound(a);
-   }
-
-
 //Converts an image with any file extension imported into 
 //images/runner/ directory into a ppm image
 string convertImage(string filename, string path, string filetype)
@@ -172,25 +76,15 @@ string convertImage(string filename, string path, string filetype)
     string oldfile = path + filename + filetype;
     string newfile = path + filename + ".ppm";
 
-    //convert ./images/runner/runner_sheet2.ppm ./images/runner/runner_sheet2.png
+    //convert ./images/runner/runner_sheet2.ppm 
+    //./images/runner/runner_sheet2.png
     string newstuff =  "convert " + oldfile + " " + newfile;
     filename = system(newstuff.data());
     return filename;
 }
-
-//Boolean value to determine if runner touched an obstacle
-bool endGame(Game *g)
-{
-    //If runner dies, game over
-    if (runner.dead == 1)
-        return true;
-    else
-        return false;
-}
 */
-
 //Game Over Menu if runner dies
-void endMenu(Game *g)
+/*void endMenu(Game *g)
 {
     int yellow = 0x00ffff00;
     int red = 0x00ff0000;
@@ -206,4 +100,4 @@ void endMenu(Game *g)
     r.bot = yres - 600;
     ggprint16(&r, 50, yellow, "Press ESC to Exit");
 }
-
+*/
