@@ -4,20 +4,34 @@
 
 #include "tyM.h"
 
-//This code gets called when the sprite jumps. It updates the y axis of the sprite to make it look like it is jumping.
-int Jumping (double spritesheetx, float wid, int jump, Bigfoot &bigfoot, GLuint jumpTexture)
+extern "C" {
+#include "fonts.h"
+}
+
+
+//This code gets called when the sprite jumps. 
+//It updates the y axis of the sprite to make it look like it is jumping.
+int Jumping (double spritesheetx, float wid, int jump, 
+	Bigfoot &bigfoot, GLuint jumpTexture, int stuff)
 {
-    if(jump < 32 && jump > 0) {
+    if (!stuff) {
+	if (jump < 32 && jump > 0) {
+	    bigfoot.pos[1] +=3;
+	    jump++;
+	} else if(jump >= 32 && jump < 62 ) {
+	    bigfoot.pos[1] -=3;
+	    jump ++;
+	} else{
+	    jump = 0;
+	    bigfoot.pos[1] = 75;
+	    spritesheetx=0;
+	}
+    }
+    if (stuff) {
 	bigfoot.pos[1] +=3;
 	jump++;
-    } else if(jump >= 32 && jump < 62 ) {
-	bigfoot.pos[1] -=3;
-	jump ++;
-    } else{
-	jump = 0;
-	bigfoot.pos[1] = 75;
-	spritesheetx=0;
     }
+
     glPushMatrix();
     glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
     glBindTexture(GL_TEXTURE_2D, jumpTexture);
