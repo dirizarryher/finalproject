@@ -474,7 +474,7 @@ void initOpengl(void)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     //
     //must build a new set of data...
-    unsigned char *BoostsilhouetteData = buildAlphaData(jumpImage);	
+    unsigned char *BoostsilhouetteData = buildAlphaData(boostImage);	
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, boost_w, boost_h, 0,
 	    GL_RGBA, GL_UNSIGNED_BYTE, BoostsilhouetteData);
     //-------------------------------------------------------------------------
@@ -621,9 +621,11 @@ void initOpengl(void)
     //
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    silhouetteData = buildAlphaData(farbackgroundImage);
     glTexImage2D(GL_TEXTURE_2D, 0, 3,
 	    farbackgroundImage->width, farbackgroundImage->height,
 	    0, GL_RGB, GL_UNSIGNED_BYTE, farbackgroundImage->data);
+    free(silhouetteData);
     //-------------------------------------------------------------------------
     //
     //ground
@@ -1139,6 +1141,8 @@ void render(Game *game)
     float wid = 60.0f;
     glColor3f(1.0, 1.0, 1.0);
     if (forest) {
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
 	//sky
 	glBindTexture(GL_TEXTURE_2D, skyTexture);
 	glBegin(GL_QUADS);
@@ -1148,6 +1152,8 @@ void render(Game *game)
 	glTexCoord2f(1.0f-skyx, 1.0f); glVertex2i(xres, 0);
 	glEnd();
 	//far background
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
 	glBindTexture(GL_TEXTURE_2D, farbackgroundTexture);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0.0f-farbackgroundx, 1.0f); glVertex2i(0, 0);
@@ -1156,6 +1162,8 @@ void render(Game *game)
 	glTexCoord2f(0.5f-farbackgroundx, 1.0f); glVertex2i(xres, 0);
 	glEnd();
 	//ground
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
 	glBindTexture(GL_TEXTURE_2D, groundTexture);
 	glBegin(GL_QUADS);
 	glTexCoord2f(0.0f-groundx, 1.0f); glVertex2i(0, 0);
@@ -1194,11 +1202,11 @@ void render(Game *game)
     }
 
     if(slide){
-        showRunner = 0;
-        slide = sliding(slidesheetx, wid, slide, bigfoot, slideTexture);
+	showRunner = 0;
+	slide = sliding(slidesheetx, wid, slide, bigfoot, slideTexture);
     }else{
-        showRunner = 1;
-        slidesheetx = 0;
+	showRunner = 1;
+	slidesheetx = 0;
     }
 
 
@@ -1340,24 +1348,24 @@ void render(Game *game)
     b.center = 0;
     sprintf(cScore, "SCORE: %d", score); 
     /*ggprint8b(&r, 16, 0, "B - Bigfoot");
-    ggprint8b(&r, 16, 0, "F - Forest");
-    ggprint8b(&r, 16, 0, "S - Silhouette");
-    ggprint8b(&r, 16, 0, "T - Trees");
-    ggprint8b(&r, 16, 0, "U - Umbrella");
-    ggprint8b(&r, 16, 0, "R - Rain");
-    ggprint8b(&r, 16, 0, "D - Deflection");
-    ggprint8b(&r, 16, 0, "N - Sounds");*/
+      ggprint8b(&r, 16, 0, "F - Forest");
+      ggprint8b(&r, 16, 0, "S - Silhouette");
+      ggprint8b(&r, 16, 0, "T - Trees");
+      ggprint8b(&r, 16, 0, "U - Umbrella");
+      ggprint8b(&r, 16, 0, "R - Rain");
+      ggprint8b(&r, 16, 0, "D - Deflection");
+      ggprint8b(&r, 16, 0, "N - Sounds");*/
     ggprint8b(&b, 26, 0, cScore);
 
     if (name) {
-        nameText = displayName(box_x - 30);
+	nameText = displayName(box_x - 30);
 	ggprint8b(&nameText, 26, 0, "Ty Morrell");
 
-        game->box[0].width = box_length;
-        game->box[0].height = 10;
-        game->box[0].center.x = box_x -= 2;
-        game->box[0].center.y = box_y;
-        
+	game->box[0].width = box_length;
+	game->box[0].height = 10;
+	game->box[0].center.x = box_x -= 2;
+	game->box[0].center.y = box_y;
+
 	if (box_x < -30)
 	    box_x = 800;
     }
