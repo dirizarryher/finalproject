@@ -215,7 +215,7 @@ void render(Game *game);
 int check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
 void projectImage(float x, float y, float z, GLuint speedTexture);
-bool checkcollison(int sprite, float x, float y, float wid);
+bool checkcollison(int sprite, float x);
 void funnystuff(int stuff_counter);
 
 int main(void)
@@ -615,17 +615,31 @@ void initOpengl(void)
     //-------------------------------------------------------------------------
     //
     //far background
-    //int forest_w = WINDOW_WIDTH * 2;
-    //int forest_h = WINDOW_HEIGHT;
+    int tmp_w = farbackgroundImage->width;
+    int tmp_h = farbackgroundImage->height;
+    //
     glBindTexture(GL_TEXTURE_2D, farbackgroundTexture);
     //
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    silhouetteData = buildAlphaData(farbackgroundImage);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3,
-	    farbackgroundImage->width, farbackgroundImage->height,
-	    0, GL_RGB, GL_UNSIGNED_BYTE, farbackgroundImage->data);
-    free(silhouetteData);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, tmp_w, tmp_h, 0,
+	    GL_RGB, GL_UNSIGNED_BYTE, farbackgroundImage->data);
+    //int forest_w = WINDOW_WIDTH * 2;
+    //int forest_h = WINDOW_HEIGHT;
+    //speedboost silhouette
+    //this is similar to a sprite graphic
+    //
+    //
+    glBindTexture(GL_TEXTURE_2D, farbackgroundTexture);
+
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *farbackgroundData = buildAlphaData(farbackgroundImage);	
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tmp_w, tmp_h, 0,
+	    GL_RGBA, GL_UNSIGNED_BYTE, farbackgroundData);
+    //-------------------------------------------------------------------------
     //-------------------------------------------------------------------------
     //
     //ground
@@ -1172,15 +1186,15 @@ void render(Game *game)
 	glTexCoord2f(1.0f-groundx, 1.0f); glVertex2i(xres, 0);
 	glEnd();
 	//grass
-	glBindTexture(GL_TEXTURE_2D, grassTexture);
+	/*glBindTexture(GL_TEXTURE_2D, grassTexture);
 	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f-backgroundx, 1.0f); glVertex2i(0, 0);
-	glTexCoord2f(0.0f-backgroundx, 0.0f); glVertex2i(0, (yres/10)+10);
-	glTexCoord2f(1.0f-backgroundx, 0.0f); glVertex2i(xres, (yres/10)+10);
-	glTexCoord2f(1.0f-backgroundx, 1.0f); glVertex2i(xres, 0);
-	glEnd();
+	glTexCoord2f(0.0f-grassx, 1.0f); glVertex2i(0, 0);
+	glTexCoord2f(0.0f-grassx, 0.0f); glVertex2i(0, (yres/20)+10);
+	glTexCoord2f(1.0f-grassx, 0.0f); glVertex2i(xres, (yres/20)+10);
+	glTexCoord2f(1.0f-grassx, 1.0f); glVertex2i(xres, 0);
+	glEnd();*/
     }
-    farbackgroundx-=.0001;
+    farbackgroundx-=.0005;
     skyx-=.00005;
     grassx-=.05;
     groundx-=.005;
@@ -1274,7 +1288,7 @@ void render(Game *game)
 	projectImage(x, y, z, speedTexture);
 	cout << "x is " << x << "\n";
 	x -= boostMovement;
-	if(x == -600 || checkcollison(sprite_x, x, y, wid)) {
+	if(x == -600 || checkcollison(sprite_x, x)) {
 	    image_counter = 0;
 	    x = 900;
 	    boostMovement = 0;
@@ -1373,31 +1387,6 @@ void render(Game *game)
 void movement(Game *game)
 {
     Particle *p;
-
-    //declare a box shape
-    /*game->box[1].width = box_length;
-      game->box[1].height = 40;
-      game->box[1].center.x = box_x -= 3;
-      game->box[1].center.y = box_y;*/
-    /*   if (jump > 0) {
-	 game->box[2].center.y += 2;
-	 jump++;
-	 if (jump == 51)
-	 jump = -50;
-	 } 
-	 else {
-	 if(game->box[2].center.y > sprite_y) {
-	 game->box[2].center.y -= 2;
-	 sleep(.8);
-	 jump ++;
-	 }
-	 }
-	 if (val == 0 ) { 
-	 box_y += 60;
-	 }
-	 else { 
-	 box_y -= 60;
-	 }*/
 
     if ( game->box[1].center.x < -40)
 	box_x = 1500;

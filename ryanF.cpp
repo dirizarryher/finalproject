@@ -64,7 +64,7 @@ void projectImage(float x, float y, float z, GLuint speedTexture)
 
 }
 
-int checkcollison(int sprite_x, float x, float y, float wid)
+int checkcollison(int sprite_x, float x)
 {
     
     if(x == sprite_x+20)
