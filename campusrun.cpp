@@ -116,11 +116,11 @@ typedef struct t_bigfoot {
 Bigfoot bigfoot;
 
 Ppmimage *runningImage, *deathImage, *jumpImage, *boostImage, *slideImage;
-Ppmimage *grassImage, *groundImage, *skyImage, *farbackgroundImage;
+Ppmimage *grassImage, *groundImage, *skyImage, *farbackgroundImage, *backgroundImage;
 Ppmimage *forestImage=NULL;
 GLuint runningTexture, deathTexture, jumpTexture, speedTexture, slideTexture;
 GLuint silhouetteTexture, DeathsilhouetteTexture, JumpsilhouetteTexture, slidesilhouetteTexture;
-GLuint grassTexture, groundTexture, skyTexture, farbackgroundTexture;
+GLuint grassTexture, groundTexture, skyTexture, farbackgroundTexture, backgroundTexture;
 GLuint forestTexture;
 char cScore[400];
 int name = 0;
@@ -217,6 +217,7 @@ void movement(Game *game);
 void projectImage(float x, float y, float z, GLuint speedTexture);
 bool checkcollison(int sprite, float x);
 void funnystuff(int stuff_counter);
+void displaybackground(double backgroundx, GLuint Texture, int yres, int xres, bool toggle);
 
 int main(void)
 {
@@ -432,7 +433,8 @@ void initOpengl(void)
     boostImage     = ppm6GetImage("./images/speedboost.ppm");
     slideImage     = ppm6GetImage("./images/slide_sheet.ppm");
     
-    farbackgroundImage = ppm6GetImage("./images/farbackground1.ppm");
+    farbackgroundImage = ppm6GetImage("./images/farbackground.ppm");
+    backgroundImage = ppm6GetImage("./images/background.ppm");
     grassImage         = ppm6GetImage("./images/grass.ppm");
     groundImage        = ppm6GetImage("./images/ground.ppm");
     skyImage           = ppm6GetImage("./images/sky.ppm");
@@ -449,6 +451,7 @@ void initOpengl(void)
     
     glGenTextures(1, &skyTexture);
     glGenTextures(1, &farbackgroundTexture);
+    glGenTextures(1, &backgroundTexture);
     glGenTextures(1, &groundTexture);
     glGenTextures(1, &grassTexture);
 
@@ -624,12 +627,7 @@ void initOpengl(void)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, tmp_w, tmp_h, 0,
 	    GL_RGB, GL_UNSIGNED_BYTE, farbackgroundImage->data);
-    //int forest_w = WINDOW_WIDTH * 2;
-    //int forest_h = WINDOW_HEIGHT;
-    //speedboost silhouette
-    //this is similar to a sprite graphic
-    //
-    //
+    
     glBindTexture(GL_TEXTURE_2D, farbackgroundTexture);
 
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
@@ -640,30 +638,80 @@ void initOpengl(void)
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tmp_w, tmp_h, 0,
 	    GL_RGBA, GL_UNSIGNED_BYTE, farbackgroundData);
     //-------------------------------------------------------------------------
+    //far background
+    tmp_w = backgroundImage->width;
+    tmp_h = backgroundImage->height;
+    //
+    glBindTexture(GL_TEXTURE_2D, backgroundTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, tmp_w, tmp_h, 0,
+	    GL_RGB, GL_UNSIGNED_BYTE, backgroundImage->data);
+    
+    glBindTexture(GL_TEXTURE_2D, backgroundTexture);
+
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *backgroundData = buildAlphaData(backgroundImage);	
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tmp_w, tmp_h, 0,
+	    GL_RGBA, GL_UNSIGNED_BYTE, backgroundData);
     //-------------------------------------------------------------------------
     //
     //ground
-    //int forest_w = WINDOW_WIDTH * 2;
-    //int forest_h = WINDOW_HEIGHT;
+    tmp_w = groundImage->width;
+    tmp_h = groundImage->height;
+    //
     glBindTexture(GL_TEXTURE_2D, groundTexture);
     //
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3,
-	    groundImage->width, groundImage->height,
-	    0, GL_RGB, GL_UNSIGNED_BYTE, groundImage->data);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, tmp_w, tmp_h, 0,
+	    GL_RGB, GL_UNSIGNED_BYTE, groundImage->data);
+    //int forest_w = WINDOW_WIDTH * 2;
+    //int forest_h = WINDOW_HEIGHT;
+    //speedboost silhouette
+    //this is similar to a sprite graphic
+    //
+    //
+    glBindTexture(GL_TEXTURE_2D, groundTexture);
+
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *groundData = buildAlphaData(groundImage);	
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tmp_w, tmp_h, 0,
+	    GL_RGBA, GL_UNSIGNED_BYTE, groundData);
     //-------------------------------------------------------------------------
     //
     //grass
-    //int forest_w = WINDOW_WIDTH * 2;
-    //int forest_h = WINDOW_HEIGHT;
+    tmp_w = grassImage->width;
+    tmp_h = grassImage->height;
+    //
     glBindTexture(GL_TEXTURE_2D, grassTexture);
     //
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3,
-	    grassImage->width, grassImage->height,
-	    0, GL_RGB, GL_UNSIGNED_BYTE, grassImage->data);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, tmp_w, tmp_h, 0,
+	    GL_RGB, GL_UNSIGNED_BYTE, grassImage->data);
+    //int forest_w = WINDOW_WIDTH * 2;
+    //int forest_h = WINDOW_HEIGHT;
+    //speedboost silhouette
+    //this is similar to a sprite graphic
+    //
+    //
+    glBindTexture(GL_TEXTURE_2D, grassTexture);
+
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *grassData = buildAlphaData(grassImage);	
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tmp_w, tmp_h, 0,
+	    GL_RGBA, GL_UNSIGNED_BYTE, grassData);
     //-------------------------------------------------------------------------
 }
 
@@ -1155,49 +1203,22 @@ void render(Game *game)
     float wid = 60.0f;
     glColor3f(1.0, 1.0, 1.0);
     if (forest) {
-	glEnable(GL_ALPHA_TEST);
-	glAlphaFunc(GL_GREATER, 0.0f);
 	//sky
-	glBindTexture(GL_TEXTURE_2D, skyTexture);
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f-skyx, 1.0f); glVertex2i(0, 0);
-	glTexCoord2f(0.0f-skyx, 0.0f); glVertex2i(0, yres);
-	glTexCoord2f(1.0f-skyx, 0.0f); glVertex2i(xres, yres);
-	glTexCoord2f(1.0f-skyx, 1.0f); glVertex2i(xres, 0);
-	glEnd();
+	displaybackground(skyx, skyTexture, yres, xres, 0);
 	//far background
-	glEnable(GL_ALPHA_TEST);
-	glAlphaFunc(GL_GREATER, 0.0f);
-	glBindTexture(GL_TEXTURE_2D, farbackgroundTexture);
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f-farbackgroundx, 1.0f); glVertex2i(0, 0);
-	glTexCoord2f(0.0f-farbackgroundx, 0.0f); glVertex2i(0, (yres/2)+100);
-	glTexCoord2f(0.5f-farbackgroundx, 0.0f); glVertex2i(xres, (yres/2)+100);
-	glTexCoord2f(0.5f-farbackgroundx, 1.0f); glVertex2i(xres, 0);
-	glEnd();
+	displaybackground(farbackgroundx, farbackgroundTexture, ((yres/2)+200), xres, 0);
+	//background
+	displaybackground(backgroundx, backgroundTexture, (yres/2), xres+400, 1);
 	//ground
-	glEnable(GL_ALPHA_TEST);
-	glAlphaFunc(GL_GREATER, 0.0f);
-	glBindTexture(GL_TEXTURE_2D, groundTexture);
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f-groundx, 1.0f); glVertex2i(0, 0);
-	glTexCoord2f(0.0f-groundx, 0.0f); glVertex2i(0, yres/10);
-	glTexCoord2f(1.0f-groundx, 0.0f); glVertex2i(xres, yres/10);
-	glTexCoord2f(1.0f-groundx, 1.0f); glVertex2i(xres, 0);
-	glEnd();
+	displaybackground(groundx, groundTexture, yres/20, xres, 0);
 	//grass
-	/*glBindTexture(GL_TEXTURE_2D, grassTexture);
-	glBegin(GL_QUADS);
-	glTexCoord2f(0.0f-grassx, 1.0f); glVertex2i(0, 0);
-	glTexCoord2f(0.0f-grassx, 0.0f); glVertex2i(0, (yres/20)+10);
-	glTexCoord2f(1.0f-grassx, 0.0f); glVertex2i(xres, (yres/20)+10);
-	glTexCoord2f(1.0f-grassx, 1.0f); glVertex2i(xres, 0);
-	glEnd();*/
-    }
-    farbackgroundx-=.0005;
+	//displaybackground(grassx, grassTexture, (yres/20), xres, 0);
+    farbackgroundx-=.0001;
+    backgroundx-=.0006;
     skyx-=.00005;
     grassx-=.05;
     groundx-=.005;
+    }
 
     //this makes sure the player can't double jump and does a loose aproximation of phyics for the jump
     if(jump || stuff){
@@ -1224,7 +1245,6 @@ void render(Game *game)
     }
 
 
-    backgroundx-=.005;
     if(dead) {
 	glPushMatrix();
 	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
