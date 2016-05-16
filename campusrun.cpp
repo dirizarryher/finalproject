@@ -45,7 +45,7 @@ using namespace std;
 
 int jump = 0, slide = 0;
 int stuff_counter = 0;
-int set = 0, direction = -1, counter = 0, jumpcount = 0;
+int set = 0, direction = -1, counter = 0, jumpcount = 0, slidecount = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
 sprite_x = 140, sprite_y = 75, boostMovement = 2;
 float x = 600, y = 75, z = 1;
@@ -451,6 +451,7 @@ void initOpengl(void)
     glGenTextures(1, &farbackgroundTexture);
     glGenTextures(1, &groundTexture);
     glGenTextures(1, &grassTexture);
+    glGenTextures(1, &slideTexture);
 
     //-------------------------------------------------------------------------
     //speedboost
@@ -1193,14 +1194,23 @@ void render(Game *game)
 	jumpsheetx = 0;
     }
 
+    /////////////////////////////////slide
     if(slide){
         showRunner = 0;
         slide = sliding(slidesheetx, wid, slide, bigfoot, slideTexture);
-    }else{
+        slidecount++;
+        slidesheetx++;
+    
+    if(slidecount == 4){
+        slidesheetx += 1;
+        slidecount = 0;
+    }
+    }else{ 
         showRunner = 1;
+        slidecount = 0;
         slidesheetx = 0;
     }
-
+    ///////////////////////////////////
 
     backgroundx-=.005;
     if(dead) {
