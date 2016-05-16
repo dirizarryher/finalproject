@@ -64,37 +64,41 @@ void projectImage(float x, float y, float z, GLuint speedTexture)
 
 }
 
-int checkcollison(int sprite_x, float x)
+int checkcollison(int sprite_x, float x, int sprite_y, float y)
 {
 
-    if(x == sprite_x+20)
-        return 1;
-    else
-        return 0;
+    if (x == sprite_x+50) {
+	if (y <= sprite_y+50 && y >= sprite_y-50) {
+	    return 1;
+	}
+    } else {
+	return 0; 
+    }
+    return 0; 
 }
 
 void displaybackground(double backgroundx, GLuint Texture, int yres, int xres, bool toggle)
 {
     if(!toggle)
     {
-        glEnable(GL_ALPHA_TEST);
-        glAlphaFunc(GL_GREATER, 0.0f);
-        glBindTexture(GL_TEXTURE_2D, Texture);
-        glBegin(GL_QUADS);
-        glTexCoord2f(0.0f-backgroundx, 1.0f); glVertex2i(0, 0);
-        glTexCoord2f(0.0f-backgroundx, 0.0f); glVertex2i(0, yres);
-        glTexCoord2f(1.0f-backgroundx, 0.0f); glVertex2i(xres, yres);
-        glTexCoord2f(1.0f-backgroundx, 1.0f); glVertex2i(xres, 0);
-        glEnd();
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
+	glBindTexture(GL_TEXTURE_2D, Texture);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0f-backgroundx, 1.0f); glVertex2i(0, 0);
+	glTexCoord2f(0.0f-backgroundx, 0.0f); glVertex2i(0, yres);
+	glTexCoord2f(1.0f-backgroundx, 0.0f); glVertex2i(xres, yres);
+	glTexCoord2f(1.0f-backgroundx, 1.0f); glVertex2i(xres, 0);
+	glEnd();
     } else {
-        glEnable(GL_ALPHA_TEST);
-        glAlphaFunc(GL_GREATER, 0.0f);
-        glBindTexture(GL_TEXTURE_2D, Texture);
-        glBegin(GL_QUADS);
-        glTexCoord2f(0.0f-backgroundx, 1.0f); glVertex2i(0, 0);
-        glTexCoord2f(0.0f-backgroundx, 0.0f); glVertex2i(0, yres);
-        glTexCoord2f(1.0f-backgroundx, 0.0f); glVertex2i(xres*2, yres);
-        glTexCoord2f(1.0f-backgroundx, 1.0f); glVertex2i(xres*2, 0);
-        glEnd();
+	glEnable(GL_ALPHA_TEST);
+	glAlphaFunc(GL_GREATER, 0.0f);
+	glBindTexture(GL_TEXTURE_2D, Texture);
+	glBegin(GL_QUADS);
+	glTexCoord2f(0.0f-backgroundx, 1.0f); glVertex2i(0, 0);
+	glTexCoord2f(0.0f-backgroundx, 0.0f); glVertex2i(0, yres);
+	glTexCoord2f(1.0f-backgroundx, 0.0f); glVertex2i(xres*2, yres);
+	glTexCoord2f(1.0f-backgroundx, 1.0f); glVertex2i(xres*2, 0);
+	glEnd();
     }
 }

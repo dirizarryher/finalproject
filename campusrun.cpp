@@ -215,7 +215,7 @@ void render(Game *game);
 int check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
 void projectImage(float x, float y, float z, GLuint speedTexture);
-bool checkcollison(int sprite, float x);
+bool checkcollison(int sprite, float x, int sprite_y, float y);
 void funnystuff(int stuff_counter);
 void displaybackground(double backgroundx, GLuint Texture, int yres, int xres, bool toggle);
 
@@ -1221,16 +1221,16 @@ void render(Game *game)
     }
 
     //this makes sure the player can't double jump and does a loose aproximation of phyics for the jump
-    if(jump || stuff){
+    if (jump || stuff){
 	showRunner = 0;
 	jump = Jumping(jumpsheetx, wid, jump, bigfoot, jumpTexture, stuff);
 	jumpcount++;
-	if(jumpcount == 4) {
+	if (jumpcount == 4) {
 	    jumpsheetx += .1;
 	    jumpcount = 0;
 	}
 
-    }else {
+    } else {
 	showRunner = 1;
 	jumpcount = 0;
 	jumpsheetx = 0;
@@ -1308,7 +1308,7 @@ void render(Game *game)
 	projectImage(x, y, z, speedTexture);
 	cout << "x is " << x << "\n";
 	x -= boostMovement;
-	if(x == -600 || checkcollison(sprite_x, x)) {
+	if(x == -600 || checkcollison(sprite_x, x, sprite_y, y)) {
 	    image_counter = 0;
 	    x = 900;
 	    boostMovement = 0;
