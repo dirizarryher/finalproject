@@ -12,33 +12,33 @@ extern "C" {
 //This code gets called when the sprite jumps. 
 //It updates the y axis of the sprite to make it look like it is jumping.
 int Jumping (double spritesheetx, float wid, int jump, 
-        Bigfoot &bigfoot, GLuint jumpTexture, int stuff)
+	int *sprite_y, GLuint jumpTexture, int stuff)
 {
     if (!stuff) {
-        if (jump < 32 && jump > 0) {
-            bigfoot.pos[1] +=3;
-            jump++;
-        } else if (jump >= 32 && jump < 62 ) {
-            bigfoot.pos[1] -=3;
-            jump ++;
-        } else {
-            jump = 0;
-            bigfoot.pos[1] = 75;
-            spritesheetx=0;
-        }
+	if (jump < 32 && jump > 0) {
+	    *sprite_y += 3;
+	    jump++;
+	} else if (jump >= 32 && jump < 62 ) {
+	    *sprite_y -= 3;
+	    jump ++;
+	} else {
+	    jump = 0;
+	    *sprite_y = 75;
+	}
     }
     if (stuff) {
-        bigfoot.pos[1] +=3;
-        jump++;
+	*sprite_y += 3;
+	jump++;
     }
 
     glPushMatrix();
-    glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
+    //cout << bigfoot.pos[1] << endl;
+    glTranslatef(140, *sprite_y, 0);
     glBindTexture(GL_TEXTURE_2D, jumpTexture);
     glBegin(GL_QUADS);
     glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
     glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
-    glTexCoord2f(0.1f+spritesheetx, 0.0f); glVertex2i( wid,wid);
+    glTexCoord2f(0.1f+spritesheetx, 0.0f); glVertex2i( wid, wid);
     glTexCoord2f(0.1f+spritesheetx, 1.0f); glVertex2i( wid,-wid);
     glEnd();
     glPopMatrix();
@@ -67,8 +67,8 @@ void projectImage(float x, float y, float z, GLuint speedTexture)
 int checkcollison(int sprite_x, float x, int sprite_y, float y)
 {
 
-    if (x == sprite_x+50) {
-	if (y <= sprite_y+50 && y >= sprite_y-50) {
+    if (x <= sprite_x+50 && x >= sprite_x-50) {
+	if (y <= sprite_y+50 && y >= sprite_y-20) {
 	    return 1;
 	}
     } else {

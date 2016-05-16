@@ -20,25 +20,37 @@ extern "C" {
 
 #include "tyM.h"
 
-int sliding(double spritesheetx, float wid, int slide, Bigfoot &bigfoot, GLuint slideTexture)
+int sliding(double slidesheetx, float wid, int slide, Bigfoot &bigfoot, GLuint slideTexture)
 {
 
-    if(slide==1){
-        bigfoot.pos[1] -= 3;
-        spritesheetx = 0;
+    if(slide < 32 && slide > 0){
+        //bigfoot.pos[1];
         slide++;
+    }else{
+        slide = 0;
+        slidesheetx = 0;
     }
+
+    /*if(slide==1){
+        bigfoot.pos[1] -= 3;
+        slidesheetx = 0;
+        slide++;
+    }else{
+        slide = 0;
+        bigfoot.pos[1] += 3;
+        slidesheetx = 0;
+    }*/
 
     glPushMatrix();
     glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
     glBindTexture(GL_TEXTURE_2D, slideTexture);
     glBegin(GL_QUADS);
 
-    glTexCoord2f(0.01f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
-    glTexCoord2f(0.0f+spritesheetx, 0.01f); glVertex2i(-wid, wid);
+    glTexCoord2f(0.0f+slidesheetx, 1.0f); glVertex2i(-wid,-wid);
+    glTexCoord2f(0.0f+slidesheetx, 0.01f); glVertex2i(-wid, wid);
 
-    glTexCoord2f(0.111111111f+spritesheetx, 0.0f); glVertex2i( wid,wid);
-    glTexCoord2f(0.111111111f+spritesheetx, 1.0f); glVertex2i( wid,+wid);
+    glTexCoord2f(0.111111111f+slidesheetx, 0.0f); glVertex2i( wid,wid);
+    glTexCoord2f(0.111111111f+slidesheetx, 1.0f); glVertex2i( wid,-wid);
 
     glEnd();
     glPopMatrix();

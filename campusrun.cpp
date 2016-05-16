@@ -45,7 +45,7 @@ using namespace std;
 
 int jump = 0, slide = 0;
 int stuff_counter = 0;
-int set = 0, direction = -1, counter = 0, jumpcount = 0;
+int set = 0, direction = -1, counter = 0, jumpcount = 0, slidecount = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
 sprite_x = 140, sprite_y = 75, boostMovement = 2;
 float x = 600, y = 75, z = 1;
@@ -200,7 +200,7 @@ struct Game {
 //function prototypes
 Rect displayName(int move);
 void saveData(char *u_Name, int score);
-int Jumping (double spritesheetx, float wid, int jump, Bigfoot &bigfoot, GLuint jumpTexture, int stuff);
+int Jumping (double spritesheetx, float wid, int jump, int *sprite_y, GLuint jumpTexture, int stuff);
 int sliding (double spritesheetx, float wid, int slide, Bigfoot &bigfoot, GLuint slideTexture);
 void runnerDeath (Bigfoot &b, double s);
 void initXWindows(void);
@@ -454,6 +454,7 @@ void initOpengl(void)
     glGenTextures(1, &backgroundTexture);
     glGenTextures(1, &groundTexture);
     glGenTextures(1, &grassTexture);
+    glGenTextures(1, &slideTexture);
 
     //-------------------------------------------------------------------------
     //speedboost
@@ -1192,6 +1193,7 @@ void drawRaindrops(void)
 
 void render(Game *game)
 {
+
     Rect b, nameText; // will add r to diplay game instruction when the time comes
 
     //Clear the screen
@@ -1220,11 +1222,13 @@ void render(Game *game)
     groundx-=.005;
     }
 
+    int *point_y = &sprite_y;
     //this makes sure the player can't double jump and does a loose aproximation of phyics for the jump
     if (jump || stuff){
 	showRunner = 0;
-	jump = Jumping(jumpsheetx, wid, jump, bigfoot, jumpTexture, stuff);
+	jump = Jumping(jumpsheetx, wid, jump, point_y, jumpTexture, stuff);
 	jumpcount++;
+
 	if (jumpcount == 4) {
 	    jumpsheetx += .1;
 	    jumpcount = 0;
@@ -1236,14 +1240,28 @@ void render(Game *game)
 	jumpsheetx = 0;
     }
 
+    /////////////////////////////////slide
     if(slide){
-	showRunner = 0;
+        showRunner = 0;
+        slide = sliding(slidesheetx, wid, slide, bigfoot, slideTexture);
+        slidecount++;
+        slidesheetx++;
+    
+    if(slidecount == 4){
+        slidesheetx += 1;
+        slidecount = 0;
+    }
+    }else{ 
+        showRunner = 1;
+        slidecount = 0;
+        slidesheetx = 0;
+	/*showRunner = 0;
 	slide = sliding(slidesheetx, wid, slide, bigfoot, slideTexture);
     }else{
 	showRunner = 1;
-	slidesheetx = 0;
+	slidesheetx = 0;*/
     }
-
+    ///////////////////////////////////
 
     if(dead) {
 	glPushMatrix();
@@ -1266,7 +1284,7 @@ void render(Game *game)
 	deathCounter++;
     }
     deathsheetx += .1111;
-    if (showRunner) {
+    if (showRunner && !jump) {
 	glPushMatrix();
 	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
 	if (!silhouette) {
@@ -1308,7 +1326,7 @@ void render(Game *game)
 	projectImage(x, y, z, speedTexture);
 	cout << "x is " << x << "\n";
 	x -= boostMovement;
-	if(x == -600 || checkcollison(sprite_x, x, sprite_y, y)) {
+	if(x == -100 || checkcollison(sprite_x, x, sprite_y, y)) {
 	    image_counter = 0;
 	    x = 900;
 	    boostMovement = 0;
