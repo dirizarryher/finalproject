@@ -93,8 +93,8 @@ void displaybackground(double backgroundx, GLuint Texture, int yres, int xres, b
         glBegin(GL_QUADS);
         glTexCoord2f(0.0f-backgroundx, 1.0f); glVertex2i(0, 0);
         glTexCoord2f(0.0f-backgroundx, 0.0f); glVertex2i(0, yres);
-        glTexCoord2f(1.0f-backgroundx, 0.0f); glVertex2i(xres, yres);
-        glTexCoord2f(1.0f-backgroundx, 1.0f); glVertex2i(xres, 0);
+        glTexCoord2f(1.0f-backgroundx, 0.0f); glVertex2i(xres*2, yres);
+        glTexCoord2f(1.0f-backgroundx, 1.0f); glVertex2i(xres*2, 0);
         glEnd();
     }
 }
