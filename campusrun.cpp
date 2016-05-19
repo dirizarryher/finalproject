@@ -493,23 +493,16 @@ void initOpengl(void)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, jump_w, jump_h, 0,
 	    GL_RGB, GL_UNSIGNED_BYTE, jumpImage->data);
-    //-------------------------------------------------------------------------
-    //jump silhouette
-    //this is similar to a sprite graphic
-    //
-    glBindTexture(GL_TEXTURE_2D, JumpsilhouetteTexture);
-    //
+    
+    glBindTexture(GL_TEXTURE_2D, jumpTexture);
+
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     //
     //must build a new set of data...
-    unsigned char *JumpsilhouetteData = buildAlphaData(jumpImage);	
+    unsigned char *jumpData = buildAlphaData(jumpImage);	
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, jump_w, jump_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, JumpsilhouetteData);
-    //////////////////////////////////////////////////////////////////////////////
-    /*unsigned char *BoostsilhouetteData = buildAlphaData(slideImage);	
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, boost_w, boost_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, BoostsilhouetteData);*/
+	    GL_RGBA, GL_UNSIGNED_BYTE, jumpData);
     //-------------------------------------------------------------------------
     //slide
     //
