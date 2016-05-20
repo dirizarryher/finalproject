@@ -22,6 +22,10 @@ extern "C" {
 #include "fonts.h"
 }
 
+//Ppmimage *slideImage2;
+
+//GLuint slideTexture;
+
 typedef double Vec[3];
 
 typedef struct t_bigfoot
@@ -29,6 +33,22 @@ typedef struct t_bigfoot
     Vec pos;
     Vec vel;
 }Bigfoot;
+
+/*void slidegl(int slide_w, int slide_h)
+{
+
+    slideImage2 = ppm6GetImage("./images/slide_sheet.ppm");
+
+    glGenTextures(1, &slideTexture);
+
+    glBindTexture(GL_TEXTURE_2D, slideTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, slide_w, slide_h, 0, 
+            GL_RGB, GL_UNSIGNED_BYTE, slideImage2->data);
+}
+*/
 
 int sliding(int slidecount, double slidesheetx, float wid, int slide, Bigfoot &bigfoot, GLuint slideTexture)
 {
