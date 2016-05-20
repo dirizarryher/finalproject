@@ -201,7 +201,7 @@ struct Game {
 Rect displayName(int move);
 void saveData(char *u_Name, int score);
 int Jumping (double spritesheetx, float wid, int jump, int *sprite_y, GLuint jumpTexture, int stuff);
-int sliding (double spritesheetx, float wid, int slide, Bigfoot &bigfoot, GLuint slideTexture);
+int sliding (int slidecount, double spritesheetx, float wid, int slide, Bigfoot &bigfoot, GLuint slideTexture);
 void runnerDeath (Bigfoot &b, double s);
 void initXWindows(void);
 void initOpengl(void);
@@ -1122,24 +1122,13 @@ void render(Game *game)
 
     /////////////////////////////////slide
     if(slide){
-	showRunner = 0;
-	slide = sliding(slidesheetx, wid, slide, bigfoot, slideTexture);
-	slidecount++;
-	slidesheetx++;
-
-	if(slidecount == 4){
-	    slidesheetx += 1;
-	    slidecount = 0;
-	}
+        showRunner = 0;
+        slide = sliding(slidecount, slidesheetx, wid, slide, bigfoot, slideTexture);
+    
     }else{ 
-	showRunner = 1;
-	slidecount = 0;
-	slidesheetx = 0;
-	/*showRunner = 0;
-	  slide = sliding(slidesheetx, wid, slide, bigfoot, slideTexture);
-	  }else{
-	  showRunner = 1;
-	  slidesheetx = 0;*/
+        showRunner = 1;
+        slidecount = 0;
+        slidesheetx = 0;
     }
     ///////////////////////////////////
 
