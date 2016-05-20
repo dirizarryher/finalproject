@@ -6,7 +6,7 @@
 //Updated May 16/////////
 //Updated May 19/////////
 //
-/*#include <iostream>
+#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,9 +20,15 @@
 #include "ppm.h"
 extern "C" {
 #include "fonts.h"
-}*/
+}
 
-#include "tyM.h"
+typedef double Vec[3];
+
+typedef struct t_bigfoot
+{
+    Vec pos;
+    Vec vel;
+}Bigfoot;
 
 int sliding(int slidecount, double slidesheetx, float wid, int slide, Bigfoot &bigfoot, GLuint slideTexture)
 {
@@ -41,7 +47,7 @@ int sliding(int slidecount, double slidesheetx, float wid, int slide, Bigfoot &b
     slidecount++;
     slidesheetx++;
 
-    if(slidecount == 4)
+    if(slidecount == 3)
     {
         slidesheetx += 1;
         slidecount = 0;
