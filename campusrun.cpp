@@ -54,13 +54,13 @@ float x = 600, y = 75, z = 1;
 typedef double Flt;
 typedef double Vec[3];
 typedef Flt	Matrix[4][4];
-double backgroundx = 0, spritesheetx = 0, deathsheetx = 0; 
+double backgroundx = -.0006, spritesheetx = 0, deathsheetx = 0; 
 double jumpsheetx = 0, slidesheetx = 0;
 
-double skyx = 0;
-double farbackgroundx = 0;
-double groundx = 0;
-double grassx = 0;
+double skyx = -.00005;
+double farbackgroundx = -.0001;
+double groundx = -.005;
+double grassx = -.05;
 
 //macros
 #define rnd() (((Flt)rand())/(Flt)RAND_MAX)
@@ -218,6 +218,16 @@ void projectImage(float x, float y, float z, GLuint speedTexture);
 bool checkcollison(int sprite, float x, int sprite_y, float y);
 void funnystuff(int stuff_counter);
 void displaybackground(double backgroundx, GLuint Texture, int yres, int xres, bool toggle);
+double farbackground(double x);
+double backgroundscroll(double x);
+double ground(double x);
+double sky(double x);
+double ground(double x);
+double grass(double x);
+void assignJumpTexture(GLuint *jumpTexture, Ppmimage *jumpImage);
+unsigned char *buildAlphaData(Ppmimage *img);
+void assignboostTexture(GLuint *Texture, Ppmimage *Image);
+void assignbackgroundTexture(GLuint *Texture, Ppmimage *Image);
 
 int main(void)
 {
@@ -369,7 +379,7 @@ void reshapeWindow(int width, int height)
     glOrtho(0, xres, 0, yres, -1, 1);
     setTitle();
 }
-
+/*
 unsigned char *buildAlphaData(Ppmimage *img)
 {
     //add 4th component to RGB stream...
@@ -387,21 +397,21 @@ unsigned char *buildAlphaData(Ppmimage *img)
 	*(ptr+1) = b;
 	*(ptr+2) = c;
 	//get largest color component...
-	//*(ptr+3) = (unsigned char)((
+	(ptr+3) = (unsigned char)((
 	//		(int)*(ptr+0) +
 	//		(int)*(ptr+1) +
 	//		(int)*(ptr+2)) / 3);
 	//d = a;
 	//if (b >= a && b >= c) d = b;
 	//if (c >= a && c >= b) d = c;
-	//*(ptr+3) = d;
+	(ptr+3) = d;
 	*(ptr+3) = (a|b|c);
 	ptr += 4;
 	data += 3;
     }
     return newdata;
 }
-
+*/
 void initOpengl(void)
 {
     //OpenGL initialization
@@ -459,50 +469,12 @@ void initOpengl(void)
     //-------------------------------------------------------------------------
     //speedboost
     //
-    int boost_w = boostImage->width;
-    int boost_h = boostImage->height;
+    assignboostTexture(&speedTexture, boostImage);
     //
-    glBindTexture(GL_TEXTURE_2D, speedTexture);
-    //
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, boost_w, boost_h, 0,
-	    GL_RGB, GL_UNSIGNED_BYTE, boostImage->data);
-    //-------------------------------------------------------------------------
-    //speedboost silhouette
-    //this is similar to a sprite graphic
-    //
-    glBindTexture(GL_TEXTURE_2D, speedTexture);
-    //
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    //
-    //must build a new set of data...
-    unsigned char *BoostsilhouetteData = buildAlphaData(boostImage);	
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, boost_w, boost_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, BoostsilhouetteData);
     //-------------------------------------------------------------------------
     //jump
     //
-    int jump_w = jumpImage->width;
-    int jump_h = jumpImage->height;
-    //
-    glBindTexture(GL_TEXTURE_2D, jumpTexture);
-    //
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, jump_w, jump_h, 0,
-	    GL_RGB, GL_UNSIGNED_BYTE, jumpImage->data);
-    
-    glBindTexture(GL_TEXTURE_2D, jumpTexture);
-
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    //
-    //must build a new set of data...
-    unsigned char *jumpData = buildAlphaData(jumpImage);	
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, jump_w, jump_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, jumpData);
+    assignJumpTexture(&jumpTexture, jumpImage);
     //-------------------------------------------------------------------------
     //slide
     //
@@ -612,100 +584,18 @@ void initOpengl(void)
     //-------------------------------------------------------------------------
     //
     //far background
-    int tmp_w = farbackgroundImage->width;
-    int tmp_h = farbackgroundImage->height;
-    //
-    glBindTexture(GL_TEXTURE_2D, farbackgroundTexture);
-    //
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, tmp_w, tmp_h, 0,
-	    GL_RGB, GL_UNSIGNED_BYTE, farbackgroundImage->data);
-    
-    glBindTexture(GL_TEXTURE_2D, farbackgroundTexture);
-
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    //
-    //must build a new set of data...
-    unsigned char *farbackgroundData = buildAlphaData(farbackgroundImage);	
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tmp_w, tmp_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, farbackgroundData);
+    assignbackgroundTexture(&farbackgroundTexture, farbackgroundImage);
     //-------------------------------------------------------------------------
     //far background
-    tmp_w = backgroundImage->width;
-    tmp_h = backgroundImage->height;
-    //
-    glBindTexture(GL_TEXTURE_2D, backgroundTexture);
-    //
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, tmp_w, tmp_h, 0,
-	    GL_RGB, GL_UNSIGNED_BYTE, backgroundImage->data);
-    
-    glBindTexture(GL_TEXTURE_2D, backgroundTexture);
-
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    //
-    //must build a new set of data...
-    unsigned char *backgroundData = buildAlphaData(backgroundImage);	
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tmp_w, tmp_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, backgroundData);
+    assignbackgroundTexture(&backgroundTexture, backgroundImage);
     //-------------------------------------------------------------------------
     //
     //ground
-    tmp_w = groundImage->width;
-    tmp_h = groundImage->height;
-    //
-    glBindTexture(GL_TEXTURE_2D, groundTexture);
-    //
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, tmp_w, tmp_h, 0,
-	    GL_RGB, GL_UNSIGNED_BYTE, groundImage->data);
-    //int forest_w = WINDOW_WIDTH * 2;
-    //int forest_h = WINDOW_HEIGHT;
-    //speedboost silhouette
-    //this is similar to a sprite graphic
-    //
-    //
-    glBindTexture(GL_TEXTURE_2D, groundTexture);
-
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    //
-    //must build a new set of data...
-    unsigned char *groundData = buildAlphaData(groundImage);	
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tmp_w, tmp_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, groundData);
+    assignbackgroundTexture(&groundTexture, groundImage);
     //-------------------------------------------------------------------------
     //
     //grass
-    tmp_w = grassImage->width;
-    tmp_h = grassImage->height;
-    //
-    glBindTexture(GL_TEXTURE_2D, grassTexture);
-    //
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, tmp_w, tmp_h, 0,
-	    GL_RGB, GL_UNSIGNED_BYTE, grassImage->data);
-    //int forest_w = WINDOW_WIDTH * 2;
-    //int forest_h = WINDOW_HEIGHT;
-    //speedboost silhouette
-    //this is similar to a sprite graphic
-    //
-    //
-    glBindTexture(GL_TEXTURE_2D, grassTexture);
-
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    //
-    //must build a new set of data...
-    unsigned char *grassData = buildAlphaData(grassImage);	
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tmp_w, tmp_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, grassData);
+    assignbackgroundTexture(&grassTexture, grassImage);
     //-------------------------------------------------------------------------
 }
 
@@ -728,11 +618,6 @@ void initSounds(void)
     //Fmod is not allowed.
     //OpenAL sound only.
     //Look for the openalTest folder under code.
-
-
-
-
-
 
 
 
@@ -1208,11 +1093,13 @@ void render(Game *game)
 	displaybackground(groundx, groundTexture, yres/20, xres, 0);
 	//grass
 	//displaybackground(grassx, grassTexture, (yres/20), xres, 0);
-    farbackgroundx-=.0001;
-    backgroundx-=.0006;
-    skyx-=.00005;
-    grassx-=.05;
-    groundx-=.005;
+	if (!dead) {
+	    farbackgroundx = farbackground(farbackgroundx);
+	    backgroundx = backgroundscroll(backgroundx);
+	    skyx=sky(skyx);
+	    grassx = grass(grassx);
+	    groundx = ground(groundx);
+	}
     }
 
     int *point_y = &sprite_y;
@@ -1235,24 +1122,24 @@ void render(Game *game)
 
     /////////////////////////////////slide
     if(slide){
-        showRunner = 0;
-        slide = sliding(slidesheetx, wid, slide, bigfoot, slideTexture);
-        slidecount++;
-        slidesheetx++;
-    
-    if(slidecount == 4){
-        slidesheetx += 1;
-        slidecount = 0;
-    }
-    }else{ 
-        showRunner = 1;
-        slidecount = 0;
-        slidesheetx = 0;
-	/*showRunner = 0;
+	showRunner = 0;
 	slide = sliding(slidesheetx, wid, slide, bigfoot, slideTexture);
-    }else{
+	slidecount++;
+	slidesheetx++;
+
+	if(slidecount == 4){
+	    slidesheetx += 1;
+	    slidecount = 0;
+	}
+    }else{ 
 	showRunner = 1;
-	slidesheetx = 0;*/
+	slidecount = 0;
+	slidesheetx = 0;
+	/*showRunner = 0;
+	  slide = sliding(slidesheetx, wid, slide, bigfoot, slideTexture);
+	  }else{
+	  showRunner = 1;
+	  slidesheetx = 0;*/
     }
     ///////////////////////////////////
 
@@ -1277,7 +1164,7 @@ void render(Game *game)
 	deathCounter++;
     }
     deathsheetx += .1111;
-    if (showRunner && !jump) {
+    if (showRunner && !jump && !dead) {
 	glPushMatrix();
 	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
 	if (!silhouette) {
@@ -1325,8 +1212,6 @@ void render(Game *game)
 	    boostMovement = 0;
 	}
     }
-
-
 
     float w, h;
     //Draw shapes...
