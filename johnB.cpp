@@ -1,6 +1,10 @@
 //John Henry Buenaventura
 //Initiated April 28
 //Updated May 10/////////
+//Updated May 13/////////
+//Updated May 14/////////
+//Updated May 16/////////
+//Updated May 19/////////
 //
 /*#include <iostream>
 #include <stdio.h>
@@ -20,26 +24,29 @@ extern "C" {
 
 #include "tyM.h"
 
-int sliding(double slidesheetx, float wid, int slide, Bigfoot &bigfoot, GLuint slideTexture)
+int sliding(int slidecount, double slidesheetx, float wid, int slide, Bigfoot &bigfoot, GLuint slideTexture)
 {
 
-    if(slide < 32 && slide > 0){
+    if(slide < 32 && slide > 0)
+    {
         //bigfoot.pos[1];
         slide++;
-    }else{
+    }
+    else
+    {
         slide = 0;
         slidesheetx = 0;
     }
 
-    /*if(slide==1){
-        bigfoot.pos[1] -= 3;
-        slidesheetx = 0;
-        slide++;
-    }else{
-        slide = 0;
-        bigfoot.pos[1] += 3;
-        slidesheetx = 0;
-    }*/
+    slidecount++;
+    slidesheetx++;
+
+    if(slidecount == 4)
+    {
+        slidesheetx += 1;
+        slidecount = 0;
+    }
+
 
     glPushMatrix();
     glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
