@@ -182,3 +182,9 @@ Rect displayName(int location)
    nameBox.center = 0; 
    return nameBox; 
 }
+
+int randomObstacle()
+{
+    int obstacle = rand() % 3 + 1;
+    return obstacle; 
+}
