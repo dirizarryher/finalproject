@@ -47,7 +47,7 @@ int jump = 0, slide = 0;
 int stuff_counter = 0;
 int set = 0, direction = -1, counter = 0, jumpcount = 0, slidecount = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
-sprite_x = 140, sprite_y = 75, boostMovement = 2;
+    sprite_x = 140, sprite_y = 75, boostMovement = 2;
 float x = 600, y = 75, z = 1;
 
 //defined types
@@ -117,11 +117,11 @@ Bigfoot bigfoot;
 
 Ppmimage *runningImage, *deathImage, *jumpImage, *boostImage, *slideImage;
 Ppmimage *grassImage, *groundImage, *skyImage, *farbackgroundImage, *backgroundImage;
-Ppmimage *forestImage=NULL;
-GLuint runningTexture, deathTexture, jumpTexture, speedTexture, slideTexture;
+Ppmimage *forestImage=NULL, *gameoverImage, *spearImage;
+GLuint runningTexture, deathTexture, jumpTexture, speedTexture, slideTexture, gameoverTexture;
 GLuint silhouetteTexture, DeathsilhouetteTexture, JumpsilhouetteTexture, slidesilhouetteTexture;
 GLuint grassTexture, groundTexture, skyTexture, farbackgroundTexture, backgroundTexture;
-GLuint forestTexture;
+GLuint forestTexture, gameoversilhouetteTexture, spearTexture, spearsilhouetteTexture;
 char cScore[400];
 int name = 0;
 int score = 0;
@@ -228,7 +228,7 @@ void assignJumpTexture(GLuint *jumpTexture, Ppmimage *jumpImage);
 unsigned char *buildAlphaData(Ppmimage *img);
 void assignboostTexture(GLuint *Texture, Ppmimage *Image);
 void assignbackgroundTexture(GLuint *Texture, Ppmimage *Image);
-
+int randomObstacle();
 int main(void)
 {
     memcpy(user, "temp", 5);
@@ -380,38 +380,38 @@ void reshapeWindow(int width, int height)
     setTitle();
 }
 /*
-unsigned char *buildAlphaData(Ppmimage *img)
-{
-    //add 4th component to RGB stream...
-    int i;
-    int a,b,c;
-    unsigned char *newdata, *ptr;
-    unsigned char *data = (unsigned char *)img->data;
-    newdata = (unsigned char *)malloc(img->width * img->height * 4);
-    ptr = newdata;
-    for (i=0; i<img->width * img->height * 3; i+=3) {
-	a = *(data+0);
-	b = *(data+1);
-	c = *(data+2);
-	*(ptr+0) = a;
-	*(ptr+1) = b;
-	*(ptr+2) = c;
-	//get largest color component...
-	(ptr+3) = (unsigned char)((
-	//		(int)*(ptr+0) +
-	//		(int)*(ptr+1) +
-	//		(int)*(ptr+2)) / 3);
-	//d = a;
-	//if (b >= a && b >= c) d = b;
-	//if (c >= a && c >= b) d = c;
-	(ptr+3) = d;
-	*(ptr+3) = (a|b|c);
-	ptr += 4;
-	data += 3;
-    }
-    return newdata;
-}
-*/
+   unsigned char *buildAlphaData(Ppmimage *img)
+   {
+//add 4th component to RGB stream...
+int i;
+int a,b,c;
+unsigned char *newdata, *ptr;
+unsigned char *data = (unsigned char *)img->data;
+newdata = (unsigned char *)malloc(img->width * img->height * 4);
+ptr = newdata;
+for (i=0; i<img->width * img->height * 3; i+=3) {
+a = *(data+0);
+b = *(data+1);
+c = *(data+2);
+ *(ptr+0) = a;
+ *(ptr+1) = b;
+ *(ptr+2) = c;
+//get largest color component...
+(ptr+3) = (unsigned char)((
+//		(int)*(ptr+0) +
+//		(int)*(ptr+1) +
+//		(int)*(ptr+2)) / 3);
+//d = a;
+//if (b >= a && b >= c) d = b;
+//if (c >= a && c >= b) d = c;
+(ptr+3) = d;
+ *(ptr+3) = (a|b|c);
+ ptr += 4;
+ data += 3;
+ }
+ return newdata;
+ }
+ */
 void initOpengl(void)
 {
     //OpenGL initialization
@@ -436,29 +436,33 @@ void initOpengl(void)
     //
     //load the images file into a ppm structure.
     //
-    jumpImage      = ppm6GetImage("./images/runner/jump_sheet.ppm");
-    runningImage   = ppm6GetImage("./images/runner/runner_sheet2.ppm");
-    deathImage     = ppm6GetImage("./images/runner/runnerdeath_sheet.ppm");
-    forestImage = ppm6GetImage("./images/gamebackground.ppm");
-    boostImage     = ppm6GetImage("./images/speedboost.ppm");
-    slideImage     = ppm6GetImage("./images/slide_sheet.ppm");
-    
+    jumpImage          = ppm6GetImage("./images/runner/jump_sheet.ppm");
+    runningImage       = ppm6GetImage("./images/runner/runner_sheet2.ppm");
+    deathImage         = ppm6GetImage("./images/runner/runnerdeath_sheet.ppm");
+    forestImage        = ppm6GetImage("./images/gamebackground.ppm");
+    boostImage         = ppm6GetImage("./images/speedboost.ppm");
+    spearImage         = ppm6GetImage("./images/speedboost.ppm");
+    slideImage         = ppm6GetImage("./images/slide_sheet.ppm");
+
     farbackgroundImage = ppm6GetImage("./images/farbackground.ppm");
-    backgroundImage = ppm6GetImage("./images/background.ppm");
+    backgroundImage    = ppm6GetImage("./images/background.ppm");
     grassImage         = ppm6GetImage("./images/grass.ppm");
     groundImage        = ppm6GetImage("./images/ground.ppm");
     skyImage           = ppm6GetImage("./images/sky.ppm");
+    gameoverImage      = ppm6GetImage("./images/game_over.ppm");
     //boostImage     = ppm6GetImage("./images/runner/speed_boost.ppm");
     //
     //create opengl texture elements
-   // glGenTextures(1, &bigfootTexture);
+    // glGenTextures(1, &bigfootTexture);
     //glGenTextures(1, &jumpTexture);
     glGenTextures(1, &runningTexture);
     glGenTextures(1, &jumpTexture);
     glGenTextures(1, &speedTexture);
+    glGenTextures(1, &spearTexture);
     glGenTextures(1, &silhouetteTexture);
     glGenTextures(1, &forestTexture);
-    
+    glGenTextures(1, &gameoverTexture);
+
     glGenTextures(1, &skyTexture);
     glGenTextures(1, &farbackgroundTexture);
     glGenTextures(1, &backgroundTexture);
@@ -466,6 +470,31 @@ void initOpengl(void)
     glGenTextures(1, &grassTexture);
     glGenTextures(1, &slideTexture);
 
+    //-------------------------------------------------------------------------
+    //spear
+    //
+    int spear_w = spearImage->width;
+    int spear_h = spearImage->height;
+    //
+    glBindTexture(GL_TEXTURE_2D, speedTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, spear_w, spear_h, 0,
+	    GL_RGB, GL_UNSIGNED_BYTE, spearImage->data);
+    //-------------------------------------------------------------------------
+    //speedboost silhouette
+    //this is similar to a sprite graphic
+    //
+    glBindTexture(GL_TEXTURE_2D, spearTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *SpearsilhouetteData = buildAlphaData(spearImage);	
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, spear_w, spear_h, 0,
+	    GL_RGBA, GL_UNSIGNED_BYTE, SpearsilhouetteData);
     //-------------------------------------------------------------------------
     //speedboost
     //
@@ -557,6 +586,16 @@ void initOpengl(void)
     free(DeathsilhouetteData);
     //glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
     //	GL_RGB, GL_UNSIGNED_BYTE, bigfootImage->data);
+    //-------------------------------------------------------------------------
+    //
+    //gameover
+    glBindTexture(GL_TEXTURE_2D, gameoverTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3,
+	    gameoverImage->width, gameoverImage->height,
+	    0, GL_RGB, GL_UNSIGNED_BYTE, gameoverImage->data);
     //-------------------------------------------------------------------------
     //
     //forest
@@ -744,8 +783,8 @@ void checkKeys(XEvent *e)
 	    umbrella.pos[0] += 10.0;
 	    break;
 	case XK_Down:
-        if(slide == 0)
-            slide = 1;
+	    if(slide == 0)
+		slide = 1;
 	    break;
 	case XK_equal:
 	    if (++ndrops > 40)
@@ -1083,22 +1122,33 @@ void render(Game *game)
     float wid = 60.0f;
     glColor3f(1.0, 1.0, 1.0);
     if (forest) {
-	//sky
-	displaybackground(skyx, skyTexture, yres, xres, 0);
-	//far background
-	displaybackground(farbackgroundx, farbackgroundTexture, ((yres/2)+200), xres, 0);
-	//background
-	displaybackground(backgroundx, backgroundTexture, (yres/2), xres+400, 1);
-	//ground
-	displaybackground(groundx, groundTexture, yres/20, xres, 0);
-	//grass
-	//displaybackground(grassx, grassTexture, (yres/20), xres, 0);
-	if (!dead) {
-	    farbackgroundx = farbackground(farbackgroundx);
-	    backgroundx = backgroundscroll(backgroundx);
-	    skyx=sky(skyx);
-	    grassx = grass(grassx);
-	    groundx = ground(groundx);
+	if (deathCounter < 6) {
+	    //sky
+	    displaybackground(skyx, skyTexture, yres, xres, 0);
+	    //far background
+	    displaybackground(farbackgroundx, farbackgroundTexture, ((yres/2)+200), xres, 0);
+	    //background
+	    displaybackground(backgroundx, backgroundTexture, (yres/2), xres+400, 1);
+	    //ground
+	    displaybackground(groundx, groundTexture, yres/20, xres, 0);
+	    //grass
+	    //displaybackground(grassx, grassTexture, (yres/20), xres, 0);
+	    if (!dead) {
+		farbackgroundx-=.0001;
+		backgroundx-=.0006;
+		skyx-=.00005;
+		grassx-=.05;
+		groundx-=.005;
+	    }
+	}
+	else {
+	    glBindTexture(GL_TEXTURE_2D, gameoverTexture);
+	    glBegin(GL_QUADS);
+	    glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
+	    glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
+	    glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
+	    glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
+	    glEnd();
 	}
     }
 
@@ -1121,16 +1171,21 @@ void render(Game *game)
     }
 
     /////////////////////////////////slide
-    if(slide){
-        showRunner = 0;
-        slide = sliding(slidecount, slidesheetx, wid, slide, bigfoot, slideTexture);
-    
-    }else{ 
-        showRunner = 1;
-        slidecount = 0;
-        slidesheetx = 0;
+    if (slide) {
+	showRunner = 0;
+	slide = sliding(slidecount, slidesheetx, wid, slide, bigfoot, slideTexture);
+	slidecount++;
+	slidesheetx++;
+
+	if(slidecount == 4){
+	    slidesheetx += 1;
+	    slidecount = 0;
+	}
+    } else { 
+	showRunner = 1;
+	slidecount = 0;
+	slidesheetx = 0;
     }
-    ///////////////////////////////////
 
     if(dead) {
 	glPushMatrix();
@@ -1143,16 +1198,15 @@ void render(Game *game)
 	    glAlphaFunc(GL_GREATER, 0.0f);
 	    glColor4ub(255,255,255,255);
 	}
-	runnerDeath(bigfoot, deathsheetx);
+	if (deathCounter < 6) {
+	    runnerDeath(bigfoot, deathsheetx);
+	}
 	glEnd();
 	glPopMatrix();
 	deathCounter++;
-	if (deathCounter == 0) {
-	    //dead = 0;
-	}
-	deathCounter++;
+	deathsheetx += .11111;
     }
-    deathsheetx += .1111;
+
     if (showRunner && !jump && !dead) {
 	glPushMatrix();
 	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
@@ -1165,7 +1219,6 @@ void render(Game *game)
 	    glColor4ub(255,255,255,255);
 	}
 	glBegin(GL_QUADS);
-	sleep(.9);
 	if (bigfoot.vel[0] > 0.0) {
 	    glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
 	    glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
@@ -1181,24 +1234,47 @@ void render(Game *game)
 	glPopMatrix();
 	//
     }
-    spritesheetx += .11111111111;
 
-    if(image_counter < 200)
-    {
-	boostMovement = 2;
-	image_counter++;
+    spritesheetx += .11111111111;
+    int obstacle = randomObstacle();
+    if (obstacle == 1) {
+	if(image_counter < 200)
+	{
+	    boostMovement = 2;
+	    image_counter++;
+	}
+	else {
+	    glEnd();
+	    glPopMatrix();
+	    //if(counter == somevalue)
+	    projectImage(x, y, z, speedTexture);
+	    cout << "x is " << x << "\n";
+	    x -= boostMovement;
+	    if(x == -100 || checkcollison(sprite_x, x, sprite_y, y)) {
+		image_counter = 0;
+		x = 900;
+		boostMovement = 0;
+	    }
+	}
     }
-    else {
-	glEnd();
-	glPopMatrix();
-	//if(counter == somevalue)
-	projectImage(x, y, z, speedTexture);
-	cout << "x is " << x << "\n";
-	x -= boostMovement;
-	if(x == -100 || checkcollison(sprite_x, x, sprite_y, y)) {
-	    image_counter = 0;
-	    x = 900;
-	    boostMovement = 0;
+    if (obstacle == 2) {
+	if(image_counter < 200)
+	{
+	    boostMovement = 2;
+	    image_counter++;
+	}
+	else {
+	    glEnd();
+	    glPopMatrix();
+	    //if(counter == somevalue)
+	    projectImage(x, y, z, speedTexture);
+	    cout << "x is " << x << "\n";
+	    x -= boostMovement;
+	    if(x == -100 || checkcollison(sprite_x, x, sprite_y, y)) {
+		image_counter = 0;
+		x = 900;
+		boostMovement = 0;
+	    }
 	}
     }
 
@@ -1289,6 +1365,7 @@ void render(Game *game)
 	    box_x = 800;
     }
 }
+
 void movement(Game *game)
 {
     Particle *p;
