@@ -199,6 +199,7 @@ struct Game {
 
 //function prototypes
 Rect displayName(int move);
+int randomObstacle();
 void saveData(char *u_Name, int score);
 int Jumping (double spritesheetx, float wid, int jump, int *sprite_y, GLuint jumpTexture, int stuff);
 int sliding (double spritesheetx, float wid, int slide, Bigfoot &bigfoot, GLuint slideTexture);
@@ -1267,7 +1268,7 @@ void render(Game *game)
 
     int *point_y = &sprite_y;
     //this makes sure the player can't double jump and does a loose aproximation of phyics for the jump
-    if (jump || stuff){
+    if (jump || stuff) {
 	showRunner = 0;
 	jump = Jumping(jumpsheetx, wid, jump, point_y, jumpTexture, stuff);
 	jumpcount++;
@@ -1317,9 +1318,8 @@ void render(Game *game)
 	    glAlphaFunc(GL_GREATER, 0.0f);
 	    glColor4ub(255,255,255,255);
 	}
-	if (deathCounter < 6) {
+	if (deathCounter < 6) 
 	    runnerDeath(bigfoot, deathsheetx);
-	}
 	glEnd();
 	glPopMatrix();
 	deathCounter++;
@@ -1393,6 +1393,7 @@ void render(Game *game)
 		boostMovement = 0;
 	    }
 	}
+    }
 
 
 
