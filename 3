@@ -44,7 +44,7 @@ using namespace std;
 #define GRAVITY 0.1
 
 int jump = 0, slide = 0, obstacle = -1;
-int stuff_counter = 0, booster = 300;
+int stuff_counter = 0;
 int set = 0, direction = -1, counter = 0, jumpcount = 0, slidecount = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
     sprite_x = 140, sprite_y = 75, boostMovement = 2, spearMovement = 9;
@@ -442,7 +442,7 @@ void initOpengl(void)
     deathImage         = ppm6GetImage("./images/runner/runnerdeath_sheet.ppm");
     forestImage        = ppm6GetImage("./images/gamebackground.ppm");
     boostImage         = ppm6GetImage("./images/speedboost.ppm");
-    spearImage         = ppm6GetImage("./images/runner/spear.ppm");
+    spearImage         = ppm6GetImage("./images/speedboost.ppm");
     slideImage         = ppm6GetImage("./images/slide_sheet.ppm");
 
     farbackgroundImage = ppm6GetImage("./images/farbackground.ppm");
@@ -477,14 +477,14 @@ void initOpengl(void)
     int spear_w = spearImage->width;
     int spear_h = spearImage->height;
     //
-    glBindTexture(GL_TEXTURE_2D, spearTexture);
+    glBindTexture(GL_TEXTURE_2D, speedTexture);
     //
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, spear_w, spear_h, 0,
 	    GL_RGB, GL_UNSIGNED_BYTE, spearImage->data);
     //-------------------------------------------------------------------------
-    //spear silhouette
+    //speedboost silhouette
     //this is similar to a sprite graphic
     //
     glBindTexture(GL_TEXTURE_2D, spearTexture);
@@ -1123,7 +1123,7 @@ void render(Game *game)
     float wid = 60.0f;
     glColor3f(1.0, 1.0, 1.0);
     if (forest) {
-	if (deathCounter < 9) {
+	if (deathCounter < 6) {
 	    //sky
 	    displaybackground(skyx, skyTexture, yres, xres, 0);
 	    //far background
@@ -1135,21 +1135,11 @@ void render(Game *game)
 	    //grass
 	    //displaybackground(grassx, grassTexture, (yres/20), xres, 0);
 	    if (!dead) {
-		if (booster < 200) {
-		    farbackgroundx-=.1;
-		    backgroundx-=.6;
-		    skyx-=.5;
-		    grassx-=.5;
-		    groundx-=.05;
-		    booster++;
-		}
-		else {
-		    farbackgroundx-=.0001;
-		    backgroundx-=.0006;
-		    skyx-=.00005;
-		    grassx-=.05;
-		    groundx-=.005;
-		}
+		farbackgroundx-=.0001;
+		backgroundx-=.0006;
+		skyx-=.00005;
+		grassx-=.05;
+		groundx-=.005;
 	    }
 	}
 	else {
@@ -1209,7 +1199,7 @@ void render(Game *game)
 	    glAlphaFunc(GL_GREATER, 0.0f);
 	    glColor4ub(255,255,255,255);
 	}
-	if (deathCounter < 9) 
+	if (deathCounter < 6) 
 	    runnerDeath(bigfoot, deathsheetx);
 	glEnd();
 	glPopMatrix();
@@ -1246,15 +1236,14 @@ void render(Game *game)
     }
 
     spritesheetx += .11111111111;
-
     if (obstacle == -1)
-	obstacle = randomObstacle();
+	obstacle = 2;
     if (obstacle) {
 	switch(obstacle) {
 	    case 1:
 		if(image_counter < 200)
 		{
-		    boostMovement = 8;
+		    boostMovement = 2;
 		    image_counter++;
 		}
 		else {
@@ -1262,12 +1251,9 @@ void render(Game *game)
 		    glPopMatrix();
 		    //if(counter == somevalue)
 		    projectImage(x, y, z, speedTexture);
-		    cout << "boost x is " << x << "\n";
+		    cout << "x is " << x << "\n";
 		    x -= boostMovement;
-		    if(x < -100 || checkcollison(sprite_x, x, sprite_y, y)) {
-			if(checkcollison(sprite_x, x, sprite_y, y)) 
-			    booster = checkcollison(sprite_x, x, sprite_y, y);
-			score *= 10;
+		    if(x == -100 || checkcollison(sprite_x, x, sprite_y, y)) {
 			image_counter = 0;
 			x = 900;
 			boostMovement = 0;
@@ -1278,7 +1264,7 @@ void render(Game *game)
 	    case 2:
 		if(image_counter < 200)
 		{
-		    spearMovement = 18;
+		    spearMovement = 8;
 		    image_counter++;
 		}
 		else {
@@ -1286,42 +1272,37 @@ void render(Game *game)
 		    glPopMatrix();
 		    //if(counter == somevalue)
 		    projectImage(x, y, z, spearTexture);
-		    cout << "spear x is " << x << "\n";
+		    cout << "x is " << x << "\n";
 		    x -= spearMovement;
-		    if(x < -100 || checkcollison(sprite_x, x, sprite_y, y)) {
-			if(checkcollison(sprite_x, x, sprite_y, y))
-			   dead = 1; 
+		    if(x == -100 || checkcollison(sprite_x, x, sprite_y, y)) {
 			image_counter = 0;
 			x = 900;
 			spearMovement = 0;
 			obstacle = -1;
 		    }
 		}
-		break;
-	    default: 
-		obstacle = -1;
 	}
     }
-    /*if (obstacle == 2) {
-      if(image_counter < 200)
-      {
-      boostMovement = 2;
-      image_counter++;
-      }
-      else {
-      glEnd();
-      glPopMatrix();
-    //if(counter == somevalue)
-    projectImage(x, y, z, speedTexture);
-    cout << "x is " << x << "\n";
-    x -= boostMovement;
-    if(x == -100 || checkcollison(sprite_x, x, sprite_y, y)) {
-    image_counter = 0;
-    x = 900;
-    boostMovement = 0;
+    if (obstacle == 2) {
+	if(image_counter < 200)
+	{
+	    boostMovement = 2;
+	    image_counter++;
+	}
+	else {
+	    glEnd();
+	    glPopMatrix();
+	    //if(counter == somevalue)
+	    projectImage(x, y, z, speedTexture);
+	    cout << "x is " << x << "\n";
+	    x -= boostMovement;
+	    if(x == -100 || checkcollison(sprite_x, x, sprite_y, y)) {
+		image_counter = 0;
+		x = 900;
+		boostMovement = 0;
+	    }
+	}
     }
-    }
-    }*/
 
     float w, h;
     //Draw shapes...
