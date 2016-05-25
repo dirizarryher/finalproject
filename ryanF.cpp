@@ -16,10 +16,10 @@ int Jumping (double spritesheetx, float wid, int jump,
 {
     if (!stuff) {
 	if (jump < 32 && jump > 0) {
-	    *sprite_y += 3;
+	    *sprite_y += 5;
 	    jump++;
 	} else if (jump >= 32 && jump < 62 ) {
-	    *sprite_y -= 3;
+	    *sprite_y -= 5;
 	    jump ++;
 	} else {
 	    jump = 0;
@@ -68,7 +68,7 @@ int checkcollison(int sprite_x, float x, int sprite_y, float y)
 {
 
     if (x <= sprite_x+50 && x >= sprite_x-50) {
-	if (y <= sprite_y+50 && y >= sprite_y-20) {
+	if (y <= sprite_y+50 && y >= sprite_y-40) {
 	    return 1;
 	}
     } else {

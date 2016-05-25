@@ -1170,7 +1170,7 @@ void render(Game *game)
 
     int *point_y = &sprite_y;
     //this makes sure the player can't double jump and does a loose aproximation of phyics for the jump
-    if (jump || stuff) {
+    if ((jump || stuff) && !dead) {
 	showRunner = 0;
 	jump = Jumping(jumpsheetx, wid, jump, point_y, jumpTexture, stuff);
 	jumpcount++;
