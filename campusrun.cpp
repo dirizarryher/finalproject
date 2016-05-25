@@ -236,6 +236,7 @@ void assignJumpTexture(GLuint *jumpTexture, Ppmimage *jumpImage);
 unsigned char *buildAlphaData(Ppmimage *img);
 void assignboostTexture(GLuint *Texture, Ppmimage *Image);
 void assignbackgroundTexture(GLuint *Texture, Ppmimage *Image);
+void initiateSlideTexture(GLuint *slideTexture, Ppmimage *slideImage);
 
 int main(void)
 {
@@ -515,7 +516,8 @@ void initOpengl(void)
     //-------------------------------------------------------------------------
     //slide
     //
-    int slide_w = slideImage->width;
+    initiateSlideTexture(&slideTexture, slideImage);
+   /* int slide_w = slideImage->width;
     int slide_h = slideImage->height;
     //
     glBindTexture(GL_TEXTURE_2D, slideTexture);
@@ -536,7 +538,7 @@ void initOpengl(void)
     //must build a new set of data...
     unsigned char *slidesilhouetteData = buildAlphaData(slideImage);	
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, slide_w, slide_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, slidesilhouetteData);
+	    GL_RGBA, GL_UNSIGNED_BYTE, slidesilhouetteData);*/
     //-------------------------------------------------------------------------
     //running
     //
@@ -1172,7 +1174,7 @@ void render(Game *game)
 
     int *point_y = &sprite_y;
     //this makes sure the player can't double jump and does a loose aproximation of phyics for the jump
-    if (jump || stuff) {
+    if ((jump || stuff) && !dead) {
 	showRunner = 0;
 	jump = Jumping(jumpsheetx, wid, jump, point_y, jumpTexture, stuff);
 	jumpcount++;

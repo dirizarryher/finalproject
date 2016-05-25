@@ -1,10 +1,9 @@
 //John Henry Buenaventura
 //Initiated April 28
-//Updated May 10/////////
-//Updated May 13/////////
 //Updated May 14/////////
 //Updated May 16/////////
 //Updated May 19/////////
+//Updated May 25/////////
 //
 #include <iostream>
 #include <stdio.h>
@@ -91,3 +90,51 @@ int sliding(int slidecount, double slidesheetx, float wid, int slide, Bigfoot &b
     return slide;
 
 }
+
+//Derived from Gordon's Rainforest
+unsigned char *buildAlphaData2(Ppmimage *img)
+{
+    int i;
+    int a, b, c;
+    unsigned char *newdata, *ptr;
+    unsigned char *data = (unsigned char *)img->data;
+    newdata = (unsigned char *)malloc(img->width * img->height * 4);
+    ptr = newdata;
+    for (i = 0; i<img->width * img->height * 3; i+=3)
+    {
+        a = *(data+0);
+        b = *(data+1);
+        c = *(data+1);
+        *(ptr+0) = a;
+        *(ptr+1) = b;
+        *(ptr+2) = c;
+        *(ptr+3) = (a|b|c);
+        ptr += 4;
+        data += 3;
+    }
+    return newdata;
+}
+
+//Derived from Gordon's Rainforest
+void initiateSlideTexture(GLuint *slideTexture, Ppmimage *slideImage)
+{
+    int slide_w = slideImage->width;
+    int slide_h = slideImage->height;
+
+    glBindTexture(GL_TEXTURE_2D, *slideTexture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, slide_w, slide_h, 0,
+            GL_RGB, GL_UNSIGNED_BYTE, slideImage->data);
+
+    glBindTexture(GL_TEXTURE_2D, *slideTexture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    unsigned char *slideData = buildAlphaData2(slideImage);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, slide_w, slide_h, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, slideData);
+}
+    
