@@ -12,18 +12,17 @@ extern "C" {
 //This code gets called when the sprite jumps. 
 //It updates the y axis of the sprite to make it look like it is jumping.
 int Jumping (double spritesheetx, float wid, int jump, 
-	int *sprite_y, GLuint jumpTexture, int stuff)
+	int *sprite_y, GLuint jumpTexture, int stuff, double diff)
 {
     if (!stuff) {
-	if (jump < 32 && jump > 0) {
-	    *sprite_y += 3;
+	if (jump < 26 && jump > 0) {
+	    *sprite_y += (5*diff);
 	    jump++;
-	} else if (jump >= 32 && jump < 62 ) {
-	    *sprite_y -= 3;
+	} else if (jump >= 26 && jump < 52 ) {
+	    *sprite_y -= (5*diff);
 	    jump ++;
 	} else {
 	    jump = 0;
-	    *sprite_y = 75;
 	}
     }
     if (stuff) {
@@ -48,9 +47,9 @@ int Jumping (double spritesheetx, float wid, int jump,
 }
 
 //This will project powerups onto the screen in front of the player
-void projectImage(float x, float y, float z, GLuint Texture)
+void projectImage(float x, float y, float z, GLuint Texture, double diff)
 {
-    float wid = 30;
+    float wid = 30*diff;
     glPushMatrix();
     glBindTexture(GL_TEXTURE_2D, Texture);
     glTranslatef(x, y, z);
@@ -64,11 +63,15 @@ void projectImage(float x, float y, float z, GLuint Texture)
 
 }
 
-int checkcollison(int sprite_x, float x, int sprite_y, float y)
+int checkcollison(int sprite_x, float x, int sprite_y, float y, double diff)
 {
 
-    if (x <= sprite_x+50 && x >= sprite_x-50) {
-	if (y <= sprite_y+50 && y >= sprite_y-20) {
+    double set = 50;
+    if (diff > 1) {
+	set *= diff;
+    }
+    if (x <= sprite_x+set && x >= sprite_x-set) {
+	if (y <= sprite_y+set && y >= sprite_y-set) {
 	    return 1;
 	}
     } else {
@@ -160,15 +163,6 @@ unsigned char *buildAlphaData(Ppmimage *img)
         *(ptr+0) = a;
         *(ptr+1) = b;
         *(ptr+2) = c;
-        //get largest color component...
-        //*(ptr+3) = (unsigned char)((
-        //              (int)*(ptr+0) +
-        //              (int)*(ptr+1) +
-        //              (int)*(ptr+2)) / 3);
-        //d = a;
-        //if (b >= a && b >= c) d = b;
-        //if (c >= a && c >= b) d = c;
-        //*(ptr+3) = d;
         *(ptr+3) = (a|b|c);
         ptr += 4;
         data += 3;
@@ -250,3 +244,4 @@ void assignbackgroundTexture(GLuint *Texture, Ppmimage *Image)
 	    GL_RGBA, GL_UNSIGNED_BYTE, farbackgroundData);
 
 }
+

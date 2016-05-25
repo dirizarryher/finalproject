@@ -191,7 +191,7 @@ int randomObstacle()
 
 float obstacleEffect(int movement, float x, float y, float z, GLuint Texture,
 	int &dead, int &image_counter, int &obstacle, int sprite_x,
-	int sprite_y, int &booster, double &spritesheetx)
+	int sprite_y, int &booster, double diff, double &spritex)
 {
     glEnd();
     glPopMatrix();
@@ -201,32 +201,42 @@ float obstacleEffect(int movement, float x, float y, float z, GLuint Texture,
 	    if (image_counter < 200) {
 		movement = 8;
 		image_counter++;
+		x = 1200;
 	    }
-	    else { 
-		cout << "x is " << x << "\n";
-		x -= movement;
-		projectImage(x, y, z, Texture);
-		if (x < -100 || checkcollison(sprite_x, x, sprite_y, y)) {
-		    if(checkcollison(sprite_x, x, sprite_y, y))
-			booster = checkcollison(sprite_x, x, sprite_y, y);
-		    image_counter = 0;
-		    x = 900;
-		    movement = 0;
-		    obstacle = -1;
+	    else {
+		int luck = rand() % 1000 + 1;
+		if (luck % 7 == 0) {
+		    cout << "x is " << x << "\n";
+		    x -= movement;
+		    projectImage(x*diff, y*diff, z, Texture, diff);
+		    if (x < -100 || checkcollison(sprite_x, x*diff, 
+				sprite_y, y*diff, diff)) {
+			if(checkcollison(sprite_x, x*diff, sprite_y, y*diff, diff))
+			    booster = checkcollison(sprite_x, x*diff, 
+				    sprite_y, y*diff, diff);
+			image_counter = 0;
+			x = 900;
+			movement = 0;
+			obstacle = -1;
+		    }
 		}
+		else 
+		    obstacle = 2;
 	    }
 	    break;
 	case 2:
 	    if(image_counter < 200) {
 		movement = 18;
 		image_counter++;
+		x = 1200;
 	    }
 	    else {
-		cout << "x is " << x << "\n";
+		cout << "x is " << x*diff << "\n";
 		x -= movement;
-		projectImage(x, y, z, Texture);
-		if (x < -100 || checkcollison(sprite_x, x, sprite_y, y)) {
-		    if(checkcollison(sprite_x, x, sprite_y, y))
+		projectImage(x*diff, y*diff, z, Texture, diff);
+		if (x < -100 || checkcollison(sprite_x, x*diff, 
+			    sprite_y, y*diff, diff)) {
+		    if(checkcollison(sprite_x, x*diff, sprite_y, y*diff, diff))
 			dead = 1; 
 		    image_counter = 0;
 		    x = 900;
@@ -244,8 +254,8 @@ float obstacleEffect(int movement, float x, float y, float z, GLuint Texture,
 	    else {
 		cout << "x is " << x << "\n";
 		x += movement;
-		projectImage(x, y+300, z, Texture);
-		if (x > 700 ) {
+		projectImage(x*diff, (y+300)*diff, z, Texture, diff);
+		if (x > 1200 ) {
 		    image_counter = 0;
 		    x = -100;
 		    movement = 0;
@@ -254,7 +264,7 @@ float obstacleEffect(int movement, float x, float y, float z, GLuint Texture,
 	    }
 	    break;
 	case 4:
-	    float wid = 50.0f;
+	    float wid = 50.0f*diff;
 	    if(image_counter < 100) {
 		movement = 8;
 		image_counter++;
@@ -262,29 +272,29 @@ float obstacleEffect(int movement, float x, float y, float z, GLuint Texture,
 	    }
 	    else {
 		glPushMatrix();
-		glTranslatef(x, y, z);
+		glTranslatef(x*diff, y*diff, z);
 		glBindTexture(GL_TEXTURE_2D, Texture);
 		glEnable(GL_ALPHA_TEST);
 		glAlphaFunc(GL_GREATER, 0.0f);
 		glColor4ub(255,255,255,255);
 		glBegin(GL_QUADS);
-		glTexCoord2f(0.0f-spritesheetx, 1.0f); glVertex2i(-wid,-wid);
-		glTexCoord2f(0.0f-spritesheetx, 0.0f); glVertex2i(-wid, wid);
-		glTexCoord2f(0.111111111f-spritesheetx, 0.0f);glVertex2i(wid,wid);
-		glTexCoord2f(0.111111111f-spritesheetx, 1.0f);glVertex2i(wid,-wid);
+		glTexCoord2f(0.0f-spritex, 1.0f); glVertex2i(-wid,-wid);
+		glTexCoord2f(0.0f-spritex, 0.0f); glVertex2i(-wid, wid);
+		glTexCoord2f(0.111111111f-spritex,0.0f);glVertex2i(wid,wid);
+		glTexCoord2f(0.111111111f-spritex,1.0f);glVertex2i(wid,-wid);
 		glEnd();
 		glPopMatrix();
 	    }
-	    spritesheetx += .1428;
+	    spritex += .1428;
 	    cout << "x is " << x << "\n";
 	    x -= movement;
-	    if (x < -100 || checkcollison(sprite_x, x, sprite_y, y)) {
-		if(checkcollison(sprite_x, x, sprite_y, y))
+	    if (x < -100 || checkcollison(sprite_x, x, sprite_y, y, diff)) {
+		if(checkcollison(sprite_x, x*diff, sprite_y, y*diff, diff))
 		    dead = 1; 
 		image_counter = 0;
 		x = -100;
 		movement = 0;
-		obstacle = 4;
+		obstacle = -1;
 	    }
     }
     return x;
