@@ -191,12 +191,11 @@ int randomObstacle()
 
 float obstacleEffect(int movement, float x, float y, float z, GLuint Texture,
 	int &dead, int &image_counter, int &obstacle, int sprite_x,
-	int sprite_y, int &booster)
+	int sprite_y, int &booster, double &spritesheetx)
 {
     glEnd();
     glPopMatrix();
     //if(counter == somevalue)
-    obstacle = 4;
     switch(obstacle) {
 	case 1:
 	    if (image_counter < 200) {
@@ -253,12 +252,13 @@ float obstacleEffect(int movement, float x, float y, float z, GLuint Texture,
 		    obstacle = 4;
 		}
 	    }
+	    break;
 	case 4:
-            float spritesheetx = 0;
+	    float wid = 50.0f;
 	    if(image_counter < 100) {
 		movement = 8;
 		image_counter++;
-		x = 900;
+		x = 1400;
 	    }
 	    else {
 		glPushMatrix();
@@ -268,24 +268,24 @@ float obstacleEffect(int movement, float x, float y, float z, GLuint Texture,
 		glAlphaFunc(GL_GREATER, 0.0f);
 		glColor4ub(255,255,255,255);
 		glBegin(GL_QUADS);
-		    glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
-		    glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
-		    glTexCoord2f(0.111111111f-spritesheetx, 0.0f);glVertex2i(wid,wid);
-		    glTexCoord2f(0.111111111f-spritesheetx, 1.0f);glVertex2i(wid,-wid);
+		glTexCoord2f(0.0f-spritesheetx, 1.0f); glVertex2i(-wid,-wid);
+		glTexCoord2f(0.0f-spritesheetx, 0.0f); glVertex2i(-wid, wid);
+		glTexCoord2f(0.111111111f-spritesheetx, 0.0f);glVertex2i(wid,wid);
+		glTexCoord2f(0.111111111f-spritesheetx, 1.0f);glVertex2i(wid,-wid);
 		glEnd();
 		glPopMatrix();
 	    }
-	    spritesheetx += .14285714;
+	    spritesheetx += .1428;
 	    cout << "x is " << x << "\n";
 	    x -= movement;
 	    if (x < -100 || checkcollison(sprite_x, x, sprite_y, y)) {
-		dead = 1; 
+		if(checkcollison(sprite_x, x, sprite_y, y))
+		    dead = 1; 
 		image_counter = 0;
 		x = -100;
 		movement = 0;
 		obstacle = 4;
 	    }
     }
-}
-return x;
+    return x;
 }

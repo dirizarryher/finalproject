@@ -48,14 +48,14 @@ int stuff_counter = 0, booster = 300;
 int set = 0, direction = -1, counter = 0, jumpcount = 0, slidecount = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
     sprite_x = 140, sprite_y = 75, boostMovement = 8, spearMovement = 18, 
-    saucerMovement = 3, monsterMovement = 25;
+    saucerMovement = 3, monsterMovement = 5;
 float x = 600, y = 75, z = 1;
 
 //defined types
 typedef double Flt;
 typedef double Vec[3];
 typedef Flt	Matrix[4][4];
-double backgroundx = -.0006, spritesheetx = 0, deathsheetx = 0; 
+double backgroundx = -.0006, spritesheetx=0, deathsheetx=0, monstersheetx=0; 
 double jumpsheetx = 0, slidesheetx = 0;
 
 double skyx = -.00005;
@@ -202,7 +202,7 @@ struct Game {
 
 //function prototypes
 float obstacleEffect(int m, float x, float y, float z, GLuint T, int &d, 
-	int &i, int &o, int sx, int xy, int &boost);
+	int &i, int &o, int sx, int xy, int &boost, double &msx);
 Rect displayName(int move);
 int randomObstacle();
 void saveData(char *u_Name, int score);
@@ -1315,22 +1315,22 @@ void render(Game *game)
 	    case 1:
 		x = obstacleEffect(boostMovement, x, y, z, speedTexture, 
 			dead, image_counter, obstacle, sprite_x, 
-			sprite_y, booster);
+			sprite_y, booster, monstersheetx);
 		break;
 	    case 2:
 		x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
 			dead, image_counter, obstacle, sprite_x, 
-			sprite_y, booster);
+			sprite_y, booster, monstersheetx);
 		break;
 	    case 3:
 		x = obstacleEffect(saucerMovement, x, y, z, saucerTexture, 
 			dead, image_counter, obstacle, sprite_x, 
-			sprite_y, booster);
+			sprite_y, booster, monstersheetx);
 		break;
 	    case 4:
 		x = obstacleEffect(monsterMovement, x, y, z, monsterTexture, 
 			dead, image_counter, obstacle, sprite_x, 
-			sprite_y, booster);
+			sprite_y, booster, monstersheetx);
 		break;
 	    default: 
 		obstacle = -1;
