@@ -47,8 +47,11 @@ int jump = 0, slide = 0, obstacle = -1;
 int stuff_counter = 0, booster = 300;
 int set = 0, direction = -1, counter = 0, jumpcount = 0, slidecount = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
-    sprite_x = 140, sprite_y = 75, boostMovement = 8, spearMovement = 18;
+    sprite_x = 140, boostMovement = 8, spearMovement = 18;
 float x = 600, y = 75, z = 1;
+double xdiff = 1, ydiff = 1;
+int standardy = 75;
+int sprite_y = standardy*xdiff;
 
 //defined types
 typedef double Flt;
@@ -101,7 +104,7 @@ void timeCopy(struct timespec *dest, struct timespec *source) {
 
 int image_counter = 0;
 int done=0;
-int xres=800, yres=600;
+double xres=800, yres=600;
 
 typedef struct t_background {
     Vec pos;
@@ -199,12 +202,12 @@ struct Game {
 
 //function prototypes
 float obstacleEffect(int m, float x, float y, float z, GLuint T, int &d, 
-	int &i, int &o, int sx, int xy, int &boost);
+	int &i, int &o, int sx, int xy, int &boost, double diff);
 Rect displayName(int move);
 int randomObstacle();
 void saveData(char *u_Name, int score);
 int Jumping (double spritesheetx, float wid, int jump, int *sprite_y, 
-	GLuint jumpTexture, int stuff);
+	GLuint jumpTexture, int stuff, double diff);
 int sliding (int slidecount, double spritesheetx, float wid, int slide, 
 	Bigfoot &bigfoot, GLuint slideTexture);
 void runnerDeath (Bigfoot &b, double s);
@@ -219,8 +222,8 @@ void physics(void);
 void render(Game *game);
 int check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
-void projectImage(float x, float y, float z, GLuint speedTexture);
-bool checkcollison(int sprite, float x, int sprite_y, float y);
+void projectImage(float x, float y, float z, GLuint speedTexture, double diff);
+bool checkcollison(int sprite, float x, int sprite_y, float y, double diff);
 void funnystuff(int stuff_counter);
 void displaybackground(double backgroundx, GLuint Texture, int yres, 
 	int xres, bool toggle);
@@ -241,23 +244,6 @@ int main(void)
     //int keys = 0;
     Game game;
     game.n=0;	
-
-    //declare a box shape
-    /*int x = 400, y = 10, length = 4000;
-    //declare a box shape
-    game.box[0].width = length;
-    game.box[0].height = 10;
-    game.box[0].center.x = x;
-    game.box[0].center.y = y;
-    game.circle[0].center.x = 10;
-    game.circle[0].center.y = -20;
-    game.circle[0].radius = 100;*/
-
-
-    //game.box[2].width = 10;
-    //game.box[2].height = 20;
-    //game.box[2].center.x = sprite_x;
-    //game.box[2].center.y = sprite_y;
 
     logOpen();
     initXWindows();
@@ -451,7 +437,7 @@ void initOpengl(void)
     slideImage         = ppm6GetImage("./images/slide_sheet.ppm");
 
     farbackgroundImage = ppm6GetImage("./images/farbackground.ppm");
-    backgroundImage    = ppm6GetImage("./images/background.ppm");
+    backgroundImage    = ppm6GetImage("./images/background1.ppm");
     grassImage         = ppm6GetImage("./images/grass.ppm");
     groundImage        = ppm6GetImage("./images/ground.ppm");
     skyImage           = ppm6GetImage("./images/sky.ppm");
@@ -653,6 +639,8 @@ void checkResize(XEvent *e)
     XConfigureEvent xce = e->xconfigure;
     if (xce.width != xres || xce.height != yres) {
 	//Window size did change.
+	xdiff =xce.width-xres;
+	xdiff = xdiff/xres;
 	reshapeWindow(xce.width, xce.height);
     }
 }
@@ -863,21 +851,6 @@ void deleteRain(Raindrop *node)
 
     //hints:
     //check for some special cases:
-    //1. only 1 node in list (it is also the head node)
-    //2. node at beginning of list (it is also the head node)
-    //3. node at end of list.
-    //4. node somewhere else in list.
-
-    //if (node->prev == NULL) <--- node at beginning of list.
-
-
-
-
-
-
-
-    //At the end of this function, free the node's memory,
-    //and set the node to NULL.
 }
 
 void moveBigfoot()
@@ -1119,6 +1092,7 @@ void render(Game *game)
 
     Rect b, nameText; // will add r to diplay game instruction when the time comes
 
+    //sprite_y = standardy*xdiff;
     //Clear the screen
     glClearColor(1.0, 1.0, 1.0, 1.0);
     glClear(GL_COLOR_BUFFER_BIT);
@@ -1126,13 +1100,14 @@ void render(Game *game)
     //
     //draw a quad with texture
     float wid = 60.0f;
+    wid *= xdiff;
     glColor3f(1.0, 1.0, 1.0);
     if (forest) {
 	if (deathCounter < 9) {
 	    //sky
 	    displaybackground(skyx, skyTexture, yres, xres, 0);
 	    //far background
-	    displaybackground(farbackgroundx, farbackgroundTexture, ((yres/2)+200), xres, 0);
+	    displaybackground(farbackgroundx, farbackgroundTexture, (yres-300), xres, 0);
 	    //background
 	    displaybackground(backgroundx, backgroundTexture, (yres/2), xres+400, 1);
 	    //ground
@@ -1172,7 +1147,7 @@ void render(Game *game)
     //this makes sure the player can't double jump and does a loose aproximation of phyics for the jump
     if ((jump || stuff) && !dead) {
 	showRunner = 0;
-	jump = Jumping(jumpsheetx, wid, jump, point_y, jumpTexture, stuff);
+	jump = Jumping(jumpsheetx, (wid), jump, point_y, jumpTexture, stuff, xdiff);
 	jumpcount++;
 
 	if (jumpcount == 4) {
@@ -1182,6 +1157,7 @@ void render(Game *game)
 
     } else {
 	showRunner = 1;
+	sprite_y = standardy*xdiff;
 	jumpcount = 0;
 	jumpsheetx = 0;
     }
@@ -1224,7 +1200,7 @@ void render(Game *game)
 
     if (showRunner && !jump && !dead) {
 	glPushMatrix();
-	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
+	glTranslatef(bigfoot.pos[0], sprite_y, bigfoot.pos[2]);
 	if (!silhouette) {
 	    glBindTexture(GL_TEXTURE_2D, runningTexture);
 	} else {
@@ -1259,12 +1235,12 @@ void render(Game *game)
 	    case 1:
 		    x = obstacleEffect(boostMovement, x, y, z, speedTexture, 
 			          dead, image_counter, obstacle, sprite_x, 
-				  sprite_y, booster);
+				  sprite_y, booster, xdiff);
 		break;
 	    case 2:
 		    x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
 			          dead, image_counter, obstacle, sprite_x, 
-				  sprite_y, booster);
+				  sprite_y, booster, xdiff);
 		break;
 	    default: 
 		obstacle = -1;
@@ -1357,6 +1333,7 @@ void render(Game *game)
 	if (box_x < -30)
 	    box_x = 800;
     }
+    wid = 60;
 }
 
 void movement(Game *game)
