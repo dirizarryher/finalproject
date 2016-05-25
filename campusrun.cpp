@@ -47,7 +47,7 @@ int jump = 0, slide = 0, obstacle = -1;
 int stuff_counter = 0, booster = 300;
 int set = 0, direction = -1, counter = 0, jumpcount = 0, slidecount = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
-    sprite_x = 140, sprite_y = 75, boostMovement = 2, spearMovement = 9;
+    sprite_x = 140, sprite_y = 75, boostMovement = 8, spearMovement = 18;
 float x = 600, y = 75, z = 1;
 
 //defined types
@@ -198,11 +198,15 @@ struct Game {
 };
 
 //function prototypes
+float obstacleEffect(int m, float x, float y, float z, GLuint T, int &d, 
+	int &i, int &o, int sx, int xy, int &boost);
 Rect displayName(int move);
 int randomObstacle();
 void saveData(char *u_Name, int score);
-int Jumping (double spritesheetx, float wid, int jump, int *sprite_y, GLuint jumpTexture, int stuff);
-int sliding (int slidecount, double spritesheetx, float wid, int slide, Bigfoot &bigfoot, GLuint slideTexture);
+int Jumping (double spritesheetx, float wid, int jump, int *sprite_y, 
+	GLuint jumpTexture, int stuff);
+int sliding (int slidecount, double spritesheetx, float wid, int slide, 
+	Bigfoot &bigfoot, GLuint slideTexture);
 void runnerDeath (Bigfoot &b, double s);
 void initXWindows(void);
 void initOpengl(void);
@@ -218,7 +222,8 @@ void movement(Game *game);
 void projectImage(float x, float y, float z, GLuint speedTexture);
 bool checkcollison(int sprite, float x, int sprite_y, float y);
 void funnystuff(int stuff_counter);
-void displaybackground(double backgroundx, GLuint Texture, int yres, int xres, bool toggle);
+void displaybackground(double backgroundx, GLuint Texture, int yres, 
+	int xres, bool toggle);
 double farbackground(double x);
 double backgroundscroll(double x);
 double ground(double x);
@@ -1252,76 +1257,19 @@ void render(Game *game)
     if (obstacle) {
 	switch(obstacle) {
 	    case 1:
-		if(image_counter < 200)
-		{
-		    boostMovement = 8;
-		    image_counter++;
-		}
-		else {
-		    glEnd();
-		    glPopMatrix();
-		    //if(counter == somevalue)
-		    projectImage(x, y, z, speedTexture);
-		    cout << "boost x is " << x << "\n";
-		    x -= boostMovement;
-		    if(x < -100 || checkcollison(sprite_x, x, sprite_y, y)) {
-			if(checkcollison(sprite_x, x, sprite_y, y)) 
-			    booster = checkcollison(sprite_x, x, sprite_y, y);
-			score *= 10;
-			image_counter = 0;
-			x = 900;
-			boostMovement = 0;
-			obstacle = -1;
-		    }
-		}
+		    x = obstacleEffect(boostMovement, x, y, z, speedTexture, 
+			          dead, image_counter, obstacle, sprite_x, 
+				  sprite_y, booster);
 		break;
 	    case 2:
-		if(image_counter < 200)
-		{
-		    spearMovement = 18;
-		    image_counter++;
-		}
-		else {
-		    glEnd();
-		    glPopMatrix();
-		    //if(counter == somevalue)
-		    projectImage(x, y, z, spearTexture);
-		    cout << "spear x is " << x << "\n";
-		    x -= spearMovement;
-		    if(x < -100 || checkcollison(sprite_x, x, sprite_y, y)) {
-			if(checkcollison(sprite_x, x, sprite_y, y))
-			   dead = 1; 
-			image_counter = 0;
-			x = 900;
-			spearMovement = 0;
-			obstacle = -1;
-		    }
-		}
+		    x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
+			          dead, image_counter, obstacle, sprite_x, 
+				  sprite_y, booster);
 		break;
 	    default: 
 		obstacle = -1;
 	}
     }
-    /*if (obstacle == 2) {
-      if(image_counter < 200)
-      {
-      boostMovement = 2;
-      image_counter++;
-      }
-      else {
-      glEnd();
-      glPopMatrix();
-    //if(counter == somevalue)
-    projectImage(x, y, z, speedTexture);
-    cout << "x is " << x << "\n";
-    x -= boostMovement;
-    if(x == -100 || checkcollison(sprite_x, x, sprite_y, y)) {
-    image_counter = 0;
-    x = 900;
-    boostMovement = 0;
-    }
-    }
-    }*/
 
     float w, h;
     //Draw shapes...
