@@ -44,17 +44,17 @@ void saveData(char* u_Name, int score)
     remote->sin_family = AF_INET;
     tmpres = inet_pton(AF_INET, ip, (void *)(&(remote->sin_addr.s_addr)));
     if (tmpres < 0)  {
-        perror("Can't set remote->sin_addr.s_addr");
-        exit(1);
+	perror("Can't set remote->sin_addr.s_addr");
+	exit(1);
     } else if (tmpres == 0) {
-        fprintf(stderr, "%s is not a valid IP address\n", ip);
-        exit(1);
+	fprintf(stderr, "%s is not a valid IP address\n", ip);
+	exit(1);
     }
     remote->sin_port = htons(PORT);
 
     if (connect(sock, (struct sockaddr *)remote, sizeof(struct sockaddr)) <0) {
-        perror("Could not connect");
-        exit(1);
+	perror("Could not connect");
+	exit(1);
     }
     get = build_get_query(host, page);
     fprintf(stderr, "Query is:\n<<START>>\n%s<<END>>\n", get);
@@ -63,39 +63,39 @@ void saveData(char* u_Name, int score)
     int sent = 0;
     // cast as int to remove warning: 
     while (sent < (int)strlen(get)) {
-        tmpres = send(sock, get+sent, strlen(get)-sent, 0);
-        if (tmpres == -1) {
-            perror("Can't send query");
-            exit(1);
-        }
-        sent += tmpres;
+	tmpres = send(sock, get+sent, strlen(get)-sent, 0);
+	if (tmpres == -1) {
+	    perror("Can't send query");
+	    exit(1);
+	}
+	sent += tmpres;
     }
     //now it is time to receive the page
     memset(buf, 0, sizeof(buf));
     int htmlstart = 0;
     char * htmlcontent;
     while ((tmpres = recv(sock, buf, BUFSIZ, 0)) > 0) {
-        if (htmlstart == 0) {
-            /* Under certain conditions this will not work.
-             * If the \r\n\r\n part is splitted into two messages
-             * it will fail to detect the beginning of HTML content
-             */
-            htmlcontent = strstr(buf, "\r\n\r\n");
-            if (htmlcontent != NULL) {
-                htmlstart = 1;
-                htmlcontent += 4;
-            }
-        } else {
-            htmlcontent = buf;
-        }
-        if (htmlstart) {
-            cout << htmlcontent;;
-        }
+	if (htmlstart == 0) {
+	    /* Under certain conditions this will not work.
+	     * If the \r\n\r\n part is splitted into two messages
+	     * it will fail to detect the beginning of HTML content
+	     */
+	    htmlcontent = strstr(buf, "\r\n\r\n");
+	    if (htmlcontent != NULL) {
+		htmlstart = 1;
+		htmlcontent += 4;
+	    }
+	} else {
+	    htmlcontent = buf;
+	}
+	if (htmlstart) {
+	    cout << htmlcontent;;
+	}
 
-        memset(buf, 0, tmpres);
+	memset(buf, 0, tmpres);
     }
     if (tmpres < 0) {
-        perror("Error receiving data");
+	perror("Error receiving data");
     }
     free(get);
     free(remote);
@@ -106,8 +106,8 @@ void saveData(char* u_Name, int score)
 void usage()
 {
     fprintf(stderr, "USAGE: htmlget host [page]\n\
-            \thost: the website hostname. ex: coding.debuntu.org\n\
-            \tpage: the page to retrieve. ex: index.html, default: /\n");
+	    \thost: the website hostname. ex: coding.debuntu.org\n\
+	    \tpage: the page to retrieve. ex: index.html, default: /\n");
 }
 
 
@@ -115,8 +115,8 @@ int create_tcp_socket()
 {
     int sock;
     if ((sock = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP)) < 0) {
-        perror("Can't create TCP socket");
-        exit(1);
+	perror("Can't create TCP socket");
+	exit(1);
     }
     return sock;
 }
@@ -129,12 +129,12 @@ char *get_ip(char *host)
     char *ip = (char *)malloc(iplen+1);
     memset(ip, 0, iplen+1);
     if ((hent = gethostbyname(host)) == NULL) {
-        herror("Can't get IP");
-        exit(1);
+	herror("Can't get IP");
+	exit(1);
     }
     if (inet_ntop(AF_INET, (void *)hent->h_addr_list[0], ip,iplen+1) == NULL) {
-        perror("Can't resolve host");
-        exit(1);
+	perror("Can't resolve host");
+	exit(1);
     }
     return ip;
 }
@@ -146,13 +146,13 @@ char *build_get_query(char *host, char *page)
     // cast to char* to remove warning: deprecated conversion
     char *tpl = (char*)"GET /%s HTTP/1.0\r\nHost:%s\r\nUser-Agent: %s\r\n\r\n";
     if (getpage[0] == '/') {
-        getpage = getpage + 1;
-        fprintf(stderr,"Removing leading\"/\",converting %s to %s\n",
-                page,getpage);
+	getpage = getpage + 1;
+	fprintf(stderr,"Removing leading\"/\",converting %s to %s\n",
+		page,getpage);
     }
     // -5 is to consider the %s %s %s in tpl and the ending \0
     query = (char *)malloc(strlen(host)+strlen(getpage)+
-            strlen(USERAGENT)+strlen(tpl)-5);
+	    strlen(USERAGENT)+strlen(tpl)-5);
 
     sprintf(query, tpl, getpage, host, USERAGENT);
     return query;
@@ -162,23 +162,78 @@ void runnerDeath (Bigfoot &bigfoot, double spritesheetx)
     float wid = 60.0f;
     glBegin(GL_QUADS);
     if (bigfoot.vel[0] > 0.0) {
-        glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
-        glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
-        glTexCoord2f(0.1f+spritesheetx, 0.0f); glVertex2i( wid,wid);
-        glTexCoord2f(0.1f+spritesheetx, 1.0f); glVertex2i( wid,-wid);
+	glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
+	glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
+	glTexCoord2f(0.1f+spritesheetx, 0.0f); glVertex2i( wid,wid);
+	glTexCoord2f(0.1f+spritesheetx, 1.0f); glVertex2i( wid,-wid);
     } else {
-        glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
-        glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
-        glTexCoord2f(0.1f, 1.0f); glVertex2i( wid, wid);
-        glTexCoord2f(0.1f, 0.0f); glVertex2i( wid,-wid);
+	glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
+	glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+	glTexCoord2f(0.1f, 1.0f); glVertex2i( wid, wid);
+	glTexCoord2f(0.1f, 0.0f); glVertex2i( wid,-wid);
     }
 }
 
 Rect displayName(int location) 
 {
-   Rect nameBox;
-   nameBox.bot = 380;
-   nameBox.left = location;
-   nameBox.center = 0; 
-   return nameBox; 
+    Rect nameBox;
+    nameBox.bot = 380;
+    nameBox.left = location;
+    nameBox.center = 0; 
+    return nameBox; 
+}
+
+int randomObstacle()
+{
+    int obstacle = rand() % 3 + 1;
+    return obstacle; 
+}
+
+float obstacleEffect(int movement, float x, float y, float z, GLuint Texture,
+	int &dead, int &image_counter, int &obstacle, int sprite_x,
+	int sprite_y, int &booster)
+{
+    glEnd();
+    glPopMatrix();
+    //if(counter == somevalue)
+    switch(obstacle) {
+	case 1:
+	    if (image_counter < 200) {
+		movement = 8;
+		image_counter++;
+	    }
+	    else { 
+		cout << "x is " << x << "\n";
+		x -= movement;
+		projectImage(x, y, z, Texture);
+		if (x < -100 || checkcollison(sprite_x, x, sprite_y, y)) {
+		    if(checkcollison(sprite_x, x, sprite_y, y))
+			booster = checkcollison(sprite_x, x, sprite_y, y);
+		    image_counter = 0;
+		    x = 900;
+		    movement = 0;
+		    obstacle = -1;
+		}
+	    }
+	    break;
+	case 2:
+	    if(image_counter < 200) {
+		movement = 18;
+		image_counter++;
+	    }
+	    else {
+		cout << "x is " << x << "\n";
+		x -= movement;
+		projectImage(x, y, z, Texture);
+		if (x < -100 || checkcollison(sprite_x, x, sprite_y, y)) {
+		    if(checkcollison(sprite_x, x, sprite_y, y))
+			dead = 1; 
+		    image_counter = 0;
+		    x = 900;
+		    movement = 0;
+		    obstacle = -1;
+		}
+	    }
+    }
+    return x;
 }
