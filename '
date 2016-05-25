@@ -47,8 +47,7 @@ int jump = 0, slide = 0, obstacle = -1;
 int stuff_counter = 0, booster = 300;
 int set = 0, direction = -1, counter = 0, jumpcount = 0, slidecount = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
-    sprite_x = 140, sprite_y = 75, boostMovement = 8, spearMovement = 18, 
-    saucerMovement = 3, monsterMovement = 25;
+    sprite_x = 140, sprite_y = 75, boostMovement = 8, spearMovement = 18, saucerMovement = 7;
 float x = 600, y = 75, z = 1;
 
 //defined types
@@ -118,13 +117,12 @@ Bigfoot bigfoot;
 
 Ppmimage *runningImage, *deathImage, *jumpImage, *boostImage, *slideImage;
 Ppmimage *grassImage, *groundImage, *skyImage, *farbackgroundImage, *backgroundImage;
-Ppmimage *forestImage=NULL, *gameoverImage, *spearImage, *saucerImage, *monsterImage;
+Ppmimage *forestImage=NULL, *gameoverImage, *spearImage, *saucerImage;
 GLuint runningTexture, deathTexture, jumpTexture, speedTexture, slideTexture, gameoverTexture;
 GLuint silhouetteTexture, DeathsilhouetteTexture, JumpsilhouetteTexture, slidesilhouetteTexture;
 GLuint grassTexture, groundTexture, skyTexture, farbackgroundTexture, backgroundTexture;
 GLuint forestTexture, gameoversilhouetteTexture, spearTexture, 
-       spearsilhouetteTexture, saucerTexture, sucersilhouetteTexture, 
-       monsterTexture, monstersilhouetterTexture;
+       spearsilhouetteTexture, saucerTexture, sucersilhouetteTexture;
 char cScore[400];
 int name = 0;
 int score = 0;
@@ -452,7 +450,6 @@ void initOpengl(void)
     boostImage         = ppm6GetImage("./images/speedboost.ppm");
     spearImage         = ppm6GetImage("./images/runner/spear.ppm");
     saucerImage        = ppm6GetImage("./images/runner/saucer.ppm");
-    monsterImage       = ppm6GetImage("./images/runner/monster.ppm");
     slideImage         = ppm6GetImage("./images/slide_sheet.ppm");
 
     farbackgroundImage = ppm6GetImage("./images/farbackground.ppm");
@@ -467,7 +464,6 @@ void initOpengl(void)
     // glGenTextures(1, &bigfootTexture);
     //glGenTextures(1, &jumpTexture);
     glGenTextures(1, &runningTexture);
-    glGenTextures(1, &monsterTexture);
     glGenTextures(1, &saucerTexture);
     glGenTextures(1, &jumpTexture);
     glGenTextures(1, &speedTexture);
@@ -483,31 +479,6 @@ void initOpengl(void)
     glGenTextures(1, &grassTexture);
     glGenTextures(1, &slideTexture);
 
-    //-------------------------------------------------------------------------
-    //monster
-    //
-    int monster_w = monsterImage->width;
-    int monster_h = monsterImage->height;
-    //
-    glBindTexture(GL_TEXTURE_2D, monsterTexture);
-    //
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, monster_w, monster_h, 0,
-	    GL_RGB, GL_UNSIGNED_BYTE, monsterImage->data);
-    //-------------------------------------------------------------------------
-    //saucer silhouette
-    //this is similar to a sprite graphic
-    //
-    glBindTexture(GL_TEXTURE_2D, monsterTexture);
-    //
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    //
-    //must build a new set of data...
-    unsigned char *MonstersilhouetteData = buildAlphaData(monsterImage);	
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, monster_w, monster_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, MonstersilhouetteData);
     //-------------------------------------------------------------------------
     //saucer
     //
@@ -1313,24 +1284,19 @@ void render(Game *game)
     if (obstacle) {
 	switch(obstacle) {
 	    case 1:
-		x = obstacleEffect(boostMovement, x, y, z, speedTexture, 
-			dead, image_counter, obstacle, sprite_x, 
-			sprite_y, booster);
+		    x = obstacleEffect(boostMovement, x, y, z, speedTexture, 
+			          dead, image_counter, obstacle, sprite_x, 
+				  sprite_y, booster);
 		break;
 	    case 2:
-		x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
-			dead, image_counter, obstacle, sprite_x, 
-			sprite_y, booster);
+		    x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
+			          dead, image_counter, obstacle, sprite_x, 
+				  sprite_y, booster);
 		break;
 	    case 3:
-		x = obstacleEffect(saucerMovement, x, y, z, saucerTexture, 
-			dead, image_counter, obstacle, sprite_x, 
-			sprite_y, booster);
-		break;
-	    case 4:
-		x = obstacleEffect(monsterMovement, x, y, z, monsterTexture, 
-			dead, image_counter, obstacle, sprite_x, 
-			sprite_y, booster);
+		    x = obstacleEffect(saucerMovement, x, y, z, saucerTexture, 
+			          dead, image_counter, obstacle, sprite_x, 
+				  sprite_y, booster);
 		break;
 	    default: 
 		obstacle = -1;
