@@ -1,3 +1,5 @@
+//
+//
 //cs335
 //
 //program: rainforest
@@ -43,9 +45,9 @@ using namespace std;
 #define MAX_PARTICLES 5000
 #define GRAVITY 0.1
 
-int jump = 0, slide = 0, obstacle = -1;
+int jump = 0, slide = 0, obstacle = -1, smoke = 0;
 int stuff_counter = 0, booster = 300;
-int set = 0, direction = -1, counter = 0, jumpcount = 0, slidecount = 0;
+int set = 0, direction = -1, counter = 0, jumpcount = 0, slidecount = 0, smokecount = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
     sprite_x = 140, sprite_y = 75, boostMovement = 8, spearMovement = 18, 
     saucerMovement = 3, monsterMovement = 9, batMovement = 8;
@@ -122,13 +124,13 @@ typedef struct t_bigfoot {
 } Bigfoot;
 Bigfoot bigfoot;
 
-Ppmimage *runningImage, *deathImage, *jumpImage, *boostImage, *slideImage;
+Ppmimage *runningImage, *deathImage, *jumpImage, *boostImage, *slideImage, *smokeImage;
 Ppmimage *grassImage, *groundImage, *skyImage, *farbackgroundImage, 
          *backgroundImage, *batImage;
 Ppmimage *forestImage=NULL, *gameoverImage, *spearImage, *saucerImage, 
          *monsterImage;
 GLuint runningTexture, deathTexture, jumpTexture, speedTexture, slideTexture, 
-       gameoverTexture;
+       gameoverTexture, smokeTexture;
 GLuint silhouetteTexture, DeathsilhouetteTexture, JumpsilhouetteTexture, 
        slidesilhouetteTexture;
 GLuint grassTexture, groundTexture, skyTexture, farbackgroundTexture, 
@@ -221,7 +223,9 @@ void saveData(char *u_Name, int score);
 int Jumping (double spritesheetx, float wid, int jump, int *sprite_y, 
         GLuint jumpTexture, int stuff, double diff);
 int sliding (int slidecount, double spritesheetx, float wid, int slide, 
-        Bigfoot &bigfoot, GLuint slideTexture);
+	Bigfoot &bigfoot, GLuint slideTexture);
+int smoking (int smokecount, double spritesheetx, float wid, int smoke,
+        Bigfoot &bigfoot, GLuint smokeTexture);
 void runnerDeath (Bigfoot &b, double s);
 void initXWindows(void);
 void initOpengl(void);
@@ -249,6 +253,8 @@ void assignJumpTexture(GLuint *jumpTexture, Ppmimage *jumpImage);
 unsigned char *buildAlphaData(Ppmimage *img);
 void assignboostTexture(GLuint *Texture, Ppmimage *Image);
 void assignbackgroundTexture(GLuint *Texture, Ppmimage *Image);
+void initiateSlideTexture(GLuint *slideTexture, Ppmimage *slideImage);
+void initiateSmokeTexture(GLuint *smokeTexture, Ppmimage *smokeImage);
 string convertImage(string filename, string path, string filetype);
 void deletePPM();
 void functioncall();
@@ -464,6 +470,7 @@ void initOpengl(void)
     convertImage("ground", path, filetype);
     convertImage("sky", path, filetype);
     convertImage("game_over", path, filetype);
+<<<<<<< HEAD
     */
 
     functioncall();
@@ -477,6 +484,8 @@ void initOpengl(void)
     boostImage         = ppm6GetImage("./images/speedboost.ppm");
     batImage           = ppm6GetImage("./images/runner/bat.ppm");
     slideImage         = ppm6GetImage("./images/slide_sheet.ppm");
+    smokeImage         = ppm6GetImage("./images/Smoke.ppm");
+
     farbackgroundImage = ppm6GetImage("./images/farbackground.ppm");
     backgroundImage    = ppm6GetImage("./images/background1.ppm");
     grassImage         = ppm6GetImage("./images/grass.ppm");
@@ -618,28 +627,8 @@ void initOpengl(void)
     //-------------------------------------------------------------------------
     //slide
     //
-    int slide_w = slideImage->width;
-    int slide_h = slideImage->height;
-    //
-    glBindTexture(GL_TEXTURE_2D, slideTexture);
-    //
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, slide_w, slide_h, 0,
-            GL_RGB, GL_UNSIGNED_BYTE, slideImage->data);
-    //-------------------------------------------------------------------------
-    //slide silhouette
-    //this is similar to a sprite graphic
-    //
-    glBindTexture(GL_TEXTURE_2D, slidesilhouetteTexture);
-    //
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    //
-    //must build a new set of data...
-    unsigned char *slidesilhouetteData = buildAlphaData(slideImage);	
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, slide_w, slide_h, 0,
-            GL_RGBA, GL_UNSIGNED_BYTE, slidesilhouetteData);
+    initiateSlideTexture(&slideTexture, slideImage);
+    initiateSmokeTexture(&smokeTexture, smokeImage);
     //-------------------------------------------------------------------------
     //running
     //
@@ -840,83 +829,85 @@ void checkKeys(XEvent *e)
         return;
     }
     switch(key) {
-        case XK_b:
-            showRunner^= 1;
-            if (showRunner) {
-                bigfoot.pos[0] = -250.0;
-            }
-            break;
-        case XK_d:
-            dead ^= 1;
-            showRunner = 0;
-            runnerSpeed = 1000000;
-            saveData(user, score);
-            break;
-        case XK_f:
-            stuff ^= 1;
-            break;
-        case XK_s:
-            silhouette ^= 1;
-            printf("silhouette: %i\n",silhouette);
-            break;
-        case XK_t:
-            trees ^= 1;
-            break;
-        case XK_u:
-            showUmbrella ^= 1;
-            break;
-        case XK_p:
-            umbrella.shape ^= 1;
-            break;
-        case XK_z:
-            name ^= 1;
-            break;
-        case XK_r:
-            showRain ^= 1;
-            //if (!show_rain)
-            //	cleanup_raindrops();
-            break;
-        case XK_Left:
-            VecCopy(umbrella.pos, umbrella.lastpos);
-            umbrella.pos[0] -= 10.0;
-            break;
-        case XK_Right:
-            VecCopy(umbrella.pos, umbrella.lastpos);
-            umbrella.pos[0] += 10.0;
-            break;
-        case XK_Down:
-            if(slide == 0)
-                slide = 1;
-            break;
-        case XK_equal:
-            if (++ndrops > 40)
-                ndrops=40;
-            break;
-        case XK_minus:
-            if (--ndrops < 0)
-                ndrops = 0;
-            break;
-        case XK_n:
-            break;
-        case XK_w:
-            if (shift) {
-                //shrink the umbrella
-                umbrella.width *= (1.0 / 1.05);
-            } else {
-                //enlarge the umbrella
-                umbrella.width *= 1.05;
-            }
-            //half the width
-            umbrella.width2 = umbrella.width * 0.5;
-            umbrella.radius = (float)umbrella.width2;
-            break;
-        case XK_Up:
-            if(jump == 0)
-                jump = 1;
-            break;
-        case XK_Escape:
-            done=1;
-            break;
+	case XK_b:
+	    showRunner^= 1;
+	    if (showRunner) {
+		bigfoot.pos[0] = -250.0;
+	    }
+	    break;
+	case XK_d:
+	    dead ^= 1;
+	    showRunner = 0;
+	    runnerSpeed = 1000000;
+	    saveData(user, score);
+	    break;
+	case XK_f:
+	    stuff ^= 1;
+	    break;
+	case XK_s:
+	    silhouette ^= 1;
+	    printf("silhouette: %i\n",silhouette);
+	    break;
+	case XK_t:
+	    trees ^= 1;
+	    break;
+	case XK_u:
+	    showUmbrella ^= 1;
+	    break;
+	case XK_p:
+	    umbrella.shape ^= 1;
+	    break;
+	case XK_z:
+	    name ^= 1;
+	    break;
+	case XK_r:
+	    showRain ^= 1;
+	    //if (!show_rain)
+	    //	cleanup_raindrops();
+	    break;
+	case XK_Left:
+	    VecCopy(umbrella.pos, umbrella.lastpos);
+	    umbrella.pos[0] -= 10.0;
+	    break;
+	case XK_Right:
+	    VecCopy(umbrella.pos, umbrella.lastpos);
+	    umbrella.pos[0] += 10.0;
+	    break;
+	case XK_Down:
+	    if(slide == 0)
+		slide = 1;
+        if(smoke == 0)
+            smoke = 1;
+	    break;
+	case XK_equal:
+	    if (++ndrops > 40)
+		ndrops=40;
+	    break;
+	case XK_minus:
+	    if (--ndrops < 0)
+		ndrops = 0;
+	    break;
+	case XK_n:
+	    break;
+	case XK_w:
+	    if (shift) {
+		//shrink the umbrella
+		umbrella.width *= (1.0 / 1.05);
+	    } else {
+		//enlarge the umbrella
+		umbrella.width *= 1.05;
+	    }
+	    //half the width
+	    umbrella.width2 = umbrella.width * 0.5;
+	    umbrella.radius = (float)umbrella.width2;
+	    break;
+	case XK_Up:
+	    if(jump == 0)
+		jump = 1;
+	    break;
+	case XK_Escape:
+	    done=1;
+	    break;
     }
 }
 

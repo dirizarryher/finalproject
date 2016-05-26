@@ -267,6 +267,7 @@ void functioncall()
     convertImage("ground", path, filetype);
     convertImage("sky", path, filetype);
     convertImage("game_over", path, filetype);
+    convertImage("Smoke", path, filetype);    
 
 }
 

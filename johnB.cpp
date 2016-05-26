@@ -1,10 +1,9 @@
 //John Henry Buenaventura
 //Initiated April 28
-//Updated May 10/////////
-//Updated May 13/////////
 //Updated May 14/////////
 //Updated May 16/////////
 //Updated May 19/////////
+//Updated May 25/////////
 //
 #include <iostream>
 #include <stdio.h>
@@ -22,6 +21,10 @@ extern "C" {
 #include "fonts.h"
 }
 
+//Ppmimage *slideImage2;
+
+//GLuint slideTexture;
+
 typedef double Vec[3];
 
 typedef struct t_bigfoot
@@ -29,6 +32,7 @@ typedef struct t_bigfoot
     Vec pos;
     Vec vel;
 }Bigfoot;
+
 
 int sliding(int slidecount, double slidesheetx, float wid, int slide, Bigfoot &bigfoot, GLuint slideTexture)
 {
@@ -59,15 +63,129 @@ int sliding(int slidecount, double slidesheetx, float wid, int slide, Bigfoot &b
     glBindTexture(GL_TEXTURE_2D, slideTexture);
     glBegin(GL_QUADS);
 
-    glTexCoord2f(0.0f+slidesheetx, 1.0f); glVertex2i(-wid,-wid);
-    glTexCoord2f(0.0f+slidesheetx, 0.01f); glVertex2i(-wid, wid);
+    glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
+    glTexCoord2f(0.0f, 0.01f); glVertex2i(-wid, wid);
 
-    glTexCoord2f(0.111111111f+slidesheetx, 0.0f); glVertex2i( wid,wid);
-    glTexCoord2f(0.111111111f+slidesheetx, 1.0f); glVertex2i( wid,-wid);
+    glTexCoord2f(1.0, 0.0f); glVertex2i( wid,wid);
+    glTexCoord2f(1.0, 1.0f); glVertex2i( wid,-wid);
 
     glEnd();
     glPopMatrix();
 
     return slide;
 
+}
+
+int smoking(int smokecount, double smokesheetx, float wid, int smoke, Bigfoot &bigfoot, GLuint smokeTexture)
+{
+
+    if(smoke < 32 && smoke > 0)
+    {
+        //bigfoot.pos[1];
+        smoke++;
+    }
+    else
+    {
+        smoke = 0;
+        smokesheetx = 0;
+    }
+
+    smokecount++;
+    smokesheetx++;
+
+    if(smokecount == 3)
+    {
+        smokesheetx += 1;
+        smokecount = 0;
+    }
+
+
+    glPushMatrix();
+    glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
+    glBindTexture(GL_TEXTURE_2D, smokeTexture);
+    glBegin(GL_QUADS);
+
+    glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
+    glTexCoord2f(0.0f, 0.01f); glVertex2i(-wid, wid);
+
+    glTexCoord2f(0.1+smokesheetx, 0.0f); glVertex2i( wid,wid);
+    glTexCoord2f(0.1+smokesheetx, 1.0f); glVertex2i( wid,-wid);
+
+    glEnd();
+    glPopMatrix();
+
+    return smoke;
+
+}
+
+
+//Derived from Lab
+unsigned char *buildAlphaData2(Ppmimage *img)
+{
+    int i;
+    int a, b, c;
+    unsigned char *newdata, *ptr;
+    unsigned char *data = (unsigned char *)img->data;
+    newdata = (unsigned char *)malloc(img->width * img->height * 4);
+    ptr = newdata;
+    for (i = 0; i<img->width * img->height * 3; i+=3)
+    {
+        a = *(data+0);
+        b = *(data+1);
+        c = *(data+1);
+        //
+        *(ptr+0) = a;
+        *(ptr+1) = b;
+        *(ptr+2) = c;
+        *(ptr+3) = (a|b|c);
+        //
+        ptr += 4;
+        data += 3;
+    }
+    return newdata;
+}
+
+//Derived from Lab
+void initiateSlideTexture(GLuint *slideTexture, Ppmimage *slideImage)
+{
+    int slide_w = slideImage->width;
+    int slide_h = slideImage->height;
+
+    glBindTexture(GL_TEXTURE_2D, *slideTexture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, slide_w, slide_h, 0,
+            GL_RGB, GL_UNSIGNED_BYTE, slideImage->data);
+
+    glBindTexture(GL_TEXTURE_2D, *slideTexture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    unsigned char *slideData = buildAlphaData2(slideImage);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, slide_w, slide_h, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, slideData);
+}
+    
+void initiateSmokeTexture(GLuint *smokeTexture, Ppmimage *smokeImage)
+{
+    int smoke_w = smokeImage->width;
+    int smoke_h = smokeImage->height;
+
+    glBindTexture(GL_TEXTURE_2D, *smokeTexture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, smoke_w, smoke_h, 0,
+            GL_RGB, GL_UNSIGNED_BYTE, smokeImage->data);
+
+    glBindTexture(GL_TEXTURE_2D, *smokeTexture);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+
+    unsigned char *smokeData = buildAlphaData2(smokeImage);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, smoke_w, smoke_h, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, smokeData);
 }
