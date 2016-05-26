@@ -8,6 +8,7 @@ extern "C" {
 #include "fonts.h"
 }
 
+string convertImage(string filename, string path, string filetype);
 
 //This code gets called when the sprite jumps. 
 //It updates the y axis of the sprite to make it look like it is jumping.
@@ -241,6 +242,30 @@ void assignbackgroundTexture(GLuint *Texture, Ppmimage *Image)
     unsigned char *farbackgroundData = buildAlphaData(Image);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tmp_w, tmp_h, 0,
 	GL_RGBA, GL_UNSIGNED_BYTE, farbackgroundData);
+
+}
+
+void functioncall()
+{
+    string path = "./images/runner/";
+    string filetype = ".png";
+    convertImage("runner_sheet2", path, filetype);
+    convertImage("jump_sheet", path, filetype);
+    convertImage("spear", path, filetype);
+    convertImage("saucer", path, filetype);
+    convertImage("monster", path, filetype);
+    convertImage("runner_sheet2", path, filetype);
+    convertImage("runnerdeath_sheet", path, filetype);
+
+    path = "./images/";
+    convertImage("speedboost", path, filetype);
+    convertImage("slide_sheet", path, filetype);
+    convertImage("farbackground", path, filetype);
+    convertImage("background1", path, filetype);
+    convertImage("grass", path, filetype);
+    convertImage("ground", path, filetype);
+    convertImage("sky", path, filetype);
+    convertImage("game_over", path, filetype);
 
 }
 

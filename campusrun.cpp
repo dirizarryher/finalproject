@@ -249,6 +249,7 @@ void assignboostTexture(GLuint *Texture, Ppmimage *Image);
 void assignbackgroundTexture(GLuint *Texture, Ppmimage *Image);
 string convertImage(string filename, string path, string filetype);
 void deletePPM();
+void functioncall();
 
 int main(void)
 {
@@ -441,6 +442,7 @@ void initOpengl(void)
     //
     //load the images file into a ppm structure.
     //
+   /* 
     string path = "./images/runner/";
     string filetype = ".png";
     convertImage("runner_sheet2", path, filetype);
@@ -460,8 +462,10 @@ void initOpengl(void)
     convertImage("ground", path, filetype);
     convertImage("sky", path, filetype);
     convertImage("game_over", path, filetype);
+    */
 
-    
+    functioncall();
+
     jumpImage          = ppm6GetImage("./images/runner/jump_sheet.ppm");
     runningImage       = ppm6GetImage("./images/runner/runner_sheet2.ppm");
     deathImage         = ppm6GetImage("./images/runner/runnerdeath_sheet.ppm");
