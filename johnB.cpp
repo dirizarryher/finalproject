@@ -78,11 +78,11 @@ int sliding(int slidecount, double slidesheetx, float wid, int slide, Bigfoot &b
     glBindTexture(GL_TEXTURE_2D, slideTexture);
     glBegin(GL_QUADS);
 
-    glTexCoord2f(0.0f+slidesheetx, 1.0f); glVertex2i(-wid,-wid);
-    glTexCoord2f(0.0f+slidesheetx, 0.01f); glVertex2i(-wid, wid);
+    glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
+    glTexCoord2f(0.0f, 0.01f); glVertex2i(-wid, wid);
 
-    glTexCoord2f(0.111111111f+slidesheetx, 0.0f); glVertex2i( wid,wid);
-    glTexCoord2f(0.111111111f+slidesheetx, 1.0f); glVertex2i( wid,-wid);
+    glTexCoord2f(1.0, 0.0f); glVertex2i( wid,wid);
+    glTexCoord2f(1.0, 1.0f); glVertex2i( wid,-wid);
 
     glEnd();
     glPopMatrix();
@@ -91,7 +91,7 @@ int sliding(int slidecount, double slidesheetx, float wid, int slide, Bigfoot &b
 
 }
 
-//Derived from Gordon's Rainforest
+//Derived from Rainforest
 unsigned char *buildAlphaData2(Ppmimage *img)
 {
     int i;
@@ -115,7 +115,7 @@ unsigned char *buildAlphaData2(Ppmimage *img)
     return newdata;
 }
 
-//Derived from Gordon's Rainforest
+//Derived from Rainforest
 void initiateSlideTexture(GLuint *slideTexture, Ppmimage *slideImage)
 {
     int slide_w = slideImage->width;
