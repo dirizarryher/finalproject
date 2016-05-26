@@ -50,7 +50,7 @@ int stuff_counter = 0, booster = 300;
 int set = 0, direction = -1, counter = 0, jumpcount = 0, slidecount = 0, smokecount = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
     sprite_x = 140, sprite_y = 75, boostMovement = 8, spearMovement = 18, 
-    saucerMovement = 3, monsterMovement = 5;
+    saucerMovement = 3, monsterMovement = 9, batMovement = 8;
 float x = 600, y = 75, z = 1;
 double xdiff = 1, ydiff = 1;
 int standardy = 75;
@@ -60,7 +60,8 @@ int standardy = 75;
 typedef double Flt;
 typedef double Vec[3];
 typedef Flt	Matrix[4][4];
-double backgroundx = -.0006, spritesheetx=0, deathsheetx=0, monstersheetx=0; 
+double backgroundx = -.0006, spritesheetx=0, deathsheetx=0, 
+       monstersheetx=0, batsheetx = 0; 
 double jumpsheetx = 0, slidesheetx = 0;
 
 double skyx = -.00005;
@@ -125,7 +126,7 @@ Bigfoot bigfoot;
 
 Ppmimage *runningImage, *deathImage, *jumpImage, *boostImage, *slideImage, *smokeImage;
 Ppmimage *grassImage, *groundImage, *skyImage, *farbackgroundImage, 
-         *backgroundImage;
+         *backgroundImage, *batImage;
 Ppmimage *forestImage=NULL, *gameoverImage, *spearImage, *saucerImage, 
          *monsterImage;
 GLuint runningTexture, deathTexture, jumpTexture, speedTexture, slideTexture, 
@@ -136,7 +137,8 @@ GLuint grassTexture, groundTexture, skyTexture, farbackgroundTexture,
        backgroundTexture;
 GLuint forestTexture, gameoversilhouetteTexture, spearTexture, 
        spearsilhouetteTexture, saucerTexture, sucersilhouetteTexture, 
-       monsterTexture, monstersilhouetterTexture;
+       monsterTexture, monstersilhouetterTexture, 
+       batTexture, batsilhouetteTexture;
 char cScore[400];
 int name = 0;
 int score = 0;
@@ -475,8 +477,8 @@ void initOpengl(void)
     spearImage         = ppm6GetImage("./images/runner/spear.ppm");
     saucerImage        = ppm6GetImage("./images/runner/saucer.ppm");
     monsterImage       = ppm6GetImage("./images/runner/monster.ppm");
-    
     boostImage         = ppm6GetImage("./images/speedboost.ppm");
+    batImage           = ppm6GetImage("./images/runner/bat.ppm");
     slideImage         = ppm6GetImage("./images/slide_sheet.ppm");
     smokeImage         = ppm6GetImage("./images/Smoke.ppm");
 
@@ -492,6 +494,7 @@ void initOpengl(void)
     // glGenTextures(1, &bigfootTexture);
     //glGenTextures(1, &jumpTexture);
     glGenTextures(1, &runningTexture);
+    glGenTextures(1, &batTexture);
     glGenTextures(1, &monsterTexture);
     glGenTextures(1, &saucerTexture);
     glGenTextures(1, &jumpTexture);
@@ -508,6 +511,31 @@ void initOpengl(void)
     glGenTextures(1, &grassTexture);
     glGenTextures(1, &slideTexture);
 
+    //-------------------------------------------------------------------------
+    //bat
+    //
+    int bat_w = batImage->width;
+    int bat_h = batImage->height;
+    //
+    glBindTexture(GL_TEXTURE_2D, batTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, bat_w, bat_h, 0,
+            GL_RGB, GL_UNSIGNED_BYTE, batImage->data);
+    //-------------------------------------------------------------------------
+    //bat silhouette
+    //this is similar to a sprite graphic
+    //
+    glBindTexture(GL_TEXTURE_2D, batTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *BatsilhouetteData = buildAlphaData(batImage);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, bat_w, bat_h, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, BatsilhouetteData);
     //-------------------------------------------------------------------------
     //monster
     //
@@ -1298,7 +1326,6 @@ void render(Game *game)
         //
     }
     spritesheetx += .11111111111;
-
     if (obstacle == -1)
         obstacle = randomObstacle();
     if (obstacle) {
@@ -1322,6 +1349,12 @@ void render(Game *game)
                 x = obstacleEffect(monsterMovement, x, y, z, monsterTexture, 
                         dead, image_counter, obstacle, sprite_x, 
                         sprite_y, booster, xdiff, monstersheetx);
+                break;
+            case 5:
+                x = obstacleEffect(batMovement, x, y, z, batTexture, 
+                        dead, image_counter, obstacle, sprite_x, 
+                        sprite_y, booster, xdiff, batsheetx);
+		batsheetx += 0.08349;
                 break;
             default: 
                 obstacle = -1;
