@@ -15,12 +15,9 @@
 //
 //
 //
-#ifndef HEADER_H
-#define HEADER_H
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <string>
 #include <unistd.h>
 #include <time.h>
 #include <math.h>
@@ -35,7 +32,6 @@
 extern "C" {
 #include "fonts.h"
 }
-using namespace std;
 
 #define WINDOW_WIDTH  2000
 #define WINDOW_HEIGHT 1000
@@ -108,14 +104,10 @@ typedef struct t_bigfoot {
 } Bigfoot;
 Bigfoot bigfoot;
 
-Ppmimage *runningImage = NULL;
-Ppmimage *deathImage = NULL;
-Ppmimage *jumpImage = NULL;
-Ppmimage *forestImage = NULL;
-Ppmimage *boostImage = NULL;
+Ppmimage *runningImage, *deathImage, *jumpImage;
+Ppmimage *forestImage=NULL;
 GLuint bigfootTexture, bigfootTexture2, bigfootTexture3;
-GLuint runningTexture, speedTexture, silhouetteTexture, JumpsilhouetteTexture, 
-       DeathsilhouetteTexture, jumpTexture, deathTexture;
+GLuint silhouetteTexture, DeathsilhouetteTexture, jumpTexture;
 GLuint forestTexture;
 int showRunner=1;
 int runnerSpeed = 80000;
@@ -200,5 +192,3 @@ void physics(void);
 void render(Game *game);
 int check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
-
-#endif

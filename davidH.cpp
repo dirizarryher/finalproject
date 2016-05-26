@@ -20,21 +20,23 @@ using namespace std;
 #define NUM_SOURCES 20
 ALfloat listenerPos[3] = {0.0f, 0.0f, 0.0f};
 ALfloat listenerVel[3] = {0.0f, 0.0f, 0.0f};
-float listenerOri[6] = {0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f};
+float listenerOri[6] = {0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f};
 ALfloat sourcePos[3] = {0.0f, 0.0f, 0.0f};
 ALfloat sourceVel[3] = {0.0f, 0.0f, 0.0f};
-ALfloat sourceOri[6] = {0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f};
-ALuint alSource[18];
-ALuint alBuffer[18];
+ALfloat sourceOri[6] = {0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f};
+ALuint alSource[NUM_BUFFERS];
+ALuint alBuffer[NUM_SOURCES];
 ALboolean volumeFlag;
 ALenum error;
-string get_ALerror(int errID);
+string get_ALerror(ALenum errID);
 void init_sounds(void);
 void play_music(void);
 void play_sound(void);
 void clean_sounds(void);
+extern bool play;
 
-string get_ALerror(int errID)
+
+string get_ALerror(ALenum errID)
 {
 	if (errID == AL_NO_ERROR) {
 		return "";
@@ -63,13 +65,12 @@ void init_sounds(void)
 	alutInit(0, NULL);
 
 	if ((error = alGetError()) != AL_NO_ERROR) {
-		get_ALerror(error);
+		printf("%s\n", get_ALerror(error).c_str());
 		fprintf(stderr, "ALUT Error: %s\n", alutGetErrorString(alutGetError()));
 		return;
 	}
 	//Clear error state
 	alGetError();
-
 
 	//Setup the initial positions for the listener position,
 	//velocity, and orientation
@@ -117,11 +118,9 @@ void init_sounds(void)
 	//Homage to DOOM
 	alBuffer[17] = alutCreateBufferFromFile("sounds/OutOfGum.wav\0");
 
-
-	//Sources[] refer to the sound
 	//Generate a source and store it into their respective buffers
 	//alGenSources(NUM_SOURCES, alSource);
-	for (int i = 0; i < 18; i++) {
+	for (int i = 0; i < NUM_SOURCES; i++) {
 		alGenSources(1, &alSource[i]);
 		alSourcei(alSource[i], AL_BUFFER, alBuffer[i]);
 
@@ -131,61 +130,88 @@ void init_sounds(void)
 		alSourcefv(alSource[i], AL_POSITION, sourcePos);
 		alSourcefv(alSource[i], AL_VELOCITY, sourceVel);
 		//Set a looping sound for Main Menu music
-//if (i == 0) {
-	//		alSourcei(alSource[0], AL_LOOPING, AL_TRUE);
+		//if (i == 0) {
+			//alSourcei(alSource[0], AL_LOOPING, AL_TRUE);
 		//}
-		//else
 		alSourcei(alSource[i], AL_LOOPING, AL_FALSE);
+		
 		printf("Loading source[%d]\n", i);
 	}
 
 	if ((error = alGetError()) != AL_NO_ERROR) {
-		get_ALerror(error);
+		printf("%s\n", get_ALerror(error).c_str());
+		fprintf(stderr, "ALUT Error: %s\n", alutGetErrorString(alutGetError()));
 		return;
 	} else {
 		printf("Loading soundboard\n");
 	}
+	alGetError();
+
 	if ((error = alGetError()) != AL_NO_ERROR) {
 		printf("Error: Setting Source\n");
-		get_ALerror(error);
+		printf("%s\n", get_ALerror(error).c_str());
+		fprintf(stderr, "ALUT Error: %s\n", alutGetErrorString(alutGetError()));
 		return;
 	} else {
 		printf("Sources have been set\n");
 	}
 	alGetError();
-
-	
-	//Now we play the sound using:
-	//alSourcePlay(source[0]);
-	//Stopping sound:
-	//alSourceStop(souce[0]);
-	//Resetting sound to the start of the sample
-	//alSourceRewind(souce[0]);
-	//Pausing sound:
-	//alSourcePause(souce[0]);
-
 }
 
 void play_music(void)
 {
-    alSourcePlay(alSource[0]);
-    printf("Playing sound %i", alSource[0]);
+	alSourcePlay(alSource[0]);
+	//printf("Playing sound %i", alSource[0]);
+	play = 0;
 }
 
-void play_sound(void) 
+void play_jumpsound(void) 
 {
-	alSourcePlay(alSource[0]);
-	printf("Playing sound %i", alSource[0]);
+	alSourcePlay(alSource[6]);
+	//printf("Playing sound %i", alSource[0]);
+	play = 0;	
 }
+
+void play_slide(void) 
+{
+	alSourcePlay(alSource[3]);
+	play = 0;
+}
+
+void play_dead(void) 
+{
+	alSourcePlay(alSource[5]);
+	alSourcePlay(alSource[4]);
+	play = 0;
+}
+
+/* void alSpeedOfSound (
+ * 	ALfloat value
+ * );
+ * value = the speed of sound value to set
+ * The default spped of sound value is 343.3
+ *
+ * void alDopplerFactor (
+ * 	ALfloat value
+ * 	);
+ * value = the Dopller scale value to set
+ * The default Doppler factor value is 1.0
+ */
 
 void clean_sounds(void) 
 {
 	//Sound sound;
 	//Delete the soundboard source and buffer
-	for (int i = 0; i < 18; i++) {
-		alDeleteSources(NUM_SOURCES, &alSource[i]);
-		alDeleteBuffers(NUM_BUFFERS, &alBuffer[i]);
-		printf("Deleting source[%d]\n", i);
+	for (int i = 0; i < NUM_SOURCES; i++) {
+		alDeleteSources(1, &alSource[i]);
+		alDeleteBuffers(1, &alBuffer[i]);
+		//fprintf("Deleting source[%d]\n", i);
+		if ((error = alGetError()) != AL_NO_ERROR) {
+		    //printf("Error: Deleting Sounds\n");
+		    printf("%s\n", get_ALerror(error).c_str());
+		    fprintf(stderr, "ALUT Error: %s\n", alutGetErrorString(alutGetError()));
+		    return;
+		}
 	}
 
 	//Close out OPAL itself
@@ -201,7 +227,6 @@ void clean_sounds(void)
 	alcCloseDevice(Device);
 }
 
-/*
 //Converts an image with any file extension imported into 
 //images/runner/ directory into a ppm image
 string convertImage(string filename, string path, string filetype)
@@ -209,13 +234,12 @@ string convertImage(string filename, string path, string filetype)
 string oldfile = path + filename + filetype;
 string newfile = path + filename + ".ppm";
 
-//convert ./images/runner/runner_sheet2.ppm 
-//./images/runner/runner_sheet2.png
+//converting sprite.png to sprite.ppm
 string newstuff =  "convert " + oldfile + " " + newfile;
 filename = system(newstuff.data());
 return filename;
 }
-*/
+
 //Game Over Menu if runner dies
 /*void endMenu(Game *g)
   {
