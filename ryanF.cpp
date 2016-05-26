@@ -244,3 +244,9 @@ void assignbackgroundTexture(GLuint *Texture, Ppmimage *Image)
 
 }
 
+void deletePPM()
+{
+    system("rm -f ./images/runner/*.ppm");
+    //system("rm -f ./images/*.ppm");
+}
+

@@ -247,6 +247,7 @@ void assignJumpTexture(GLuint *jumpTexture, Ppmimage *jumpImage);
 unsigned char *buildAlphaData(Ppmimage *img);
 void assignboostTexture(GLuint *Texture, Ppmimage *Image);
 void assignbackgroundTexture(GLuint *Texture, Ppmimage *Image);
+string convertImage(string filename, string path, string filetype);
 
 int main(void)
 {
@@ -438,16 +439,35 @@ void initOpengl(void)
     //
     //load the images file into a ppm structure.
     //
+    string path = "./images/runner/";
+    string filetype = ".png";
+    convertImage("runner_sheet2", path, filetype);
+    convertImage("jump_sheet", path, filetype);
+    convertImage("spear", path, filetype);
+    convertImage("saucer", path, filetype);
+    convertImage("monster", path, filetype);
+    convertImage("runner_sheet2", path, filetype);
+    
+    path = "./images/";
+    convertImage("speedboost", path, filetype);
+    convertImage("slide_sheet", path, filetype);
+    convertImage("farbackground", path, filetype);
+    convertImage("background1", path, filetype);
+    convertImage("grass", path, filetype);
+    convertImage("ground", path, filetype);
+    convertImage("sky", path, filetype);
+    convertImage("game_over", path, filetype);
+
+    
     jumpImage          = ppm6GetImage("./images/runner/jump_sheet.ppm");
     runningImage       = ppm6GetImage("./images/runner/runner_sheet2.ppm");
     deathImage         = ppm6GetImage("./images/runner/runnerdeath_sheet.ppm");
-    forestImage        = ppm6GetImage("./images/gamebackground.ppm");
-    boostImage         = ppm6GetImage("./images/speedboost.ppm");
     spearImage         = ppm6GetImage("./images/runner/spear.ppm");
     saucerImage        = ppm6GetImage("./images/runner/saucer.ppm");
     monsterImage       = ppm6GetImage("./images/runner/monster.ppm");
+    
+    boostImage         = ppm6GetImage("./images/speedboost.ppm");
     slideImage         = ppm6GetImage("./images/slide_sheet.ppm");
-
     farbackgroundImage = ppm6GetImage("./images/farbackground.ppm");
     backgroundImage    = ppm6GetImage("./images/background1.ppm");
     grassImage         = ppm6GetImage("./images/grass.ppm");
