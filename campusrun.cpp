@@ -45,9 +45,9 @@ using namespace std;
 #define MAX_PARTICLES 5000
 #define GRAVITY 0.1
 
-int jump = 0, slide = 0, obstacle = -1;
+int jump = 0, slide = 0, obstacle = -1, smoke = 0;
 int stuff_counter = 0, booster = 300;
-int set = 0, direction = -1, counter = 0, jumpcount = 0, slidecount = 0;
+int set = 0, direction = -1, counter = 0, jumpcount = 0, slidecount = 0, smokecount = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
     sprite_x = 140, sprite_y = 75, boostMovement = 8, spearMovement = 18;
 float x = 600, y = 75, z = 1;
@@ -57,7 +57,7 @@ typedef double Flt;
 typedef double Vec[3];
 typedef Flt	Matrix[4][4];
 double backgroundx = -.0006, spritesheetx = 0, deathsheetx = 0; 
-double jumpsheetx = 0, slidesheetx = 0;
+double jumpsheetx = 0, slidesheetx = 0, smokesheetx = 0;
 
 double skyx = -.00005;
 double farbackgroundx = -.0001;
@@ -117,11 +117,11 @@ typedef struct t_bigfoot {
 } Bigfoot;
 Bigfoot bigfoot;
 
-Ppmimage *runningImage, *deathImage, *jumpImage, *boostImage, *slideImage;
+Ppmimage *runningImage, *deathImage, *jumpImage, *boostImage, *slideImage, *smokeImage;
 Ppmimage *grassImage, *groundImage, *skyImage, *farbackgroundImage, *backgroundImage;
 Ppmimage *forestImage=NULL, *gameoverImage, *spearImage;
-GLuint runningTexture, deathTexture, jumpTexture, speedTexture, slideTexture, gameoverTexture;
-GLuint silhouetteTexture, DeathsilhouetteTexture, JumpsilhouetteTexture, slidesilhouetteTexture;
+GLuint runningTexture, deathTexture, jumpTexture, speedTexture, slideTexture, gameoverTexture, smokeTexture;
+GLuint silhouetteTexture, DeathsilhouetteTexture, JumpsilhouetteTexture, slidesilhouetteTexture, smokesilhouette;
 GLuint grassTexture, groundTexture, skyTexture, farbackgroundTexture, backgroundTexture;
 GLuint forestTexture, gameoversilhouetteTexture, spearTexture, spearsilhouetteTexture;
 char cScore[400];
@@ -209,6 +209,8 @@ int Jumping (double spritesheetx, float wid, int jump, int *sprite_y,
 	GLuint jumpTexture, int stuff);
 int sliding (int slidecount, double spritesheetx, float wid, int slide, 
 	Bigfoot &bigfoot, GLuint slideTexture);
+int smoking (int smokecount, double spritesheetx, float wid, int smoke,
+        Bigfoot &bigfoot, GLuint smokeTexture);
 void runnerDeath (Bigfoot &b, double s);
 void initXWindows(void);
 void initOpengl(void);
@@ -237,6 +239,7 @@ unsigned char *buildAlphaData(Ppmimage *img);
 void assignboostTexture(GLuint *Texture, Ppmimage *Image);
 void assignbackgroundTexture(GLuint *Texture, Ppmimage *Image);
 void initiateSlideTexture(GLuint *slideTexture, Ppmimage *slideImage);
+void initiateSmokeTexture(GLuint *smokeTexture, Ppmimage *smokeImage);
 
 int main(void)
 {
@@ -452,6 +455,7 @@ void initOpengl(void)
     boostImage         = ppm6GetImage("./images/speedboost.ppm");
     spearImage         = ppm6GetImage("./images/runner/spear.ppm");
     slideImage         = ppm6GetImage("./images/slide_sheet.ppm");
+    smokeImage         = ppm6GetImage("./images/Smoke.ppm");
 
     farbackgroundImage = ppm6GetImage("./images/farbackground.ppm");
     backgroundImage    = ppm6GetImage("./images/background.ppm");
@@ -517,6 +521,7 @@ void initOpengl(void)
     //slide
     //
     initiateSlideTexture(&slideTexture, slideImage);
+    initiateSmokeTexture(&smokeTexture, smokeImage);
     //-------------------------------------------------------------------------
     //running
     //
@@ -773,6 +778,8 @@ void checkKeys(XEvent *e)
 	case XK_Down:
 	    if(slide == 0)
 		slide = 1;
+        if(smoke == 0)
+            smoke = 1;
 	    break;
 	case XK_equal:
 	    if (++ndrops > 40)
