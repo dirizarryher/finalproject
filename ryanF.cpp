@@ -256,6 +256,7 @@ void functioncall()
     convertImage("monster", path, filetype);
     convertImage("runner_sheet2", path, filetype);
     convertImage("runnerdeath_sheet", path, filetype);
+    convertImage("bat", path, filetype);
 
     path = "./images/";
     convertImage("speedboost", path, filetype);
