@@ -28,12 +28,11 @@ ALuint alSource[NUM_BUFFERS];
 ALuint alBuffer[NUM_SOURCES];
 ALboolean volumeFlag;
 ALenum error;
-string get_ALerror(ALenum errID);
-void init_sounds(void);
-void play_music(void);
-void play_sound(void);
-void clean_sounds(void);
 extern bool play;
+extern bool king;
+extern int jump;
+extern int slide;
+extern int dead;
 
 
 string get_ALerror(ALenum errID)
@@ -58,7 +57,6 @@ string get_ALerror(ALenum errID)
 	}
 	return "Error undefined";
 }
-
 
 void init_sounds(void)
 {
@@ -94,7 +92,6 @@ void init_sounds(void)
 	alBuffer[5] = alutCreateBufferFromFile("sounds/runner5.wav\0");
 	//Runner Jumping
 	alBuffer[6] = alutCreateBufferFromFile("sounds/runner6.wav\0");
-
 	//Variations of spears thrown
 	alBuffer[7] = alutCreateBufferFromFile("sounds/spear1.wav\0");
 	alBuffer[8] = alutCreateBufferFromFile("sounds/spear2.wav\0");
@@ -105,39 +102,39 @@ void init_sounds(void)
 	alBuffer[11] = alutCreateBufferFromFile("sounds/spearLTR.wav\0");
 	//Spear thrown from Right to Left
 	alBuffer[12] = alutCreateBufferFromFile("sounds/spearRTL.wav\0");
-
 	//Enter button
 	alBuffer[13] = alutCreateBufferFromFile("sounds/button1.wav\0");
 	//Back button
 	alBuffer[14] = alutCreateBufferFromFile("sounds/button2.wav\0");
-
 	//Game Over Sound
 	alBuffer[15] = alutCreateBufferFromFile("sounds/endOfGame.wav\0");
 	//Hail to the King Baby!
-	alBuffer[16] = alutCreateBufferFromFile("./sounds/HailToTheKing.wav\0");
+	alBuffer[16] = alutCreateBufferFromFile("sounds/Hail.wav\0");
 	//Homage to DOOM
-	alBuffer[17] = alutCreateBufferFromFile("sounds/OutOfGum.wav\0");
-
+	alBuffer[17] = alutCreateBufferFromFile("sounds/Gum.wav\0");
+	
 	//Generate a source and store it into their respective buffers
 	//alGenSources(NUM_SOURCES, alSource);
 	for (int i = 0; i < NUM_SOURCES; i++) {
 		alGenSources(1, &alSource[i]);
 		alSourcei(alSource[i], AL_BUFFER, alBuffer[i]);
-
+		
 		//Set properties for each sound
 		alSourcef(alSource[i], AL_GAIN, 1.0f);
 		alSourcef(alSource[i], AL_PITCH, 1.0f);
 		alSourcefv(alSource[i], AL_POSITION, sourcePos);
 		alSourcefv(alSource[i], AL_VELOCITY, sourceVel);
-		//Set a looping sound for Main Menu music
-		//if (i == 0) {
-			//alSourcei(alSource[0], AL_LOOPING, AL_TRUE);
-		//}
 		alSourcei(alSource[i], AL_LOOPING, AL_FALSE);
+		if ((error = alGetError()) != AL_NO_ERROR) {
+			printf("%s\n", get_ALerror(error).c_str());
+			fprintf(stderr, "ALUT Error: %s\n", alutGetErrorString(alutGetError()));
+			return;
+		} else {
+			//printf("Loading source[%d]\n", i);
+		}
+		alGetError();
+	};
 		
-		printf("Loading source[%d]\n", i);
-	}
-
 	if ((error = alGetError()) != AL_NO_ERROR) {
 		printf("%s\n", get_ALerror(error).c_str());
 		fprintf(stderr, "ALUT Error: %s\n", alutGetErrorString(alutGetError()));
@@ -156,42 +153,97 @@ void init_sounds(void)
 		printf("Sources have been set\n");
 	}
 	alGetError();
+	
+		//Running attributes
+		alSourcef(alSource[1], AL_GAIN, 0.5f);
+		alSourcef(alSource[1], AL_PITCH, 2.0f);
+		alSourcei(alSource[1], AL_LOOPING, AL_FALSE);
+		
+		//Heavy Breathing attributes
+		alSourcef(alSource[2], AL_GAIN, 0.6f);
+		alSourcef(alSource[2], AL_PITCH, 0.7f);
+		alSourcei(alSource[2], AL_LOOPING, AL_FALSE);
+		
+		//Dead runner attributes
+		alSourcef(alSource[4], AL_GAIN, 0.9f);
+		alSourcef(alSource[4], AL_PITCH, 1.5f);
+		
+		//Pain sound attributes
+		alSourcef(alSource[5], AL_GAIN, 0.2f);
+		alSourcef(alSource[5], AL_PITCH, 1.3f);
+		
+		//Jump sound attributes
+		alSourcef(alSource[6], AL_GAIN, 0.9f);
+		alSourcef(alSource[6], AL_PITCH, 1.3f);
+		
+		//endGame attibutes
+		alSourcef(alSource[15], AL_GAIN, 1.5f);
+		alSourcef(alSource[15], AL_PITCH, 1.0f);
+		
+		//HTTK attributes
+		alSourcef(alSource[16], AL_GAIN, 1.0f);
+		alSourcef(alSource[16], AL_PITCH, 1.0f);
+		
+		//OOG attributes
+		alSourcef(alSource[17], AL_GAIN, 1.25f);
+		alSourcef(alSource[17], AL_PITCH, 1.0f);
+		
 }
 
+	//Change 1 (Run), 2(Breathing), 4(Dead), 5(Pain), 6(Jump)
+	//Modify 15(end), 16(king), 17(gum)
+	//Slide 3
+	//Spears 7,8,9, 10(flurry), 11(LTR), 12(RTL)
+	//Buttons 13, 14
+	
 void play_music(void)
 {
 	alSourcePlay(alSource[0]);
 	//printf("Playing sound %i", alSource[0]);
-	play = 0;
+	play = !play;
 }
 
 void play_jumpsound(void) 
 {
+	if (!dead && play){
 	alSourcePlay(alSource[6]);
-	//printf("Playing sound %i", alSource[0]);
-	play = 0;	
+	//printf("Playing sound %i", alSource[6]);
+	play = !play;
+	}
 }
 
 void play_slide(void) 
 {
+	if (!dead && play){
 	alSourcePlay(alSource[3]);
-	play = 0;
+	printf("Playing sound %d\n", alSource[3]);
+	play = !play;
+	}
+	//printf("Playing sound %i", alSource[3]);
 }
 
 void play_dead(void) 
 {
-	alSourcePlay(alSource[5]);
 	alSourcePlay(alSource[4]);
-	play = 0;
+	//printf("Playing sound %i", alSource[4]);
 }
 
-/* void alSpeedOfSound (
- * 	ALfloat value
- * );
- * value = the speed of sound value to set
- * The default spped of sound value is 343.3
- *
- * void alDopplerFactor (
+void play_end(void)
+{
+	alSourcePlay(alSource[15]);
+	//printf("Playing sound %i", alSource[15]);
+}
+
+void play_king(void)
+{
+	if ((!dead && king)){
+	alSourcePlay(alSource[15]);
+	printf("Playing sound %d\n", alSource[16]);
+	king = !king;
+	}
+}
+
+ /* void alDopplerFactor (
  * 	ALfloat value
  * 	);
  * value = the Dopller scale value to set
@@ -213,7 +265,7 @@ void clean_sounds(void)
 		    return;
 		}
 	}
-
+	
 	//Close out OPAL itself
 	//Get active context
 	ALCcontext *Context = alcGetCurrentContext();

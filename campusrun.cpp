@@ -45,7 +45,7 @@ using namespace std;
 #define MAX_PARTICLES 5000
 #define GRAVITY 0.1
 
-bool play;
+bool play, king;
 
 int jump = 0, slide = 0, obstacle = -1;
 int stuff_counter = 0, booster = 300;
@@ -257,6 +257,8 @@ void play_music(void);
 void play_jumpsound(void);
 void play_slide(void);
 void play_dead(void);
+void play_end(void);
+void play_king(void);
 //void endMenu(Game *g);
 
 int main(void)
@@ -839,7 +841,9 @@ void checkKeys(XEvent *e)
             umbrella.shape ^= 1;
             break;
         case XK_z:
-            name ^= 1;
+            if (king == 0) {
+				king = 1;
+			}
             break;
         case XK_r:
             showRain ^= 1;
@@ -855,10 +859,13 @@ void checkKeys(XEvent *e)
             umbrella.pos[0] += 10.0;
             break;
         case XK_Down:
-            if (slide == 0) {
-		slide = 1;
-		play = 1;
-	    }
+			//Ensure that slide sound is played only once
+            if (slide == 0 && !jump) {
+				slide = 1;
+				if (slide == 1 && !play){
+					play = 1;
+				}
+			}
             break;
         case XK_equal:
             if (++ndrops > 40)
@@ -883,10 +890,13 @@ void checkKeys(XEvent *e)
             umbrella.radius = (float)umbrella.width2;
             break;
         case XK_Up:
-	    if(jump == 0) {
-                jump = 1;
-		play = 1;
-	    }
+			//Makes sure no other sound is played when jumping
+			if (jump == 0 && !jump) {
+					jump = 1;
+				if (jump == 1 && !play){
+					play = 1;
+				}
+			}
             break;
         case XK_Escape:
             done=1;
@@ -1235,12 +1245,9 @@ void render(Game *game)
         jump = Jumping(jumpsheetx, (wid), jump, point_y, jumpTexture, 
                 stuff, xdiff);
         jumpcount++;
-	
-	if (play == 1) {
-	    play_jumpsound();
-	    play = 0;
-	}
-
+        //Jump sound
+		play_jumpsound();
+		
         if (jumpcount == 4) {
             jumpsheetx += .1;
             jumpcount = 0;
@@ -1251,33 +1258,29 @@ void render(Game *game)
         sprite_y = standardy*xdiff;
         jumpcount = 0;
         jumpsheetx = 0;
-	play = 0;
+        play = !play;
     }
 
     /////////////////////////////////slide
-    if (slide) {
+    if ((slide || stuff) && !dead) {
         showRunner = 0;
         slide = sliding(slidecount, slidesheetx, wid, slide, bigfoot, 
                 slideTexture);
         slidecount++;
         slidesheetx++;
-	
-	if (play == 1) {
-	    play_slide();
-	    play = 0;
-	}
-
+		
         if (slidecount == 4){
             slidesheetx += 1;
             slidecount = 0;
+            play_slide();
         }
     } else { 
         showRunner = 1;
         slidecount = 0;
         slidesheetx = 0;
-	play = 0;
+		play = 0;
     }
-
+    
     if (dead) {
         glPushMatrix();
         glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
@@ -1290,11 +1293,14 @@ void render(Game *game)
             glColor4ub(255,255,255,255);
         }
         if (deathCounter < 9) {
-	    play = 1;
-	    play_dead();
-	    play = 0;
             runnerDeath(bigfoot, deathsheetx);
-	}
+		}
+		
+		//If runner dies, play death sound
+		if (deathCounter < 2) {
+			play_dead();
+		}
+		
         glEnd();
         glPopMatrix();
         deathCounter++;
@@ -1302,6 +1308,9 @@ void render(Game *game)
     }
 
     if (showRunner && !jump && !dead) {
+		//Hail currently does not work
+		play_king();
+
         glPushMatrix();
         glTranslatef(bigfoot.pos[0], sprite_y, bigfoot.pos[2]);
         if (!silhouette) {
@@ -1326,7 +1335,6 @@ void render(Game *game)
         }
         glEnd();
         glPopMatrix();
-        //
     }
     spritesheetx += .11111111111;
 
