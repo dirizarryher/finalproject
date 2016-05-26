@@ -1,35 +1,38 @@
 // David A. Hernandez II CS335
-#include "davidH.h"
+#include <iostream>
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <math.h>
+#include <string>
+#include <string.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <fcntl.h>
 #include </usr/include/AL/alut.h>
 #include </usr/include/AL/al.h>
-
-ALfloat listenerPos[] = {0.0f, 0.0f, 0.0f};
-ALfloat listenerVel[] = {0.0f, 0.0f, 0.0f};
-ALfloat listenerOri[] = {0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f};
-ALfloat sourcePos[] = {0.0, 0.0, 0.0};
-ALfloat sourceVel[] = {0.0, 0.0, 0.0};
-ALfloat sourceOri[] = {0.0, 0.0, -1.0, 0.0, 1.0, 0.0};
-
-extern Sound sound;
-
-Sound::Sound() 
-{
-	volumeFlag = false;
-	error = 0;
+extern "C" {
+#include "fonts.h"
 }
+using namespace std;
 
-void Sound::get_error(int err) 
-{
-	error = err;
-}
-
-void Sound::get_flag(bool flag)
-{
-	volumeFlag = flag;
-}
+#define NUM_BUFFERS 20
+#define NUM_SOURCES 20
+ALfloat listenerPos[3] = {0.0f, 0.0f, 0.0f};
+ALfloat listenerVel[3] = {0.0f, 0.0f, 0.0f};
+float listenerOri[6] = {0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f};
+ALfloat sourcePos[3] = {0.0f, 0.0f, 0.0f};
+ALfloat sourceVel[3] = {0.0f, 0.0f, 0.0f};
+ALfloat sourceOri[6] = {0.0f, 1.0f, 1.0f, 0.0f, 1.0f, 0.0f};
+ALuint alSource[18];
+ALuint alBuffer[18];
+ALboolean volumeFlag;
+ALenum error;
+string get_ALerror(int errID);
+void init_sounds(void);
+void play_music(void);
+void play_sound(void);
+void clean_sounds(void);
 
 string get_ALerror(int errID)
 {
@@ -54,13 +57,14 @@ string get_ALerror(int errID)
 	return "Error undefined";
 }
 
+
 void init_sounds(void)
 {
 	alutInit(0, NULL);
-	ALuint error = sound.error;
 
 	if ((error = alGetError()) != AL_NO_ERROR) {
 		get_ALerror(error);
+		fprintf(stderr, "ALUT Error: %s\n", alutGetErrorString(alutGetError()));
 		return;
 	}
 	//Clear error state
@@ -69,80 +73,69 @@ void init_sounds(void)
 
 	//Setup the initial positions for the listener position,
 	//velocity, and orientation
-	//
 	alListener3f(AL_POSITION, 0.0f, 0.0f, 0.0f);
 	alListenerfv(AL_ORIENTATION, listenerOri);
 	alListenerfv(AL_VELOCITY, listenerVel);
 	alListenerf(AL_GAIN, 1.0f);
 
-
-	//Create the buffers and check for errors
-	alGenBuffers(NUM_BUFFERS, sound.buffers);
-	if ((sound.error = alGetError()) != AL_NO_ERROR) {
-		get_ALerror(sound.error);
-		return;
-	} else {
-		printf("Loading Buffers\n");
-	}
-	alGetError();
-
 	//buffers[] holds the sound information
 	//This is the main menu music
-	sound.buffers[0] = alutCreateBufferFromFile("sounds/test.wav");
+	alBuffer[0] = alutCreateBufferFromFile("./sounds/test.wav\0");
 	//Running Sound
-	sound.buffers[1] = alutCreateBufferFromFile("sounds/runner1.wav");
+	alBuffer[1] = alutCreateBufferFromFile("sounds/runner1.wav\0");
 	//Heavy Breathing Sound
-	sound.buffers[2] = alutCreateBufferFromFile("sounds/runner2.wav");
+	alBuffer[2] = alutCreateBufferFromFile("sounds/runner2.wav\0");
 	//Sliding Sound
-	sound.buffers[3] = alutCreateBufferFromFile("sounds/runner3.wav");
+	alBuffer[3] = alutCreateBufferFromFile("sounds/runner3.wav\0");
 	//Sound for dead runner (screaming)
-	sound.buffers[4] = alutCreateBufferFromFile("sounds/runner4.wav");
+	alBuffer[4] = alutCreateBufferFromFile("sounds/runner4.wav\0");
 	//Runner in Pain
-	sound.buffers[5] = alutCreateBufferFromFile("sounds/runner5.wav");
+	alBuffer[5] = alutCreateBufferFromFile("sounds/runner5.wav\0");
 	//Runner Jumping
-	sound.buffers[6] = alutCreateBufferFromFile("sounds/runner6.wav");
+	alBuffer[6] = alutCreateBufferFromFile("sounds/runner6.wav\0");
 
 	//Variations of spears thrown
-	sound.buffers[7] = alutCreateBufferFromFile("sounds/spear1.wav");
-	sound.buffers[8] = alutCreateBufferFromFile("sounds/spear2.wav");
-	sound.buffers[9] = alutCreateBufferFromFile("sounds/spear3.wav");
+	alBuffer[7] = alutCreateBufferFromFile("sounds/spear1.wav\0");
+	alBuffer[8] = alutCreateBufferFromFile("sounds/spear2.wav\0");
+	alBuffer[9] = alutCreateBufferFromFile("sounds/spear3.wav\0");
 	//Sound of multiple spears thrown
-	sound.buffers[10] = alutCreateBufferFromFile("sounds/spearFlurry.wav");
+	alBuffer[10] = alutCreateBufferFromFile("sounds/spearFlurry.wav\0");
 	//Spear thrown from Left to Right
-	sound.buffers[11] = alutCreateBufferFromFile("sounds/spearLTR.wav");
+	alBuffer[11] = alutCreateBufferFromFile("sounds/spearLTR.wav\0");
 	//Spear thrown from Right to Left
-	sound.buffers[12] = alutCreateBufferFromFile("sounds/spearRTL.wav");
+	alBuffer[12] = alutCreateBufferFromFile("sounds/spearRTL.wav\0");
 
 	//Enter button
-	sound.buffers[13] = alutCreateBufferFromFile("sounds/button1.wav");
+	alBuffer[13] = alutCreateBufferFromFile("sounds/button1.wav\0");
 	//Back button
-	sound.buffers[14] = alutCreateBufferFromFile("sounds/button2.wav");
+	alBuffer[14] = alutCreateBufferFromFile("sounds/button2.wav\0");
 
 	//Game Over Sound
-	sound.buffers[15] = alutCreateBufferFromFile("sounds/endOfGame.wav");
+	alBuffer[15] = alutCreateBufferFromFile("sounds/endOfGame.wav\0");
 	//Hail to the King Baby!
-	sound.buffers[16] = alutCreateBufferFromFile("sounds/HailToTheKing.wav");
+	alBuffer[16] = alutCreateBufferFromFile("./sounds/HailToTheKing.wav\0");
 	//Homage to DOOM
-	sound.buffers[17] = alutCreateBufferFromFile("sounds/OutOfGum.wav");
+	alBuffer[17] = alutCreateBufferFromFile("sounds/OutOfGum.wav\0");
 
 
 	//Sources[] refer to the sound
 	//Generate a source and store it into their respective buffers
-	alGenSources(NUM_SOURCES, sound.sources);
+	//alGenSources(NUM_SOURCES, alSource);
 	for (int i = 0; i < 18; i++) {
-		alSourcei(sound.sources[i], AL_BUFFER, sound.buffers[i]);
+		alGenSources(1, &alSource[i]);
+		alSourcei(alSource[i], AL_BUFFER, alBuffer[i]);
 
 		//Set properties for each sound
-		alSourcef(sound.sources[i], AL_GAIN, 1.0f);
-		alSourcef(sound.sources[i], AL_PITCH, 1.0f);
-		alSourcefv(sound.sources[i], AL_POSITION, sourcePos);
-		alSourcefv(sound.sources[i], AL_VELOCITY, sourceVel);
+		alSourcef(alSource[i], AL_GAIN, 1.0f);
+		alSourcef(alSource[i], AL_PITCH, 1.0f);
+		alSourcefv(alSource[i], AL_POSITION, sourcePos);
+		alSourcefv(alSource[i], AL_VELOCITY, sourceVel);
 		//Set a looping sound for Main Menu music
-		if (i == 0) {
-			alSourcei(sound.sources[0], AL_LOOPING, AL_TRUE);
-		}
-		else
-			alSourcei(sound.sources[i], AL_LOOPING, AL_FALSE);
+//if (i == 0) {
+	//		alSourcei(alSource[0], AL_LOOPING, AL_TRUE);
+		//}
+		//else
+		alSourcei(alSource[i], AL_LOOPING, AL_FALSE);
 		printf("Loading source[%d]\n", i);
 	}
 
@@ -161,10 +154,7 @@ void init_sounds(void)
 	}
 	alGetError();
 
-	for (int i = 0; i < 4; i++) {
-		alSourcePlay(sound.sources[0]);
-		usleep(250000);
-	} 
+	
 	//Now we play the sound using:
 	//alSourcePlay(source[0]);
 	//Stopping sound:
@@ -176,17 +166,27 @@ void init_sounds(void)
 
 }
 
-void play_sound(ALuint alSource) 
+void play_music(void)
 {
-	alSourcePlay(alSource);
+    alSourcePlay(alSource[0]);
+    printf("Playing sound %i", alSource[0]);
 }
 
-void clean_music(void) 
+void play_sound(void) 
+{
+	alSourcePlay(alSource[0]);
+	printf("Playing sound %i", alSource[0]);
+}
+
+void clean_sounds(void) 
 {
 	//Sound sound;
 	//Delete the soundboard source and buffer
-	alDeleteSources(NUM_SOURCES, sound.sources);
-	alDeleteBuffers(NUM_BUFFERS, sound.buffers);
+	for (int i = 0; i < 18; i++) {
+		alDeleteSources(NUM_SOURCES, &alSource[i]);
+		alDeleteBuffers(NUM_BUFFERS, &alBuffer[i]);
+		printf("Deleting source[%d]\n", i);
+	}
 
 	//Close out OPAL itself
 	//Get active context

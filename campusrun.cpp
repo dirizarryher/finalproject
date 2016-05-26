@@ -1,20 +1,3 @@
-//cs335
-//
-//program: rainforest
-//author:  Gordon Griesel
-//date:    2013 to present
-//
-//This program demonstrates the use of OpenGL and XWindows
-//
-//Texture maps are displayed.
-//Press B to see bigfoot roaming his forest.
-//
-//The rain builds up like snow on the ground.
-//Fix it by removing each raindrop for the rain linked list.
-//look for the 
-//
-//
-//
 #include "header.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,7 +18,6 @@ extern "C" {
 }
 #include <string>
 #include </usr/include/AL/alut.h>
-//#include "davidH.h"
 using namespace std;
 
 #define WINDOW_WIDTH  2000
@@ -195,7 +177,8 @@ struct Game {
     int lastMousey;
 };
 */
-ALuint alSource;
+//ALuint alSource;
+//ALuint alBuffer;
 
 //function prototypes
 Rect displayName(int move);
@@ -215,8 +198,10 @@ int check_Gamekeys(XEvent *e, Game *game);
 void movement(Game *game);
 void projectImage(float x, float y, float z, GLuint texture);
 void init_sounds(void);
-void play_music(ALuint);
-void clean_music(ALuint &, ALuint);
+void play_sound(void);
+void play_music(void);
+void clean_sounds(void);
+//void endMenu(Game *g);
 
 int main(void)
 {
@@ -245,6 +230,7 @@ int main(void)
     logOpen();
     initXWindows();
     initOpengl();
+    init_sounds();
     init();
     clock_gettime(CLOCK_REALTIME, &timePause);
     clock_gettime(CLOCK_REALTIME, &timeStart);
@@ -289,7 +275,9 @@ int main(void)
     }
     cleanupXWindows();
     cleanup_fonts();
-    logClose();
+    clean_sounds();
+	
+	logClose();
     return 0;
 }
 
@@ -422,10 +410,6 @@ void initOpengl(void)
     //Do this to allow fonts
     glEnable(GL_TEXTURE_2D);
     initialize_fonts();
-    
-    //Initialize sound for the game
-    init_sounds();
-    
     
     
     //load the images file into a ppm structure.
@@ -579,22 +563,6 @@ void checkResize(XEvent *e)
     }
 }
 
-void initSounds(void)
-{
-    //You may add sound here for some extra credit.
-    //Fmod is not allowed.
-    //OpenAL sound only.
-    //Look for the openalTest folder under code.
-
-
-
-
-
-
-
-
-}
-
 void init() {
     umbrella.pos[0] = 220.0;
     umbrella.pos[1] = (double)(yres-200);
@@ -607,7 +575,7 @@ void init() {
     MakeVector(6.0,0.0,0.0, bigfoot.vel);
 
     //Play in-game music
-    play_music(alSource);
+    play_music();
 
 }
 
@@ -746,8 +714,10 @@ void checkKeys(XEvent *e)
 	    umbrella.radius = (float)umbrella.width2;
 	    break;
 	case XK_Up:
+		play_sound();
 	    if(jump == 0)
 		jump = 1;
+		
 	    break;
 	case XK_Escape:
 	    done=1;
