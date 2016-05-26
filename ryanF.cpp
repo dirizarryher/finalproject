@@ -16,13 +16,13 @@ int Jumping (double spritesheetx, float wid, int jump,
 {
     if (!stuff) {
 	if (jump < 26 && jump > 0) {
-	    *sprite_y += (5*diff);
-	    jump++;
+		*sprite_y += (5*diff);
+		jump++;
 	} else if (jump >= 26 && jump < 52 ) {
-	    *sprite_y -= (5*diff);
-	    jump ++;
+		*sprite_y -= (5*diff);
+		jump ++;
 	} else {
-	    jump = 0;
+		jump = 0;
 	}
     }
     if (stuff) {
@@ -72,7 +72,7 @@ int checkcollison(int sprite_x, float x, int sprite_y, float y, double diff)
     }
     if (x <= sprite_x+set && x >= sprite_x-set) {
 	if (y <= sprite_y+set && y >= sprite_y-set) {
-	    return 1;
+		return 1;
 	}
     } else {
 	return 0; 
@@ -82,8 +82,7 @@ int checkcollison(int sprite_x, float x, int sprite_y, float y, double diff)
 
 void displaybackground(double backgroundx, GLuint Texture, int yres, int xres, bool toggle)
 {
-    if(!toggle)
-    {
+    if (!toggle) {
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0.0f);
 	glBindTexture(GL_TEXTURE_2D, Texture);
@@ -191,7 +190,7 @@ void assignboostTexture(GLuint *Texture, Ppmimage *Image)
     //must build a new set of data...
     unsigned char *BoostsilhouetteData = buildAlphaData(Image);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, boost_w, boost_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, BoostsilhouetteData);
+	GL_RGBA, GL_UNSIGNED_BYTE, BoostsilhouetteData);
 
 }
 
@@ -206,7 +205,7 @@ void assignJumpTexture(GLuint *jumpTexture, Ppmimage *jumpImage)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, jump_w, jump_h, 0,
-	    GL_RGB, GL_UNSIGNED_BYTE, jumpImage->data);
+	GL_RGB, GL_UNSIGNED_BYTE, jumpImage->data);
 
     glBindTexture(GL_TEXTURE_2D, *jumpTexture);
 
@@ -216,7 +215,7 @@ void assignJumpTexture(GLuint *jumpTexture, Ppmimage *jumpImage)
     //must build a new set of data...
     unsigned char *jumpData = buildAlphaData(jumpImage);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, jump_w, jump_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, jumpData);
+	GL_RGBA, GL_UNSIGNED_BYTE, jumpData);
 
 }
 
@@ -231,7 +230,7 @@ void assignbackgroundTexture(GLuint *Texture, Ppmimage *Image)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, tmp_w, tmp_h, 0,
-	    GL_RGB, GL_UNSIGNED_BYTE, Image->data);
+	GL_RGB, GL_UNSIGNED_BYTE, Image->data);
 
     glBindTexture(GL_TEXTURE_2D, *Texture);
 
@@ -241,7 +240,7 @@ void assignbackgroundTexture(GLuint *Texture, Ppmimage *Image)
     //must build a new set of data...
     unsigned char *farbackgroundData = buildAlphaData(Image);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tmp_w, tmp_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, farbackgroundData);
+	GL_RGBA, GL_UNSIGNED_BYTE, farbackgroundData);
 
 }
 
