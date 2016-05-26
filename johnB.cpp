@@ -91,7 +91,7 @@ int sliding(int slidecount, double slidesheetx, float wid, int slide, Bigfoot &b
 
 }
 
-//Derived from Rainforest
+//Derived from Lab
 unsigned char *buildAlphaData2(Ppmimage *img)
 {
     int i;
@@ -105,17 +105,19 @@ unsigned char *buildAlphaData2(Ppmimage *img)
         a = *(data+0);
         b = *(data+1);
         c = *(data+1);
+        //
         *(ptr+0) = a;
         *(ptr+1) = b;
         *(ptr+2) = c;
         *(ptr+3) = (a|b|c);
+        //
         ptr += 4;
         data += 3;
     }
     return newdata;
 }
 
-//Derived from Rainforest
+//Derived from Lab
 void initiateSlideTexture(GLuint *slideTexture, Ppmimage *slideImage)
 {
     int slide_w = slideImage->width;

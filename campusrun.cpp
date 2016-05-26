@@ -517,28 +517,6 @@ void initOpengl(void)
     //slide
     //
     initiateSlideTexture(&slideTexture, slideImage);
-   /* int slide_w = slideImage->width;
-    int slide_h = slideImage->height;
-    //
-    glBindTexture(GL_TEXTURE_2D, slideTexture);
-    //
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3, slide_w, slide_h, 0,
-	    GL_RGB, GL_UNSIGNED_BYTE, slideImage->data);
-    //-------------------------------------------------------------------------
-    //slide silhouette
-    //this is similar to a sprite graphic
-    //
-    glBindTexture(GL_TEXTURE_2D, slidesilhouetteTexture);
-    //
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    //
-    //must build a new set of data...
-    unsigned char *slidesilhouetteData = buildAlphaData(slideImage);	
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, slide_w, slide_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, slidesilhouetteData);*/
     //-------------------------------------------------------------------------
     //running
     //
