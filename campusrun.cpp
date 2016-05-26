@@ -248,6 +248,7 @@ unsigned char *buildAlphaData(Ppmimage *img);
 void assignboostTexture(GLuint *Texture, Ppmimage *Image);
 void assignbackgroundTexture(GLuint *Texture, Ppmimage *Image);
 string convertImage(string filename, string path, string filetype);
+void deletePPM();
 
 int main(void)
 {
@@ -304,6 +305,7 @@ int main(void)
     cleanupXWindows();
     cleanup_fonts();
     logClose();
+    deletePPM();
     return 0;
 }
 
@@ -447,6 +449,7 @@ void initOpengl(void)
     convertImage("saucer", path, filetype);
     convertImage("monster", path, filetype);
     convertImage("runner_sheet2", path, filetype);
+    convertImage("runnerdeath_sheet", path, filetype);
     
     path = "./images/";
     convertImage("speedboost", path, filetype);
@@ -672,18 +675,6 @@ void initOpengl(void)
     glTexImage2D(GL_TEXTURE_2D, 0, 3,
             gameoverImage->width, gameoverImage->height,
             0, GL_RGB, GL_UNSIGNED_BYTE, gameoverImage->data);
-    //-------------------------------------------------------------------------
-    //
-    //forest
-    //int forest_w = WINDOW_WIDTH * 2;
-    //int forest_h = WINDOW_HEIGHT;
-    glBindTexture(GL_TEXTURE_2D, forestTexture);
-    //
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
-    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
-    glTexImage2D(GL_TEXTURE_2D, 0, 3,
-            forestImage->width, forestImage->height,
-            0, GL_RGB, GL_UNSIGNED_BYTE, forestImage->data);
     //-------------------------------------------------------------------------
     //
     //Sky
