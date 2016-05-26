@@ -12,18 +12,17 @@ extern "C" {
 //This code gets called when the sprite jumps. 
 //It updates the y axis of the sprite to make it look like it is jumping.
 int Jumping (double spritesheetx, float wid, int jump, 
-	int *sprite_y, GLuint jumpTexture, int stuff)
+	int *sprite_y, GLuint jumpTexture, int stuff, double diff)
 {
     if (!stuff) {
-	if (jump < 32 && jump > 0) {
-	    *sprite_y += 5;
-	    jump++;
-	} else if (jump >= 32 && jump < 62 ) {
-	    *sprite_y -= 5;
-	    jump ++;
+	if (jump < 26 && jump > 0) {
+		*sprite_y += (5*diff);
+		jump++;
+	} else if (jump >= 26 && jump < 52 ) {
+		*sprite_y -= (5*diff);
+		jump ++;
 	} else {
-	    jump = 0;
-	    *sprite_y = 75;
+		jump = 0;
 	}
     }
     if (stuff) {
@@ -48,9 +47,9 @@ int Jumping (double spritesheetx, float wid, int jump,
 }
 
 //This will project powerups onto the screen in front of the player
-void projectImage(float x, float y, float z, GLuint Texture)
+void projectImage(float x, float y, float z, GLuint Texture, double diff)
 {
-    float wid = 30;
+    float wid = 30*diff;
     glPushMatrix();
     glBindTexture(GL_TEXTURE_2D, Texture);
     glTranslatef(x, y, z);
@@ -64,12 +63,16 @@ void projectImage(float x, float y, float z, GLuint Texture)
 
 }
 
-int checkcollison(int sprite_x, float x, int sprite_y, float y)
+int checkcollison(int sprite_x, float x, int sprite_y, float y, double diff)
 {
 
-    if (x <= sprite_x+50 && x >= sprite_x-50) {
-	if (y <= sprite_y+50 && y >= sprite_y-40) {
-	    return 1;
+    double set = 50;
+    if (diff > 1) {
+	set *= diff;
+    }
+    if (x <= sprite_x+set && x >= sprite_x-set) {
+	if (y <= sprite_y+set && y >= sprite_y-set) {
+		return 1;
 	}
     } else {
 	return 0; 
@@ -79,8 +82,7 @@ int checkcollison(int sprite_x, float x, int sprite_y, float y)
 
 void displaybackground(double backgroundx, GLuint Texture, int yres, int xres, bool toggle)
 {
-    if(!toggle)
-    {
+    if (!toggle) {
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0.0f);
 	glBindTexture(GL_TEXTURE_2D, Texture);
@@ -160,15 +162,6 @@ unsigned char *buildAlphaData(Ppmimage *img)
         *(ptr+0) = a;
         *(ptr+1) = b;
         *(ptr+2) = c;
-        //get largest color component...
-        //*(ptr+3) = (unsigned char)((
-        //              (int)*(ptr+0) +
-        //              (int)*(ptr+1) +
-        //              (int)*(ptr+2)) / 3);
-        //d = a;
-        //if (b >= a && b >= c) d = b;
-        //if (c >= a && c >= b) d = c;
-        //*(ptr+3) = d;
         *(ptr+3) = (a|b|c);
         ptr += 4;
         data += 3;
@@ -197,7 +190,7 @@ void assignboostTexture(GLuint *Texture, Ppmimage *Image)
     //must build a new set of data...
     unsigned char *BoostsilhouetteData = buildAlphaData(Image);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, boost_w, boost_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, BoostsilhouetteData);
+	GL_RGBA, GL_UNSIGNED_BYTE, BoostsilhouetteData);
 
 }
 
@@ -212,7 +205,7 @@ void assignJumpTexture(GLuint *jumpTexture, Ppmimage *jumpImage)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, jump_w, jump_h, 0,
-	    GL_RGB, GL_UNSIGNED_BYTE, jumpImage->data);
+	GL_RGB, GL_UNSIGNED_BYTE, jumpImage->data);
 
     glBindTexture(GL_TEXTURE_2D, *jumpTexture);
 
@@ -222,7 +215,7 @@ void assignJumpTexture(GLuint *jumpTexture, Ppmimage *jumpImage)
     //must build a new set of data...
     unsigned char *jumpData = buildAlphaData(jumpImage);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, jump_w, jump_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, jumpData);
+	GL_RGBA, GL_UNSIGNED_BYTE, jumpData);
 
 }
 
@@ -237,7 +230,7 @@ void assignbackgroundTexture(GLuint *Texture, Ppmimage *Image)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, tmp_w, tmp_h, 0,
-	    GL_RGB, GL_UNSIGNED_BYTE, Image->data);
+	GL_RGB, GL_UNSIGNED_BYTE, Image->data);
 
     glBindTexture(GL_TEXTURE_2D, *Texture);
 
@@ -247,6 +240,13 @@ void assignbackgroundTexture(GLuint *Texture, Ppmimage *Image)
     //must build a new set of data...
     unsigned char *farbackgroundData = buildAlphaData(Image);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tmp_w, tmp_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, farbackgroundData);
+	GL_RGBA, GL_UNSIGNED_BYTE, farbackgroundData);
 
 }
+
+void deletePPM()
+{
+    system("rm -f ./images/runner/*.ppm");
+    system("rm -f ./images/*.ppm");
+}
+

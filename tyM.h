@@ -44,5 +44,5 @@ typedef struct t_bigfoot {
 } Bigfoot;
 
 // prototypes
-void projectImage(float x, float y, float z, GLuint Texture);
-int checkcollison(int sprite_x, float x, int sprite_y, float y);
+void projectImage(float x, float y, float z, GLuint Texture, double diff);
+int checkcollison(int sprite_x, float x, int sprite_y, float y, double diff);
