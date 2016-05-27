@@ -273,7 +273,23 @@ void functioncall()
 
 void deletePPM()
 {
-    system("rm -f ./images/runner/*.ppm");
-    system("rm -f ./images/*.ppm");
+    system("rm -f ./images/runner/runner_sheet2.ppm");
+    system("rm -f ./images/runner/jump_sheet.ppm");
+    system("rm -f ./images/runner/spear.ppm");
+    system("rm -f ./images/runner/saucer.ppm");
+    system("rm -f ./images/runner/monster.ppm");
+    system("rm -f ./images/runner/runner_sheet2.ppm");
+    system("rm -f ./images/runner/runnerdeath_sheet.ppm");
+    system("rm -f ./images/runner/bat.ppm");
+
+    system("rm -f ./images/speedboost.ppm");
+    system("rm -f ./images/slide_sheet.ppm");
+    system("rm -f ./images/farbackground.ppm");
+    system("rm -f ./images/background1.ppm");
+    system("rm -f ./images/grass.ppm");
+    system("rm -f ./images/ground.ppm");
+    system("rm -f ./images/sky.ppm");
+    system("rm -f ./images/game_over.ppm");
+    system("rm -f ./images/Smoke.ppm");
 }
 
