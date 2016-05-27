@@ -461,7 +461,7 @@ void initOpengl(void)
     
     path = "./images/";
     convertImage("speedboost", path, filetype);
-    convertImage("slide_sheet", path, filetype);
+    convertImage("Slide_000", path, filetype);
     convertImage("farbackground", path, filetype);
     convertImage("background1", path, filetype);
     convertImage("grass", path, filetype);
@@ -479,7 +479,7 @@ void initOpengl(void)
     monsterImage       = ppm6GetImage("./images/runner/monster.ppm");
     boostImage         = ppm6GetImage("./images/speedboost.ppm");
     batImage           = ppm6GetImage("./images/runner/bat.ppm");
-    slideImage         = ppm6GetImage("./images/slide_sheet.ppm");
+    slideImage         = ppm6GetImage("./images/Slide_000.ppm");
     smokeImage         = ppm6GetImage("./images/Smoke.ppm");
 
     farbackgroundImage = ppm6GetImage("./images/farbackground.ppm");
