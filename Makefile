@@ -14,7 +14,6 @@ all: campusrun
 
 campusrun: campusrun.cpp tyM.cpp ryanF.cpp johnB.cpp davidH.cpp 
 	g++ $(CFLAGS)  campusrun.cpp tyM.cpp ryanF.cpp johnB.cpp davidH.cpp ppm.cpp log.cpp libggfonts.a -Wall -Wextra $(LFLAGS) $(AFLAGS) -o campusrun
-
 clean:
 	rm -f campusrun
 	rm -f *.o

@@ -8,6 +8,7 @@ extern "C" {
 #include "fonts.h"
 }
 
+string convertImage(string filename, string path, string filetype);
 
 //This code gets called when the sprite jumps. 
 //It updates the y axis of the sprite to make it look like it is jumping.
@@ -16,13 +17,13 @@ int Jumping (double spritesheetx, float wid, int jump,
 {
     if (!stuff) {
 	if (jump < 26 && jump > 0) {
-	    *sprite_y += (5*diff);
-	    jump++;
+		*sprite_y += (5*diff);
+		jump++;
 	} else if (jump >= 26 && jump < 52 ) {
-	    *sprite_y -= (5*diff);
-	    jump ++;
+		*sprite_y -= (5*diff);
+		jump ++;
 	} else {
-	    jump = 0;
+		jump = 0;
 	}
     }
     if (stuff) {
@@ -72,7 +73,7 @@ int checkcollison(int sprite_x, float x, int sprite_y, float y, double diff)
     }
     if (x <= sprite_x+set && x >= sprite_x-set) {
 	if (y <= sprite_y+set && y >= sprite_y-set) {
-	    return 1;
+		return 1;
 	}
     } else {
 	return 0; 
@@ -82,8 +83,7 @@ int checkcollison(int sprite_x, float x, int sprite_y, float y, double diff)
 
 void displaybackground(double backgroundx, GLuint Texture, int yres, int xres, bool toggle)
 {
-    if(!toggle)
-    {
+    if (!toggle) {
 	glEnable(GL_ALPHA_TEST);
 	glAlphaFunc(GL_GREATER, 0.0f);
 	glBindTexture(GL_TEXTURE_2D, Texture);
@@ -191,7 +191,7 @@ void assignboostTexture(GLuint *Texture, Ppmimage *Image)
     //must build a new set of data...
     unsigned char *BoostsilhouetteData = buildAlphaData(Image);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, boost_w, boost_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, BoostsilhouetteData);
+	GL_RGBA, GL_UNSIGNED_BYTE, BoostsilhouetteData);
 
 }
 
@@ -206,7 +206,7 @@ void assignJumpTexture(GLuint *jumpTexture, Ppmimage *jumpImage)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, jump_w, jump_h, 0,
-	    GL_RGB, GL_UNSIGNED_BYTE, jumpImage->data);
+	GL_RGB, GL_UNSIGNED_BYTE, jumpImage->data);
 
     glBindTexture(GL_TEXTURE_2D, *jumpTexture);
 
@@ -216,7 +216,7 @@ void assignJumpTexture(GLuint *jumpTexture, Ppmimage *jumpImage)
     //must build a new set of data...
     unsigned char *jumpData = buildAlphaData(jumpImage);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, jump_w, jump_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, jumpData);
+	GL_RGBA, GL_UNSIGNED_BYTE, jumpData);
 
 }
 
@@ -231,7 +231,7 @@ void assignbackgroundTexture(GLuint *Texture, Ppmimage *Image)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3, tmp_w, tmp_h, 0,
-	    GL_RGB, GL_UNSIGNED_BYTE, Image->data);
+	GL_RGB, GL_UNSIGNED_BYTE, Image->data);
 
     glBindTexture(GL_TEXTURE_2D, *Texture);
 
@@ -241,7 +241,55 @@ void assignbackgroundTexture(GLuint *Texture, Ppmimage *Image)
     //must build a new set of data...
     unsigned char *farbackgroundData = buildAlphaData(Image);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tmp_w, tmp_h, 0,
-	    GL_RGBA, GL_UNSIGNED_BYTE, farbackgroundData);
+	GL_RGBA, GL_UNSIGNED_BYTE, farbackgroundData);
 
+}
+
+void functioncall()
+{
+    string path = "./images/runner/";
+    string filetype = ".png";
+    convertImage("runner_sheet2", path, filetype);
+    convertImage("jump_sheet", path, filetype);
+    convertImage("spear", path, filetype);
+    convertImage("saucer", path, filetype);
+    convertImage("monster", path, filetype);
+    convertImage("runner_sheet2", path, filetype);
+    convertImage("runnerdeath_sheet", path, filetype);
+    convertImage("bat", path, filetype);
+
+    path = "./images/";
+    convertImage("speedboost", path, filetype);
+    convertImage("slide_sheet", path, filetype);
+    convertImage("farbackground", path, filetype);
+    convertImage("background1", path, filetype);
+    convertImage("grass", path, filetype);
+    convertImage("ground", path, filetype);
+    convertImage("sky", path, filetype);
+    convertImage("game_over", path, filetype);
+    convertImage("Smoke", path, filetype);    
+
+}
+
+void deletePPM()
+{
+    system("rm -f ./images/runner/runner_sheet2.ppm");
+    system("rm -f ./images/runner/jump_sheet.ppm");
+    system("rm -f ./images/runner/spear.ppm");
+    system("rm -f ./images/runner/saucer.ppm");
+    system("rm -f ./images/runner/monster.ppm");
+    system("rm -f ./images/runner/runner_sheet2.ppm");
+    system("rm -f ./images/runner/runnerdeath_sheet.ppm");
+    system("rm -f ./images/runner/bat.ppm");
+
+    system("rm -f ./images/speedboost.ppm");
+    system("rm -f ./images/slide_sheet.ppm");
+    system("rm -f ./images/farbackground.ppm");
+    system("rm -f ./images/background1.ppm");
+    system("rm -f ./images/grass.ppm");
+    system("rm -f ./images/ground.ppm");
+    system("rm -f ./images/sky.ppm");
+    system("rm -f ./images/game_over.ppm");
+    system("rm -f ./images/Smoke.ppm");
 }
 

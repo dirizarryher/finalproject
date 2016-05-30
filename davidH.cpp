@@ -112,13 +112,13 @@ void init_sounds(void)
 	alBuffer[16] = alutCreateBufferFromFile("sounds/Hail.wav\0");
 	//Homage to DOOM
 	alBuffer[17] = alutCreateBufferFromFile("sounds/Gum.wav\0");
-	
+
 	//Generate a source and store it into their respective buffers
 	//alGenSources(NUM_SOURCES, alSource);
 	for (int i = 0; i < NUM_SOURCES; i++) {
 		alGenSources(1, &alSource[i]);
 		alSourcei(alSource[i], AL_BUFFER, alBuffer[i]);
-		
+
 		//Set properties for each sound
 		alSourcef(alSource[i], AL_GAIN, 1.0f);
 		alSourcef(alSource[i], AL_PITCH, 1.0f);
@@ -134,7 +134,7 @@ void init_sounds(void)
 		}
 		alGetError();
 	};
-		
+
 	if ((error = alGetError()) != AL_NO_ERROR) {
 		printf("%s\n", get_ALerror(error).c_str());
 		fprintf(stderr, "ALUT Error: %s\n", alutGetErrorString(alutGetError()));
@@ -153,49 +153,49 @@ void init_sounds(void)
 		printf("Sources have been set\n");
 	}
 	alGetError();
-	
-		//Running attributes
-		alSourcef(alSource[1], AL_GAIN, 0.5f);
-		alSourcef(alSource[1], AL_PITCH, 2.0f);
-		alSourcei(alSource[1], AL_LOOPING, AL_FALSE);
-		
-		//Heavy Breathing attributes
-		alSourcef(alSource[2], AL_GAIN, 0.6f);
-		alSourcef(alSource[2], AL_PITCH, 0.7f);
-		alSourcei(alSource[2], AL_LOOPING, AL_FALSE);
-		
-		//Dead runner attributes
-		alSourcef(alSource[4], AL_GAIN, 0.9f);
-		alSourcef(alSource[4], AL_PITCH, 1.5f);
-		
-		//Pain sound attributes
-		alSourcef(alSource[5], AL_GAIN, 0.2f);
-		alSourcef(alSource[5], AL_PITCH, 1.3f);
-		
-		//Jump sound attributes
-		alSourcef(alSource[6], AL_GAIN, 0.9f);
-		alSourcef(alSource[6], AL_PITCH, 1.3f);
-		
-		//endGame attibutes
-		alSourcef(alSource[15], AL_GAIN, 1.5f);
-		alSourcef(alSource[15], AL_PITCH, 1.0f);
-		
-		//HTTK attributes
-		alSourcef(alSource[16], AL_GAIN, 1.0f);
-		alSourcef(alSource[16], AL_PITCH, 1.0f);
-		
-		//OOG attributes
-		alSourcef(alSource[17], AL_GAIN, 1.25f);
-		alSourcef(alSource[17], AL_PITCH, 1.0f);
-		
+
+	//Running attributes
+	alSourcef(alSource[1], AL_GAIN, 0.5f);
+	alSourcef(alSource[1], AL_PITCH, 2.0f);
+	alSourcei(alSource[1], AL_LOOPING, AL_FALSE);
+
+	//Heavy Breathing attributes
+	alSourcef(alSource[2], AL_GAIN, 0.6f);
+	alSourcef(alSource[2], AL_PITCH, 0.7f);
+	alSourcei(alSource[2], AL_LOOPING, AL_FALSE);
+
+	//Dead runner attributes
+	alSourcef(alSource[4], AL_GAIN, 0.9f);
+	alSourcef(alSource[4], AL_PITCH, 1.5f);
+
+	//Pain sound attributes
+	alSourcef(alSource[5], AL_GAIN, 0.2f);
+	alSourcef(alSource[5], AL_PITCH, 1.3f);
+
+	//Jump sound attributes
+	alSourcef(alSource[6], AL_GAIN, 0.9f);
+	alSourcef(alSource[6], AL_PITCH, 1.3f);
+
+	//endGame attibutes
+	alSourcef(alSource[15], AL_GAIN, 1.5f);
+	alSourcef(alSource[15], AL_PITCH, 1.0f);
+
+	//HTTK attributes
+	alSourcef(alSource[16], AL_GAIN, 1.0f);
+	alSourcef(alSource[16], AL_PITCH, 1.0f);
+
+	//OOG attributes
+	alSourcef(alSource[17], AL_GAIN, 1.25f);
+	alSourcef(alSource[17], AL_PITCH, 1.0f);
+
 }
 
-	//Change 1 (Run), 2(Breathing), 4(Dead), 5(Pain), 6(Jump)
-	//Modify 15(end), 16(king), 17(gum)
-	//Slide 3
-	//Spears 7,8,9, 10(flurry), 11(LTR), 12(RTL)
-	//Buttons 13, 14
-	
+//Change 1 (Run), 2(Breathing), 4(Dead), 5(Pain), 6(Jump)
+//Modify 15(end), 16(king), 17(gum)
+//Slide 3
+//Spears 7,8,9, 10(flurry), 11(LTR), 12(RTL)
+//Buttons 13, 14
+
 void play_music(void)
 {
 	alSourcePlay(alSource[0]);
@@ -206,18 +206,18 @@ void play_music(void)
 void play_jumpsound(void) 
 {
 	if (!dead && play){
-	alSourcePlay(alSource[6]);
-	//printf("Playing sound %i", alSource[6]);
-	play = !play;
+		alSourcePlay(alSource[6]);
+		//printf("Playing sound %i", alSource[6]);
+		play = !play;
 	}
 }
 
 void play_slide(void) 
 {
 	if (!dead && play){
-	alSourcePlay(alSource[3]);
-	printf("Playing sound %d\n", alSource[3]);
-	play = !play;
+		alSourcePlay(alSource[3]);
+		printf("Playing sound %d\n", alSource[3]);
+		play = !play;
 	}
 	//printf("Playing sound %i", alSource[3]);
 }
@@ -237,13 +237,13 @@ void play_end(void)
 void play_king(void)
 {
 	if ((!dead && king)){
-	alSourcePlay(alSource[15]);
-	printf("Playing sound %d\n", alSource[16]);
-	king = !king;
+		alSourcePlay(alSource[15]);
+		printf("Playing sound %d\n", alSource[16]);
+		king = !king;
 	}
 }
 
- /* void alDopplerFactor (
+/* void alDopplerFactor (
  * 	ALfloat value
  * 	);
  * value = the Dopller scale value to set
@@ -259,13 +259,13 @@ void clean_sounds(void)
 		alDeleteBuffers(1, &alBuffer[i]);
 		//fprintf("Deleting source[%d]\n", i);
 		if ((error = alGetError()) != AL_NO_ERROR) {
-		    //printf("Error: Deleting Sounds\n");
-		    printf("%s\n", get_ALerror(error).c_str());
-		    fprintf(stderr, "ALUT Error: %s\n", alutGetErrorString(alutGetError()));
-		    return;
+			//printf("Error: Deleting Sounds\n");
+			printf("%s\n", get_ALerror(error).c_str());
+			fprintf(stderr, "ALUT Error: %s\n", alutGetErrorString(alutGetError()));
+			return;
 		}
 	}
-	
+
 	//Close out OPAL itself
 	//Get active context
 	ALCcontext *Context = alcGetCurrentContext();
@@ -283,13 +283,14 @@ void clean_sounds(void)
 //images/runner/ directory into a ppm image
 string convertImage(string filename, string path, string filetype)
 {
-string oldfile = path + filename + filetype;
-string newfile = path + filename + ".ppm";
+	<<<<<<< HEAD
+		string oldfile = path + filename + filetype;
+	string newfile = path + filename + ".ppm";
 
-//converting sprite.png to sprite.ppm
-string newstuff =  "convert " + oldfile + " " + newfile;
-filename = system(newstuff.data());
-return filename;
+	//converting sprite.png to sprite.ppm
+	string newstuff =  "convert " + oldfile + " " + newfile;
+	filename = system(newstuff.data());
+	return filename;
 }
 
 //Game Over Menu if runner dies
@@ -309,4 +310,4 @@ return filename;
   r.bot = yres - 600;
   ggprint16(&r, 50, yellow, "Press ESC to Exit");
   }
-  */
+ */
