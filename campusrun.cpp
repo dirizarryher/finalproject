@@ -1300,13 +1300,13 @@ void render(Game *game)
 			Rect r;
 			r.bot = yres - 200;
 			r.left = xres - 200;
-			ggprint16b(&r, 50, yellow, "Your Score: %i", score);
-			ggprint16b(&r, 50, yellow, "Your Time: %i seconds", timeSpan); 
+			ggprint16(&r, 50, yellow, "Your Score: %i", score);
+			ggprint16(&r, 50, yellow, "Your Time: %i seconds", timeSpan); 
 			
 			r.bot = yres - 400;
 			r.left = xres - 400;
-			ggprint16b(&r, 50, yellow, "Press R to Restart");
-			ggprint16b(&r, 50, yellow, "Press ESC to Exit");
+			ggprint16(&r, 50, yellow, "Press R to Restart");
+			ggprint16(&r, 50, yellow, "Press ESC to Exit");
 
 			glEnd();
 		}
