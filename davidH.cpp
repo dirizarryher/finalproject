@@ -195,16 +195,16 @@ void init_sounds(void)
 		alSourcef(alSource[15], AL_PITCH, 1.0f);
 		
 		//JohnCena attributes
-		alSourcef(alSource[16], AL_GAIN, 1.0f);
+		alSourcef(alSource[16], AL_GAIN, 0.9f);
 		alSourcef(alSource[16], AL_PITCH, 1.05f);
 		
 		//Alien attributes
-		alSourcef(alSource[17], AL_GAIN, 1.25f);
-		alSourcef(alSource[17], AL_PITCH, 1.0f);
+		alSourcef(alSource[17], AL_GAIN, 1.0f);
+		alSourcef(alSource[17], AL_PITCH, 1.5f);
 		
 		//ILLUMINATI attributes
-		alSourcef(alSource[18], AL_GAIN, 1.15f);
-		alSourcef(alSource[18], AL_PITCH, 1.05f);
+		alSourcef(alSource[18], AL_GAIN, 1.0f);
+		alSourcef(alSource[18], AL_PITCH, 1.15f);
 		alSourcei(alSource[18], AL_LOOPING, AL_TRUE);
 }
 
@@ -239,8 +239,6 @@ void play_jumpsound(void)
 	}
 }
 
-//Needs to play a random spear sound every time a spear appears in the game
-//Spears 7,8,9, 10(flurry), 11(LTR), 12(RTL)
 void play_spears(void)
 {
 	int rando = rand() % 400 + 1;
@@ -289,7 +287,7 @@ void play_king(void)
 {
 	if ((!dead && king)){
 		alSourcePlay(alSource[16]);
-		printf("Playing sound %d\n", alSource[16]);
+		//printf("Playing sound %d\n", alSource[16]);
 		king = !king;
 	}
 }
@@ -299,7 +297,7 @@ void play_alien(void)
 {
 	if (alien) {
 		alSourcePlay(alSource[17]);
-		printf("Playing sound %d\n", alSource[17]);
+		//printf("Playing sound %d\n", alSource[17]);
 		alien = !alien;
 	}
 }
@@ -309,7 +307,7 @@ void play_illuminati(void)
 {
 	if (confirmed) {
 		alSourcePlay(alSource[18]);
-		printf("Playing sound %d\n", alSource[17]);
+		//printf("Playing sound %d\n", alSource[17]);
 		confirmed = !confirmed;
 	}
 }
@@ -325,7 +323,8 @@ void clean_sounds(void)
 		if ((error = alGetError()) != AL_NO_ERROR) {
 		    //printf("Error: Deleting Sounds\n");
 		    printf("%s\n", get_ALerror(error).c_str());
-		    fprintf(stderr, "ALUT Error: %s\n", alutGetErrorString(alutGetError()));
+		    fprintf(stderr, "ALUT Error: %s\n", 
+			alutGetErrorString(alutGetError()));
 		    return;
 		}
 	}
@@ -364,22 +363,3 @@ Rect showDave(int location)
     text.center = 0;
     return text;
 }
-
-//Game Over Menu if runner dies
-/*void endMenu(Game *g)
-  {
-  int yellow = 0x00ffff00;
-  int red = 0x00ff0000;
-
-  Rect r;
-  r.bot = yres - 300;
-  r.left = 600;
-  ggprint16(&r, 50, red, "GAME OVER");
-  ggprint16(&r, 50, red, "You died!");
-  ggprint16(&r, 50, yellow, "Your Score: %i", g->score);
-  ggprint16(&r, 50, yellow, "Your Time: %i seconds", g->gameTimer); 
-
-  r.bot = yres - 600;
-  ggprint16(&r, 50, yellow, "Press ESC to Exit");
-  }
-  */

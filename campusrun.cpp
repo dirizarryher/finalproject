@@ -696,7 +696,7 @@ void initOpengl(void)
 	//must build a new set of data...
 	unsigned char *silhouetteData = buildAlphaData(runningImage);	
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
-		GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+			GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
 	free(silhouetteData);
 	//glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
 	//	GL_RGB, GL_UNSIGNED_BYTE, bigfootImage->data);
@@ -1294,6 +1294,20 @@ void render(Game *game)
 			glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
 			glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
 			glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
+
+			int yellow = 0x00ffff00;
+
+			Rect r;
+			r.bot = yres - 200;
+			r.left = xres - 200;
+			ggprint16b(&r, 50, yellow, "Your Score: %i", score);
+			ggprint16b(&r, 50, yellow, "Your Time: %i seconds", timeSpan); 
+			
+			r.bot = yres - 400;
+			r.left = xres - 400;
+			ggprint16b(&r, 50, yellow, "Press R to Restart");
+			ggprint16b(&r, 50, yellow, "Press ESC to Exit");
+
 			glEnd();
 		}
 	}
@@ -1363,12 +1377,11 @@ void render(Game *game)
 		glPopMatrix();
 		deathCounter++;
 		deathsheetx += .11111;
+
+		//Need to stop the score count here?
 	}
 
 	if (showRunner && !jump && !dead) {
-		//If user presses T button, play
-		//play_king();
-
 		glPushMatrix();
 		glTranslatef(bigfoot.pos[0], sprite_y, bigfoot.pos[2]);
 		if (!silhouette) {
@@ -1409,7 +1422,7 @@ void render(Game *game)
 				x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
 						dead, image_counter, obstacle, sprite_x, 
 						sprite_y, booster, xdiff, monstersheetx);
-				if (x == 1110) {	
+				if (x == 692) {	
 					play_spears();
 					//printf("Playing spear sound\n");
 				}
@@ -1418,13 +1431,12 @@ void render(Game *game)
 				x = obstacleEffect(saucerMovement, x, y, z, saucerTexture, 
 						dead, image_counter, obstacle, sprite_x, 
 						sprite_y, booster, xdiff, monstersheetx);
-				if (x == 32) {	
+				if (x == 101) {	
 					alien = true;
 					confirmed = true;
 					play_alien();
 					play_illuminati();
 				}
-
 				if (x == 752) {
 					alien = false;
 					confirmed = false;
@@ -1443,7 +1455,7 @@ void render(Game *game)
 				if (x == 501) {
 					play_monster();
 				}
-				
+
 				break;
 			case 5:
 				x = obstacleEffect(batMovement, x, y, z, batTexture, 
