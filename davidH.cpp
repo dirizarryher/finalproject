@@ -28,13 +28,8 @@ ALuint alSource[NUM_BUFFERS];
 ALuint alBuffer[NUM_SOURCES];
 ALboolean volumeFlag;
 ALenum error;
-extern bool play;
-extern bool king;
-extern int jump;
-extern int slide;
-extern int dead;
-extern bool spears;
-extern bool button1, button2, alien, confirmed;
+extern int jump, slide, dead;
+extern bool play, king, spear, button1, button2, alien, confirmed;
 
 string get_ALerror(ALenum errID)
 {
@@ -89,20 +84,20 @@ void init_sounds(void)
 	alBuffer[3] = alutCreateBufferFromFile("sounds/runner3.wav\0");
 	//Sound for dead runner (screaming)
 	alBuffer[4] = alutCreateBufferFromFile("sounds/runner4.wav\0");
-	//Runner in Pain
-	alBuffer[5] = alutCreateBufferFromFile("sounds/runner5.wav\0");
 	//Runner Jumping
-	alBuffer[6] = alutCreateBufferFromFile("sounds/runner6.wav\0");
+	alBuffer[5] = alutCreateBufferFromFile("sounds/runner5.wav\0");
+	//Speedboost Sound
+	alBuffer[6] = alutCreateBufferFromFile("sounds/boost.wav\0");
 	//Variations of spears thrown
 	alBuffer[7] = alutCreateBufferFromFile("sounds/spear1.wav\0");
 	alBuffer[8] = alutCreateBufferFromFile("sounds/spear2.wav\0");
 	alBuffer[9] = alutCreateBufferFromFile("sounds/spear3.wav\0");
-	//Sound of multiple spears thrown
-	alBuffer[10] = alutCreateBufferFromFile("sounds/spearFlurry.wav\0");
+	//Sound of multiple Right to Left
+	alBuffer[10] = alutCreateBufferFromFile("sounds/spearRTL.wav\0");
 	//Spear thrown from Left to Right
-	alBuffer[11] = alutCreateBufferFromFile("sounds/spearLTR.wav\0");
+	alBuffer[11] = alutCreateBufferFromFile("sounds/MonsterGrowl.wav\0");
 	//Spear thrown from Right to Left
-	alBuffer[12] = alutCreateBufferFromFile("sounds/spearRTL.wav\0");
+	alBuffer[12] = alutCreateBufferFromFile("sounds/MonsterLaugh.wav\0");
 	//Enter button
 	alBuffer[13] = alutCreateBufferFromFile("sounds/button1.wav\0");
 	//Back button
@@ -168,19 +163,35 @@ void init_sounds(void)
 		alSourcei(alSource[2], AL_LOOPING, AL_FALSE);
 		
 		//Dead runner attributes
-		alSourcef(alSource[4], AL_GAIN, 0.9f);
+		alSourcef(alSource[4], AL_GAIN, 2.0f);
 		alSourcef(alSource[4], AL_PITCH, 1.5f);
-		
-		//Pain sound attributes
-		alSourcef(alSource[5], AL_GAIN, 0.2f);
+			
+		//Jump sound attributes
+		alSourcef(alSource[5], AL_GAIN, 0.1f);
 		alSourcef(alSource[5], AL_PITCH, 1.3f);
 		
-		//Jump sound attributes
+		//Speedboost sound attributes
 		alSourcef(alSource[6], AL_GAIN, 0.9f);
-		alSourcef(alSource[6], AL_PITCH, 1.3f);
-		
+		alSourcef(alSource[6], AL_PITCH, 1.05f);
+
+		//Monster Growl attributes
+		alSourcef(alSource[11], AL_GAIN, 0.8f);
+		alSourcef(alSource[11], AL_PITCH, 2.0);
+
+		//Monster Laugh attributes
+		alSourcef(alSource[12], AL_GAIN, 0.8f);
+		alSourcef(alSource[12], AL_PITCH, 2.0f);
+
+		//Button1 attributes
+		alSourcef(alSource[13], AL_GAIN, 0.8f);
+		alSourcef(alSource[13], AL_PITCH, 1.2f);
+
+		//Button2 attributes
+		alSourcef(alSource[14], AL_GAIN, 0.8f);
+		alSourcef(alSource[14], AL_PITCH, 1.2f);
+	
 		//endGame attibutes
-		alSourcef(alSource[15], AL_GAIN, 1.5f);
+		alSourcef(alSource[15], AL_GAIN, 0.5f);
 		alSourcef(alSource[15], AL_PITCH, 1.0f);
 		
 		//JohnCena attributes
@@ -197,7 +208,6 @@ void init_sounds(void)
 		alSourcei(alSource[18], AL_LOOPING, AL_TRUE);
 }
 
-//Change 1 (Run), 2(Breathing), 4(Dead), 5(Pain), 6(Jump)
 void play_music(void)
 {
 	alSourcePlay(alSource[0]);
@@ -223,7 +233,7 @@ void play_dead(void)
 void play_jumpsound(void) 
 {
 	if (!dead && play){
-	alSourcePlay(alSource[6]);
+	alSourcePlay(alSource[5]);
 	//printf("Playing sound %i", alSource[6]);
 	play = !play;
 	}
@@ -233,25 +243,40 @@ void play_jumpsound(void)
 //Spears 7,8,9, 10(flurry), 11(LTR), 12(RTL)
 void play_spears(void)
 {
-//Assign numbers to files
-//Setup rand function 
-	//Where whichever number rand function spills out
-	//Will call the right spear file
+	int rando = rand() % 400 + 1;
+	if (rando <= 100) {
+		alSourcePlay(alSource[7]);
+	}
+	else if (rando <= 200) {
+		alSourcePlay(alSource[8]);
+	}
+	else if (rando <= 300) {
+		alSourcePlay(alSource[9]);
+	} else {
+		alSourcePlay(alSource[10]);
+	}
+}	
+
+void play_monster(void)
+{
+	int roll = rand() % 50 + 1;
+	if (roll <= 25) {
+		alSourcePlay(alSource[11]);
+	} else {
+		alSourcePlay(alSource[12]);
+	}
 }
 
 //Buttons 13, 14
 void play_button1(void)
 {
-
+	alSourcePlay(alSource[13]);
 }
 
 void play_button2(void)
 {
-
+	alSourcePlay(alSource[14]);
 }
-
-
-//Modify 15(end), 16(king), 17(gum)
 
 void play_end(void)
 {
@@ -267,35 +292,27 @@ void play_king(void)
 		printf("Playing sound %d\n", alSource[16]);
 		king = !king;
 	}
-	if (king == false) {
-		alSourceStop(alSource[16]);
-	}
 }
 
 //Sound when alien ship flies by
 void play_alien(void) 
 {
-	if (alien == true) { 
-	    alSourcePlay(alSource[17]);
-	    alien = false;
+	if (alien) {
+		alSourcePlay(alSource[17]);
+		printf("Playing sound %d\n", alSource[17]);
+		alien = !alien;
 	}
 }
 
 //Sound when creature shows on screen
 void play_illuminati(void)
 {
-	if (confirmed == true) {
-	    alSourcePlay(alSource[18]);
-	    confirmed = false;
+	if (confirmed) {
+		alSourcePlay(alSource[18]);
+		printf("Playing sound %d\n", alSource[17]);
+		confirmed = !confirmed;
 	}
 }
-
- /* void alDopplerFactor (
- * 	ALfloat value
- * 	);
- * value = the Dopller scale value to set
- * The default Doppler factor value is 1.0
- */
 
 void clean_sounds(void) 
 {

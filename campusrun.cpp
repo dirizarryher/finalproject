@@ -33,6 +33,7 @@
 #include <GL/glx.h>
 #include "log.h"
 #include "ppm.h"
+#include </usr/include/AL/alut.h>
 extern "C" {
 #include "fonts.h"
 }
@@ -47,6 +48,7 @@ using namespace std;
 
 bool play = false, king = false, spears = false, button1 = false;
 bool button2 = false, alien = false, confirmed = false, dave = false;
+extern ALuint alSource[];
 
 int restart = 0;
 int jump = 0, slide = 0, obstacle = -1, smoke = 0;
@@ -269,6 +271,7 @@ void play_slide(void);
 void play_dead(void);
 void play_jumpsound(void);
 void play_spears(void);
+void play_monster(void);
 void play_button1(void);
 void play_button2(void);
 void play_end(void);
@@ -693,7 +696,7 @@ void initOpengl(void)
 	//must build a new set of data...
 	unsigned char *silhouetteData = buildAlphaData(runningImage);	
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0,
-			GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
+		GL_RGBA, GL_UNSIGNED_BYTE, silhouetteData);
 	free(silhouetteData);
 	//glTexImage2D(GL_TEXTURE_2D, 0, 3, w, h, 0,
 	//	GL_RGB, GL_UNSIGNED_BYTE, bigfootImage->data);
@@ -889,7 +892,7 @@ void checkKeys(XEvent *e)
 			break;
 		case XK_t:
 			dave = !dave;
-			king = !king;
+			alSourcePlay(alSource[16]);
 			break;
 		case XK_u:
 			showUmbrella ^= 1;
@@ -950,7 +953,7 @@ void checkKeys(XEvent *e)
 			//Makes sure no other sound is played when jumping
 			if (jump == 0 && !jump) {
 				jump = 1;
-				if (jump == 1 && !play){
+				if (jump == 1 && !play) {
 					play = 1;
 				}
 			}
@@ -1045,7 +1048,7 @@ void createRaindrop(const int n)
 		node->vel[0] = 
 			node->vel[1] = 0.0f;
 		node->color[0] = rnd() * 0.2f + 0.8f;
-		node->color[1] = rnd() * 0.2f + 0.8f;
+		node->color[1] = rnd() *  0.2f + 0.8f;
 		node->color[2] = rnd() * 0.2f + 0.8f;
 		node->color[3] = rnd() * 0.5f + 0.3f; //alpha
 		node->linewidth = random(8)+1;
@@ -1354,6 +1357,7 @@ void render(Game *game)
 		//If runner dies, play death sound
 		if (deathCounter < 2) {
 			play_dead();
+			alSourcePlay(alSource[15]);
 		}
 		glEnd();
 		glPopMatrix();
@@ -1363,7 +1367,7 @@ void render(Game *game)
 
 	if (showRunner && !jump && !dead) {
 		//If user presses T button, play
-		play_king();
+		//play_king();
 
 		glPushMatrix();
 		glTranslatef(bigfoot.pos[0], sprite_y, bigfoot.pos[2]);
@@ -1405,21 +1409,27 @@ void render(Game *game)
 				x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
 						dead, image_counter, obstacle, sprite_x, 
 						sprite_y, booster, xdiff, monstersheetx);
-				// spears = true;
-				// if (x && ) {
-				//		play_spears();
-				// }
-				// spears = false;
+				if (x == 1110) {	
+					play_spears();
+					//printf("Playing spear sound\n");
+				}
 				break;
 			case 3:
 				x = obstacleEffect(saucerMovement, x, y, z, saucerTexture, 
 						dead, image_counter, obstacle, sprite_x, 
 						sprite_y, booster, xdiff, monstersheetx);
-				if (x > 30) {
+				if (x == 32) {	
 					alien = true;
-					play_alien();
 					confirmed = true;
+					play_alien();
 					play_illuminati();
+				}
+
+				if (x == 752) {
+					alien = false;
+					confirmed = false;
+					alSourceStop(alSource[17]);
+					alSourceStop(alSource[18]);
 				}
 				break;
 			case 4:
@@ -1427,6 +1437,13 @@ void render(Game *game)
 						dead, image_counter, obstacle, sprite_x, 
 						sprite_y, booster, xdiff, monstersheetx);
 				//Need sound for monster here
+				if (x == 1203) {
+					play_monster();
+				}
+				if (x == 501) {
+					play_monster();
+				}
+				
 				break;
 			case 5:
 				x = obstacleEffect(batMovement, x, y, z, batTexture, 
@@ -1523,7 +1540,7 @@ void render(Game *game)
 		game->box[0].center.x = box_x -= 1.5;
 		game->box[0].center.y = box_y;
 
-		if (box_x < -150)
+		if (box_x < -100)
 			box_x = 900;
 	}
 
