@@ -167,8 +167,8 @@ void init_sounds(void)
 		alSourcei(alSource[0], AL_LOOPING, AL_TRUE);
 		
 		//Running attributes
-		alSourcef(alSource[1], AL_GAIN, 0.5f);
-		alSourcef(alSource[1], AL_PITCH, 2.0f);
+		alSourcef(alSource[1], AL_GAIN, 0.2f);
+		alSourcef(alSource[1], AL_PITCH, 1.5f);
 		alSourcei(alSource[1], AL_LOOPING, AL_FALSE);
 		
 		//Heavy Breathing attributes
@@ -177,7 +177,7 @@ void init_sounds(void)
 		alSourcei(alSource[2], AL_LOOPING, AL_FALSE);
 		
 		//Sliding attributes
-		alSourcef(alSource[3], AL_GAIN, 0.6f);
+		alSourcef(alSource[3], AL_GAIN, 0.3f);
 		alSourcef(alSource[3], AL_PITCH, 0.7f);
 		alSourcei(alSource[3], AL_LOOPING, AL_FALSE);
 
@@ -186,8 +186,8 @@ void init_sounds(void)
 		alSourcef(alSource[4], AL_PITCH, 1.5f);
 			
 		//Jump sound attributes
-		alSourcef(alSource[5], AL_GAIN, 0.1f);
-		alSourcef(alSource[5], AL_PITCH, 1.3f);
+		alSourcef(alSource[5], AL_GAIN, 0.7f);
+		alSourcef(alSource[5], AL_PITCH, 1.5f);
 		
 		//Speedboost sound attributes
 		alSourcef(alSource[6], AL_GAIN, 0.7f);
@@ -198,11 +198,11 @@ void init_sounds(void)
 		alSourcef(alSource[7], AL_PITCH, 1.2f);
 
 		//Monster Growl attributes
-		alSourcef(alSource[12], AL_GAIN, 0.8f);
+		alSourcef(alSource[12], AL_GAIN, 0.7f);
 		alSourcef(alSource[12], AL_PITCH, 2.0f);
 
 		//Monster Laugh attributes
-		alSourcef(alSource[13], AL_GAIN, 0.8f);
+		alSourcef(alSource[13], AL_GAIN, 0.7f);
 		alSourcef(alSource[13], AL_PITCH, 2.0f);
 		
 		//Monster 3 attributes
@@ -210,11 +210,11 @@ void init_sounds(void)
 		alSourcef(alSource[14], AL_PITCH, 2.0f);
 
 		//Button1 attributes
-		alSourcef(alSource[15], AL_GAIN, 0.8f);
+		alSourcef(alSource[15], AL_GAIN, 1.0f);
 		alSourcef(alSource[15], AL_PITCH, 1.2f);
 
 		//Button2 attributes
-		alSourcef(alSource[16], AL_GAIN, 0.8f);
+		alSourcef(alSource[16], AL_GAIN, 1.0f);
 		alSourcef(alSource[16], AL_PITCH, 1.2f);
 	
 		//endGame attibutes
@@ -222,24 +222,24 @@ void init_sounds(void)
 		alSourcef(alSource[17], AL_PITCH, 1.0f);
 		
 		//JohnCena attributes
-		alSourcef(alSource[18], AL_GAIN, 0.7f);
+		alSourcef(alSource[18], AL_GAIN, 0.5f);
 		alSourcef(alSource[18], AL_PITCH, 1.0f);
 		
 		//AlienEnter attributes
-		alSourcef(alSource[19], AL_GAIN, 0.7f);
+		alSourcef(alSource[19], AL_GAIN, 0.1f);
 		alSourcef(alSource[19], AL_PITCH, 1.5f);
 		
 		//AlienExit attributes
-		alSourcef(alSource[20], AL_GAIN, 0.7f);
+		alSourcef(alSource[20], AL_GAIN, 0.1f);
 		alSourcef(alSource[20], AL_PITCH, 1.5f);
 		
 		//ILLUMINATI attributes
-		alSourcef(alSource[21], AL_GAIN, 1.0f);
-		alSourcef(alSource[21], AL_PITCH, 1.15f);
-		alSourcei(alSource[21], AL_LOOPING, AL_TRUE);
+		alSourcef(alSource[21], AL_GAIN, 0.5f);
+		alSourcef(alSource[21], AL_PITCH, 1.0f);
+		alSourcei(alSource[21], AL_LOOPING, AL_FALSE);
 		
 		//Bat attributes
-		alSourcef(alSource[22], AL_GAIN, 0.7f);
+		alSourcef(alSource[22], AL_GAIN, 0.6f);
 		alSourcef(alSource[22], AL_PITCH, 1.5f);
 }
 
