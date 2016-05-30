@@ -45,6 +45,9 @@ using namespace std;
 #define MAX_PARTICLES 5000
 #define GRAVITY 0.1
 
+bool play = false, king = false, spears = false, button1 = false;
+bool button2 = false, alien = false, confirmed = false, dave = false;
+
 int restart = 0;
 int jump = 0, slide = 0, obstacle = -1, smoke = 0;
 int stuff_counter = 0, booster = 300;
@@ -137,7 +140,7 @@ GLuint silhouetteTexture, DeathsilhouetteTexture, JumpsilhouetteTexture,
 GLuint grassTexture, groundTexture, skyTexture, farbackgroundTexture, 
        backgroundTexture;
 GLuint forestTexture, gameoversilhouetteTexture, spearTexture, 
-       spearsilhouetteTexture, saucerTexture, sucersilhouetteTexture, 
+       spearsilhouetteTexture, saucerTexture, saucersilhouetteTexture, 
        monsterTexture, monstersilhouetterTexture, 
        batTexture, batsilhouetteTexture;
 char cScore[400];
@@ -259,6 +262,21 @@ void initiateSmokeTexture(GLuint *smokeTexture, Ppmimage *smokeImage);
 string convertImage(string filename, string path, string filetype);
 void deletePPM();
 void functioncall();
+void init_sounds(void);
+void clean_sounds(void);
+void play_music(void);
+void play_slide(void);
+void play_dead(void);
+void play_jumpsound(void);
+void play_spears(void);
+void play_button1(void);
+void play_button2(void);
+void play_end(void);
+void play_king(void);
+void play_alien(void);
+void play_illuminati(void);
+//void endMenu(Game *g);
+Rect showDave(int loc);
 
 int main(void)
 {
@@ -869,7 +887,8 @@ void checkKeys(XEvent *e)
 	    printf("silhouette: %i\n",silhouette);
 	    break;
 	case XK_t:
-	    trees ^= 1;
+	  	dave = !dave;
+		king = !king;
 	    break;
 	case XK_u:
 	    showUmbrella ^= 1;
@@ -894,10 +913,15 @@ void checkKeys(XEvent *e)
 	    umbrella.pos[0] += 10.0;
 	    break;
 	case XK_Down:
-	    if(slide == 0)
-		slide = 1;
 	    if(smoke == 0)
 		smoke = 1;
+		//Ensure that slide sound is played only once
+        if (slide == 0 && !jump) {
+			slide = 1;
+			if (slide == 1 && !play) {
+				play = 1;
+			}
+        }
 	    break;
 	case XK_equal:
 	    if (++ndrops > 40)
@@ -922,8 +946,13 @@ void checkKeys(XEvent *e)
 	    umbrella.radius = (float)umbrella.width2;
 	    break;
 	case XK_Up:
-	    if(jump == 0)
-		jump = 1;
+	 	//Makes sure no other sound is played when jumping
+        if (jump == 0 && !jump) {
+			jump = 1;
+            if (jump == 1 && !play){
+                play = 1;
+            }
+        }
 	    break;
 	case XK_Escape:
 	    done=1;
@@ -1272,6 +1301,7 @@ void render(Game *game)
 	jump = Jumping(jumpsheetx, (wid), jump, point_y, jumpTexture, 
 		stuff, xdiff);
 	jumpcount++;
+	play_jumpsound();
 
 	if (jumpcount == 4) {
 	    jumpsheetx += .1;
@@ -1283,6 +1313,7 @@ void render(Game *game)
 	sprite_y = standardy*xdiff;
 	jumpcount = 0;
 	jumpsheetx = 0;
+	play = !play;
     }
 
     /////////////////////////////////slide
@@ -1296,11 +1327,13 @@ void render(Game *game)
 	if (slidecount == 4){
 	    slidesheetx += 1;
 	    slidecount = 0;
+		play_slide();
 	}
     } else { 
 	showRunner = 1;
 	slidecount = 0;
 	slidesheetx = 0;
+	play = 0;
     }
 
     if (dead) {
@@ -1316,6 +1349,11 @@ void render(Game *game)
 	}
 	if (deathCounter < 9) 
 	    runnerDeath(bigfoot, deathsheetx);
+	
+	//If runner dies, play death sound
+	if (deathCounter < 2) {
+		play_dead();
+	}
 	glEnd();
 	glPopMatrix();
 	deathCounter++;
@@ -1323,6 +1361,9 @@ void render(Game *game)
     }
 
     if (showRunner && !jump && !dead) {
+	//If user presses T button, play
+	play_king();
+
 	glPushMatrix();
 	glTranslatef(bigfoot.pos[0], sprite_y, bigfoot.pos[2]);
 	if (!silhouette) {
@@ -1363,22 +1404,35 @@ void render(Game *game)
 		x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
 			dead, image_counter, obstacle, sprite_x, 
 			sprite_y, booster, xdiff, monstersheetx);
+		// spears = true;
+		// if (x && ) {
+		//		play_spears();
+		// }
+		// spears = false;
 		break;
 	    case 3:
 		x = obstacleEffect(saucerMovement, x, y, z, saucerTexture, 
 			dead, image_counter, obstacle, sprite_x, 
 			sprite_y, booster, xdiff, monstersheetx);
+		if (x > 30) {
+			alien = true;
+			play_alien();
+			confirmed = true;
+			play_illuminati();
+		}
 		break;
 	    case 4:
 		x = obstacleEffect(monsterMovement, x, y, z, monsterTexture, 
 			dead, image_counter, obstacle, sprite_x, 
 			sprite_y, booster, xdiff, monstersheetx);
+		//Need sound for monster here
 		break;
 	    case 5:
 		x = obstacleEffect(batMovement, x, y, z, batTexture, 
 			dead, image_counter, obstacle, sprite_x, 
 			sprite_y, booster, xdiff, batsheetx);
 		batsheetx += 0.08349;
+		//Need sounds for bat here?
 		break;
 	    default: 
 		obstacle = -1;
@@ -1458,6 +1512,19 @@ void render(Game *game)
       ggprint8b(&r, 16, 0, "D - Deflection");
       ggprint8b(&r, 16, 0, "N - Sounds");*/
     ggprint8b(&b, 26, 0, cScore);
+
+	if (dave) {
+        nameText = showDave(800);
+        ggprint8b(&nameText, 100, 100, "David Hernandez");
+
+        game->box[0].width = 200;
+        game->box[0].height = 75;
+        game->box[0].center.x = box_x -= 1.5;
+        game->box[0].center.y = box_y;
+
+        if (box_x < -150)
+            box_x = 900;
+    }
 
     if (name) {
 	nameText = displayName(box_x - 30);
