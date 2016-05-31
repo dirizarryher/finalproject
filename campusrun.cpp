@@ -1361,11 +1361,11 @@ void render(Game *game)
 
 			Rect r;
 			r.bot = yres - 300;
-			r.left = xres - 400;
+			r.left = xres - 300;
 			ggprint16(&r, 50, yellow, "Your Score: %i", endScore);
 
 			r.bot = yres - 400;
-			r.left = xres - 400;
+			r.left = xres - 300;
 			ggprint16(&r, 50, yellow, "Press R to Restart");
 			ggprint16(&r, 50, yellow, "Press ESC to Exit");
 
@@ -1477,7 +1477,7 @@ void render(Game *game)
 				x = obstacleEffect(boostMovement, x, y, z, speedTexture, 
 						dead, image_counter, obstacle, sprite_x, score, 
 						sprite_y, booster, xdiff, monstersheetx, slide);
-				if (x == 192 /*&& runner touches boost*/) {
+				if (x == 190 /*&& runner touches boost*/) {
 					play_boost();
 				}
 
@@ -1486,7 +1486,7 @@ void render(Game *game)
 				x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
 						dead, image_counter, obstacle, sprite_x, score,
 						sprite_y, booster, xdiff, monstersheetx, slide);
-				if (x == 1002) {	
+				if (x == 1000) {	
 					play_spears();
 				}
 				break;
@@ -1495,7 +1495,7 @@ void render(Game *game)
 						dead, image_counter, obstacle, sprite_x, score,
 						sprite_y, booster, xdiff, monstersheetx, slide);
 				//Play sound of Ship entering the screen
-				if (x == 11) {	
+				if (x <= 10) {	
 					alien = true;
 					confirmed = true;
 					play_alien();
@@ -1518,10 +1518,10 @@ void render(Game *game)
 				x = obstacleEffect(monsterMovement, x, y, z, monsterTexture, 
 						dead, image_counter, obstacle, sprite_x, score,
 						sprite_y, booster, xdiff, monstersheetx, slide);
-				if (x == 1203) {
+				if (x == 1200) {
 					play_monster();
 				}
-				if (x == 501) {
+				if (x == 500) {
 					play_monster();
 				}
 				break;
@@ -1535,7 +1535,7 @@ void render(Game *game)
 				x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
 						dead, image_counter, obstacle, sprite_x, score,
 						sprite_y, booster, xdiff, batsheetx, slide);
-				if (x == 1002) {	
+				if (x == 1000) {
 					play_spears();
 				}
 				break;
