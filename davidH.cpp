@@ -57,7 +57,6 @@ string get_ALerror(ALenum errID)
 void init_sounds(void)
 {
 	alutInit(0, NULL);
-
 	if ((error = alGetError()) != AL_NO_ERROR) {
 		printf("%s\n", get_ALerror(error).c_str());
 		fprintf(stderr, "ALUT Error: %s\n", alutGetErrorString(alutGetError()));
