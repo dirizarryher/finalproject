@@ -16,8 +16,8 @@ extern "C" {
 }
 using namespace std;
 
-#define NUM_BUFFERS 20
-#define NUM_SOURCES 20
+#define NUM_BUFFERS 25
+#define NUM_SOURCES 25
 ALfloat listenerPos[3] = {0.0f, 0.0f, 0.0f};
 ALfloat listenerVel[3] = {0.0f, 0.0f, 0.0f};
 float listenerOri[6] = {0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 0.0f};
@@ -75,7 +75,7 @@ void init_sounds(void)
 
 	//buffers[] holds the sound information
 	//This is the main menu music
-	alBuffer[0] = alutCreateBufferFromFile("./sounds/test.wav\0");
+	alBuffer[0] = alutCreateBufferFromFile("./sounds/ambiance.wav\0");
 	//Running Sound
 	alBuffer[1] = alutCreateBufferFromFile("sounds/runner1.wav\0");
 	//Heavy Breathing Sound
@@ -86,31 +86,40 @@ void init_sounds(void)
 	alBuffer[4] = alutCreateBufferFromFile("sounds/runner4.wav\0");
 	//Runner Jumping
 	alBuffer[5] = alutCreateBufferFromFile("sounds/runner5.wav\0");
-	//Speedboost Sound
+	//Variations for speedboost sound
 	alBuffer[6] = alutCreateBufferFromFile("sounds/boost.wav\0");
-	//Variations of spears thrown
-	alBuffer[7] = alutCreateBufferFromFile("sounds/spear1.wav\0");
-	alBuffer[8] = alutCreateBufferFromFile("sounds/spear2.wav\0");
-	alBuffer[9] = alutCreateBufferFromFile("sounds/spear3.wav\0");
-	//Sound of multiple Right to Left
-	alBuffer[10] = alutCreateBufferFromFile("sounds/spearRTL.wav\0");
-	//Spear thrown from Left to Right
-	alBuffer[11] = alutCreateBufferFromFile("sounds/MonsterGrowl.wav\0");
-	//Spear thrown from Right to Left
-	alBuffer[12] = alutCreateBufferFromFile("sounds/MonsterLaugh.wav\0");
-	//Enter button
-	alBuffer[13] = alutCreateBufferFromFile("sounds/button1.wav\0");
-	//Back button
-	alBuffer[14] = alutCreateBufferFromFile("sounds/button2.wav\0");
-	//Game Over Sound
-	alBuffer[15] = alutCreateBufferFromFile("sounds/endOfGame.wav\0");
-	//John Cena
-	alBuffer[16] = alutCreateBufferFromFile("sounds/JohnCena.wav\0");
-	//Alien Scanner
-	alBuffer[17] = alutCreateBufferFromFile("sounds/Alien.wav\0");
-	//ILLUMINATI
-	alBuffer[18] = alutCreateBufferFromFile("sounds/Illuminati.wav\0");
+	alBuffer[7] = alutCreateBufferFromFile("sounds/Powerup.wav\0");
 	
+	//Variations of spears thrown
+	alBuffer[8] = alutCreateBufferFromFile("sounds/spear1.wav\0");
+	alBuffer[9] = alutCreateBufferFromFile("sounds/spear2.wav\0");
+	alBuffer[10] = alutCreateBufferFromFile("sounds/spear3.wav\0");
+	//Sound of multiple spears Right to Left
+	alBuffer[11] = alutCreateBufferFromFile("sounds/spearRTL.wav\0");
+
+	//Variation of Monster sounds
+	alBuffer[12] = alutCreateBufferFromFile("sounds/MonsterGrowl.wav\0");
+	alBuffer[13] = alutCreateBufferFromFile("sounds/MonsterLaugh.wav\0");
+	alBuffer[14] = alutCreateBufferFromFile("sounds/mokay.wav\0");
+
+	//Enter button
+	alBuffer[15] = alutCreateBufferFromFile("sounds/button1.wav\0");
+	//Back button
+	alBuffer[16] = alutCreateBufferFromFile("sounds/button2.wav\0");
+	//Game Over Sound
+	alBuffer[17] = alutCreateBufferFromFile("sounds/endOfGame.wav\0");
+	//John Cena
+	alBuffer[18] = alutCreateBufferFromFile("sounds/JohnCena.wav\0");
+	//AlienEnter
+	alBuffer[19] = alutCreateBufferFromFile("sounds/Alien.wav\0");
+	//AlienExit
+	alBuffer[20] = alutCreateBufferFromFile("sounds/Alien2.wav\0");
+
+	//ILLUMINATI
+	alBuffer[21] = alutCreateBufferFromFile("sounds/Illuminati.wav\0");
+	//Bat Sound
+	alBuffer[22] = alutCreateBufferFromFile("sounds/bat.wav\0");
+		
 	//Generate a source and store it into their respective buffers
 	//alGenSources(NUM_SOURCES, alSource);
 	for (int i = 0; i < NUM_SOURCES; i++) {
@@ -151,7 +160,12 @@ void init_sounds(void)
 		printf("Sources have been set\n");
 	}
 	alGetError();
-	
+		
+		//Ambiance attributes
+		alSourcef(alSource[0], AL_GAIN, 0.6f);
+		alSourcef(alSource[0], AL_PITCH, 1.0f);
+		alSourcei(alSource[0], AL_LOOPING, AL_TRUE);
+		
 		//Running attributes
 		alSourcef(alSource[1], AL_GAIN, 0.5f);
 		alSourcef(alSource[1], AL_PITCH, 2.0f);
@@ -162,6 +176,11 @@ void init_sounds(void)
 		alSourcef(alSource[2], AL_PITCH, 0.7f);
 		alSourcei(alSource[2], AL_LOOPING, AL_FALSE);
 		
+		//Sliding attributes
+		alSourcef(alSource[3], AL_GAIN, 0.6f);
+		alSourcef(alSource[3], AL_PITCH, 0.7f);
+		alSourcei(alSource[3], AL_LOOPING, AL_FALSE);
+
 		//Dead runner attributes
 		alSourcef(alSource[4], AL_GAIN, 2.0f);
 		alSourcef(alSource[4], AL_PITCH, 1.5f);
@@ -171,48 +190,68 @@ void init_sounds(void)
 		alSourcef(alSource[5], AL_PITCH, 1.3f);
 		
 		//Speedboost sound attributes
-		alSourcef(alSource[6], AL_GAIN, 0.9f);
-		alSourcef(alSource[6], AL_PITCH, 1.05f);
+		alSourcef(alSource[6], AL_GAIN, 0.7f);
+		alSourcef(alSource[6], AL_PITCH, 1.2f);
+
+		//Powerup sound attributes
+		alSourcef(alSource[7], AL_GAIN, 0.7f);
+		alSourcef(alSource[7], AL_PITCH, 1.2f);
 
 		//Monster Growl attributes
-		alSourcef(alSource[11], AL_GAIN, 0.8f);
-		alSourcef(alSource[11], AL_PITCH, 2.0);
-
-		//Monster Laugh attributes
 		alSourcef(alSource[12], AL_GAIN, 0.8f);
 		alSourcef(alSource[12], AL_PITCH, 2.0f);
 
-		//Button1 attributes
+		//Monster Laugh attributes
 		alSourcef(alSource[13], AL_GAIN, 0.8f);
-		alSourcef(alSource[13], AL_PITCH, 1.2f);
+		alSourcef(alSource[13], AL_PITCH, 2.0f);
+		
+		//Monster 3 attributes
+		alSourcef(alSource[14], AL_GAIN, 0.8f);
+		alSourcef(alSource[14], AL_PITCH, 2.0f);
+
+		//Button1 attributes
+		alSourcef(alSource[15], AL_GAIN, 0.8f);
+		alSourcef(alSource[15], AL_PITCH, 1.2f);
 
 		//Button2 attributes
-		alSourcef(alSource[14], AL_GAIN, 0.8f);
-		alSourcef(alSource[14], AL_PITCH, 1.2f);
+		alSourcef(alSource[16], AL_GAIN, 0.8f);
+		alSourcef(alSource[16], AL_PITCH, 1.2f);
 	
 		//endGame attibutes
-		alSourcef(alSource[15], AL_GAIN, 0.5f);
-		alSourcef(alSource[15], AL_PITCH, 1.0f);
+		alSourcef(alSource[17], AL_GAIN, 0.5f);
+		alSourcef(alSource[17], AL_PITCH, 1.0f);
 		
 		//JohnCena attributes
-		alSourcef(alSource[16], AL_GAIN, 0.9f);
-		alSourcef(alSource[16], AL_PITCH, 1.05f);
+		alSourcef(alSource[18], AL_GAIN, 0.7f);
+		alSourcef(alSource[18], AL_PITCH, 1.0f);
 		
-		//Alien attributes
-		alSourcef(alSource[17], AL_GAIN, 1.0f);
-		alSourcef(alSource[17], AL_PITCH, 1.5f);
+		//AlienEnter attributes
+		alSourcef(alSource[19], AL_GAIN, 0.7f);
+		alSourcef(alSource[19], AL_PITCH, 1.5f);
+		
+		//AlienExit attributes
+		alSourcef(alSource[20], AL_GAIN, 0.7f);
+		alSourcef(alSource[20], AL_PITCH, 1.5f);
 		
 		//ILLUMINATI attributes
-		alSourcef(alSource[18], AL_GAIN, 1.0f);
-		alSourcef(alSource[18], AL_PITCH, 1.15f);
-		alSourcei(alSource[18], AL_LOOPING, AL_TRUE);
+		alSourcef(alSource[21], AL_GAIN, 1.0f);
+		alSourcef(alSource[21], AL_PITCH, 1.15f);
+		alSourcei(alSource[21], AL_LOOPING, AL_TRUE);
+		
+		//Bat attributes
+		alSourcef(alSource[22], AL_GAIN, 0.7f);
+		alSourcef(alSource[22], AL_PITCH, 1.5f);
 }
 
-void play_music(void)
+void toggle_music(bool play)
 {
+	if (play == 1) {
 	alSourcePlay(alSource[0]);
 	//printf("Playing sound %i", alSource[0]);
-	play = !play;
+	}
+	else if (play == 0) {
+		alSourceStop(alSource[0]);
+	}
 }
 
 void play_slide(void) 
@@ -239,64 +278,77 @@ void play_jumpsound(void)
 	}
 }
 
+void play_boost(void)
+{
+	int random = rand() % 100 + 1;
+	if (random <= 50) {
+		alSourcePlay(alSource[6]);
+	} else {
+		alSourcePlay(alSource[7]);
+	}
+}
+
 void play_spears(void)
 {
 	int rando = rand() % 400 + 1;
 	if (rando <= 100) {
-		alSourcePlay(alSource[7]);
-	}
-	else if (rando <= 200) {
 		alSourcePlay(alSource[8]);
 	}
-	else if (rando <= 300) {
+	else if (rando <= 200) {
 		alSourcePlay(alSource[9]);
-	} else {
+	}
+	else if (rando <= 300) {
 		alSourcePlay(alSource[10]);
+	} else {
+		alSourcePlay(alSource[11]);
 	}
 }	
 
 void play_monster(void)
 {
-	int roll = rand() % 50 + 1;
+	int roll = rand() % 75 + 1;
 	if (roll <= 25) {
-		alSourcePlay(alSource[11]);
-	} else {
 		alSourcePlay(alSource[12]);
+	} 
+	else if	(roll <= 50) {
+		alSourcePlay(alSource[13]);
+	} else {
+		alSourcePlay(alSource[14]);
 	}
 }
 
-//Buttons 13, 14
+//Buttons 15, 16
 void play_button1(void)
 {
-	alSourcePlay(alSource[13]);
+	alSourcePlay(alSource[15]);
 }
 
 void play_button2(void)
 {
-	alSourcePlay(alSource[14]);
+	alSourcePlay(alSource[16]);
 }
 
 void play_end(void)
 {
-	alSourcePlay(alSource[15]);
-	//printf("Playing sound %i", alSource[15]);
+	alSourcePlay(alSource[17]);
+	//printf("Playing sound %i", alSource[17]);
 }
 
-//Sound when Z button is pushed
+//Sound when T button is pushed (18)
 void play_king(void)
 {
 	if ((!dead && king)){
-		alSourcePlay(alSource[16]);
+		alSourcePlay(alSource[18]);
 		//printf("Playing sound %d\n", alSource[16]);
 		king = !king;
 	}
 }
 
-//Sound when alien ship flies by
+//Sound when alien ship flies by (19-20)
 void play_alien(void) 
 {
 	if (alien) {
-		alSourcePlay(alSource[17]);
+		alSourcePlay(alSource[19]);
 		//printf("Playing sound %d\n", alSource[17]);
 		alien = !alien;
 	}
@@ -306,7 +358,7 @@ void play_alien(void)
 void play_illuminati(void)
 {
 	if (confirmed) {
-		alSourcePlay(alSource[18]);
+		alSourcePlay(alSource[21]);
 		//printf("Playing sound %d\n", alSource[17]);
 		confirmed = !confirmed;
 	}
@@ -363,3 +415,12 @@ Rect showDave(int location)
     text.center = 0;
     return text;
 }
+
+//void Main_Menu(game *g)
+//{
+
+
+
+
+
+//}

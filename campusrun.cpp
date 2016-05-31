@@ -266,10 +266,11 @@ void deletePPM();
 void functioncall();
 void init_sounds(void);
 void clean_sounds(void);
-void play_music(void);
+void toggle_music(bool);
 void play_slide(void);
 void play_dead(void);
 void play_jumpsound(void);
+void play_boost(void);
 void play_spears(void);
 void play_monster(void);
 void play_button1(void);
@@ -886,12 +887,16 @@ void checkKeys(XEvent *e)
 		case XK_f:
 			stuff ^= 1;
 			break;
+		case XK_m:
+			play ^=1;
+			toggle_music(play);
+			break;
 		case XK_s:
 			silhouette ^= 1;
 			printf("silhouette: %i\n",silhouette);
 			break;
 		case XK_t:
-			dave = !dave;
+			dave ^= 1;
 			alSourcePlay(alSource[16]);
 			break;
 		case XK_u:
@@ -1271,6 +1276,7 @@ void render(Game *game)
 			//displaybackground(grassx, grassTexture, (yres/20), xres, 0);
 			if (!dead) {
 				if (booster < 200) {
+					play_boost();
 					farbackgroundx-=.1;
 					backgroundx-=.6;
 					skyx-=.5;
@@ -1298,8 +1304,8 @@ void render(Game *game)
 			int yellow = 0x00ffff00;
 
 			Rect r;
-			r.bot = yres - 200;
-			r.left = xres - 200;
+			r.bot = yres - 300;
+			r.left = xres - 400;
 			ggprint16(&r, 50, yellow, "Your Score: %i", score);
 			ggprint16(&r, 50, yellow, "Your Time: %i seconds", timeSpan); 
 			
@@ -1431,24 +1437,30 @@ void render(Game *game)
 				x = obstacleEffect(saucerMovement, x, y, z, saucerTexture, 
 						dead, image_counter, obstacle, sprite_x, 
 						sprite_y, booster, xdiff, monstersheetx);
+				//Play sound of Ship entering the screen
 				if (x == 101) {	
 					alien = true;
 					confirmed = true;
 					play_alien();
 					play_illuminati();
 				}
+				//Play sound of Ship starting to exit screen
+				if (x >= 500) {
+					alSourcePlay(alSource[19]);
+				}
+				//Ensure all alien sounds have stopped
 				if (x == 752) {
 					alien = false;
 					confirmed = false;
-					alSourceStop(alSource[17]);
 					alSourceStop(alSource[18]);
+					alSourceStop(alSource[19]);
+					alSourceStop(alSource[20]);
 				}
 				break;
 			case 4:
 				x = obstacleEffect(monsterMovement, x, y, z, monsterTexture, 
 						dead, image_counter, obstacle, sprite_x, 
 						sprite_y, booster, xdiff, monstersheetx);
-				//Need sound for monster here
 				if (x == 1203) {
 					play_monster();
 				}
@@ -1462,7 +1474,10 @@ void render(Game *game)
 						dead, image_counter, obstacle, sprite_x, 
 						sprite_y, booster, xdiff, batsheetx);
 				batsheetx += 0.08349;
-				//Need sounds for bat here?
+				//Play sound for bat
+				if (x <= 600) {
+					alSourcePlay(alSource[22]);
+				}
 				break;
 			default: 
 				obstacle = -1;
@@ -1543,13 +1558,13 @@ void render(Game *game)
 	  ggprint8b(&r, 16, 0, "N - Sounds");*/
 	ggprint8b(&b, 26, 0, cScore);
 
-	if (dave) {
-		nameText = showDave(800);
+	if (dave == 1) {
+		nameText = showDave(box_x);
 		ggprint8b(&nameText, 100, 100, "David Hernandez");
 
 		game->box[0].width = 200;
 		game->box[0].height = 75;
-		game->box[0].center.x = box_x -= 1.5;
+		game->box[0].center.x = box_x -= 1.75;
 		game->box[0].center.y = box_y;
 
 		if (box_x < -100)
