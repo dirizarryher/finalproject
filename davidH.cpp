@@ -168,17 +168,14 @@ void init_sounds(void)
 	//Running attributes
 	alSourcef(alSource[1], AL_GAIN, 0.2f);
 	alSourcef(alSource[1], AL_PITCH, 1.5f);
-	alSourcei(alSource[1], AL_LOOPING, AL_FALSE);
 
 	//Heavy Breathing attributes
 	alSourcef(alSource[2], AL_GAIN, 0.6f);
 	alSourcef(alSource[2], AL_PITCH, 0.7f);
-	alSourcei(alSource[2], AL_LOOPING, AL_FALSE);
 
 	//Sliding attributes
 	alSourcef(alSource[3], AL_GAIN, 0.3f);
 	alSourcef(alSource[3], AL_PITCH, 0.7f);
-	alSourcei(alSource[3], AL_LOOPING, AL_FALSE);
 
 	//Dead runner attributes
 	alSourcef(alSource[4], AL_GAIN, 2.0f);
@@ -235,7 +232,6 @@ void init_sounds(void)
 	//ILLUMINATI attributes
 	alSourcef(alSource[21], AL_GAIN, 0.5f);
 	alSourcef(alSource[21], AL_PITCH, 1.0f);
-	alSourcei(alSource[21], AL_LOOPING, AL_FALSE);
 
 	//Bat attributes
 	alSourcef(alSource[22], AL_GAIN, 0.6f);
@@ -248,7 +244,7 @@ void toggle_music(bool play)
 		alSourcePlay(alSource[0]);
 		//printf("Playing sound %i", alSource[0]);
 	}
-	else if (play == 0) {
+	if (play == 0) {
 		alSourceStop(alSource[0]);
 	}
 }
