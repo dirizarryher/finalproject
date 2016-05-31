@@ -89,7 +89,7 @@ void init_sounds(void)
 	//Variations for speedboost sound
 	alBuffer[6] = alutCreateBufferFromFile("sounds/boost.wav\0");
 	alBuffer[7] = alutCreateBufferFromFile("sounds/Powerup.wav\0");
-	
+
 	//Variations of spears thrown
 	alBuffer[8] = alutCreateBufferFromFile("sounds/spear1.wav\0");
 	alBuffer[9] = alutCreateBufferFromFile("sounds/spear2.wav\0");
@@ -119,13 +119,13 @@ void init_sounds(void)
 	alBuffer[21] = alutCreateBufferFromFile("sounds/Illuminati.wav\0");
 	//Bat Sound
 	alBuffer[22] = alutCreateBufferFromFile("sounds/bat.wav\0");
-		
+
 	//Generate a source and store it into their respective buffers
 	//alGenSources(NUM_SOURCES, alSource);
 	for (int i = 0; i < NUM_SOURCES; i++) {
 		alGenSources(1, &alSource[i]);
 		alSourcei(alSource[i], AL_BUFFER, alBuffer[i]);
-		
+
 		//Set properties for each sound
 		alSourcef(alSource[i], AL_GAIN, 1.0f);
 		alSourcef(alSource[i], AL_PITCH, 1.0f);
@@ -141,7 +141,7 @@ void init_sounds(void)
 		}
 		alGetError();
 	};
-		
+
 	if ((error = alGetError()) != AL_NO_ERROR) {
 		printf("%s\n", get_ALerror(error).c_str());
 		fprintf(stderr, "ALUT Error: %s\n", alutGetErrorString(alutGetError()));
@@ -160,94 +160,94 @@ void init_sounds(void)
 		printf("Sources have been set\n");
 	}
 	alGetError();
-		
-		//Ambiance attributes
-		alSourcef(alSource[0], AL_GAIN, 0.6f);
-		alSourcef(alSource[0], AL_PITCH, 1.0f);
-		alSourcei(alSource[0], AL_LOOPING, AL_TRUE);
-		
-		//Running attributes
-		alSourcef(alSource[1], AL_GAIN, 0.2f);
-		alSourcef(alSource[1], AL_PITCH, 1.5f);
-		alSourcei(alSource[1], AL_LOOPING, AL_FALSE);
-		
-		//Heavy Breathing attributes
-		alSourcef(alSource[2], AL_GAIN, 0.6f);
-		alSourcef(alSource[2], AL_PITCH, 0.7f);
-		alSourcei(alSource[2], AL_LOOPING, AL_FALSE);
-		
-		//Sliding attributes
-		alSourcef(alSource[3], AL_GAIN, 0.3f);
-		alSourcef(alSource[3], AL_PITCH, 0.7f);
-		alSourcei(alSource[3], AL_LOOPING, AL_FALSE);
 
-		//Dead runner attributes
-		alSourcef(alSource[4], AL_GAIN, 2.0f);
-		alSourcef(alSource[4], AL_PITCH, 1.5f);
-			
-		//Jump sound attributes
-		alSourcef(alSource[5], AL_GAIN, 0.7f);
-		alSourcef(alSource[5], AL_PITCH, 1.5f);
-		
-		//Speedboost sound attributes
-		alSourcef(alSource[6], AL_GAIN, 0.7f);
-		alSourcef(alSource[6], AL_PITCH, 1.2f);
+	//Ambiance attributes
+	alSourcef(alSource[0], AL_GAIN, 0.6f);
+	alSourcef(alSource[0], AL_PITCH, 1.0f);
+	alSourcei(alSource[0], AL_LOOPING, AL_TRUE);
 
-		//Powerup sound attributes
-		alSourcef(alSource[7], AL_GAIN, 0.7f);
-		alSourcef(alSource[7], AL_PITCH, 1.2f);
+	//Running attributes
+	alSourcef(alSource[1], AL_GAIN, 0.2f);
+	alSourcef(alSource[1], AL_PITCH, 1.5f);
+	alSourcei(alSource[1], AL_LOOPING, AL_FALSE);
 
-		//Monster Growl attributes
-		alSourcef(alSource[12], AL_GAIN, 0.7f);
-		alSourcef(alSource[12], AL_PITCH, 2.0f);
+	//Heavy Breathing attributes
+	alSourcef(alSource[2], AL_GAIN, 0.6f);
+	alSourcef(alSource[2], AL_PITCH, 0.7f);
+	alSourcei(alSource[2], AL_LOOPING, AL_FALSE);
 
-		//Monster Laugh attributes
-		alSourcef(alSource[13], AL_GAIN, 0.7f);
-		alSourcef(alSource[13], AL_PITCH, 2.0f);
-		
-		//Monster 3 attributes
-		alSourcef(alSource[14], AL_GAIN, 0.8f);
-		alSourcef(alSource[14], AL_PITCH, 2.0f);
+	//Sliding attributes
+	alSourcef(alSource[3], AL_GAIN, 0.3f);
+	alSourcef(alSource[3], AL_PITCH, 0.7f);
+	alSourcei(alSource[3], AL_LOOPING, AL_FALSE);
 
-		//Button1 attributes
-		alSourcef(alSource[15], AL_GAIN, 1.0f);
-		alSourcef(alSource[15], AL_PITCH, 1.2f);
+	//Dead runner attributes
+	alSourcef(alSource[4], AL_GAIN, 2.0f);
+	alSourcef(alSource[4], AL_PITCH, 1.5f);
 
-		//Button2 attributes
-		alSourcef(alSource[16], AL_GAIN, 1.0f);
-		alSourcef(alSource[16], AL_PITCH, 1.2f);
-	
-		//endGame attibutes
-		alSourcef(alSource[17], AL_GAIN, 0.5f);
-		alSourcef(alSource[17], AL_PITCH, 1.0f);
-		
-		//JohnCena attributes
-		alSourcef(alSource[18], AL_GAIN, 0.5f);
-		alSourcef(alSource[18], AL_PITCH, 1.0f);
-		
-		//AlienEnter attributes
-		alSourcef(alSource[19], AL_GAIN, 0.1f);
-		alSourcef(alSource[19], AL_PITCH, 1.5f);
-		
-		//AlienExit attributes
-		alSourcef(alSource[20], AL_GAIN, 0.1f);
-		alSourcef(alSource[20], AL_PITCH, 1.5f);
-		
-		//ILLUMINATI attributes
-		alSourcef(alSource[21], AL_GAIN, 0.5f);
-		alSourcef(alSource[21], AL_PITCH, 1.0f);
-		alSourcei(alSource[21], AL_LOOPING, AL_FALSE);
-		
-		//Bat attributes
-		alSourcef(alSource[22], AL_GAIN, 0.6f);
-		alSourcef(alSource[22], AL_PITCH, 1.5f);
+	//Jump sound attributes
+	alSourcef(alSource[5], AL_GAIN, 0.7f);
+	alSourcef(alSource[5], AL_PITCH, 1.5f);
+
+	//Speedboost sound attributes
+	alSourcef(alSource[6], AL_GAIN, 0.7f);
+	alSourcef(alSource[6], AL_PITCH, 1.2f);
+
+	//Powerup sound attributes
+	alSourcef(alSource[7], AL_GAIN, 0.7f);
+	alSourcef(alSource[7], AL_PITCH, 1.2f);
+
+	//Monster Growl attributes
+	alSourcef(alSource[12], AL_GAIN, 0.7f);
+	alSourcef(alSource[12], AL_PITCH, 2.0f);
+
+	//Monster Laugh attributes
+	alSourcef(alSource[13], AL_GAIN, 0.7f);
+	alSourcef(alSource[13], AL_PITCH, 2.0f);
+
+	//Monster 3 attributes
+	alSourcef(alSource[14], AL_GAIN, 0.8f);
+	alSourcef(alSource[14], AL_PITCH, 2.0f);
+
+	//Button1 attributes
+	alSourcef(alSource[15], AL_GAIN, 1.0f);
+	alSourcef(alSource[15], AL_PITCH, 1.2f);
+
+	//Button2 attributes
+	alSourcef(alSource[16], AL_GAIN, 1.0f);
+	alSourcef(alSource[16], AL_PITCH, 1.2f);
+
+	//endGame attibutes
+	alSourcef(alSource[17], AL_GAIN, 0.5f);
+	alSourcef(alSource[17], AL_PITCH, 1.0f);
+
+	//JohnCena attributes
+	alSourcef(alSource[18], AL_GAIN, 0.5f);
+	alSourcef(alSource[18], AL_PITCH, 1.0f);
+
+	//AlienEnter attributes
+	alSourcef(alSource[19], AL_GAIN, 0.1f);
+	alSourcef(alSource[19], AL_PITCH, 1.5f);
+
+	//AlienExit attributes
+	alSourcef(alSource[20], AL_GAIN, 0.1f);
+	alSourcef(alSource[20], AL_PITCH, 1.5f);
+
+	//ILLUMINATI attributes
+	alSourcef(alSource[21], AL_GAIN, 0.5f);
+	alSourcef(alSource[21], AL_PITCH, 1.0f);
+	alSourcei(alSource[21], AL_LOOPING, AL_FALSE);
+
+	//Bat attributes
+	alSourcef(alSource[22], AL_GAIN, 0.6f);
+	alSourcef(alSource[22], AL_PITCH, 1.5f);
 }
 
 void toggle_music(bool play)
 {
 	if (play == 1) {
-	alSourcePlay(alSource[0]);
-	//printf("Playing sound %i", alSource[0]);
+		alSourcePlay(alSource[0]);
+		//printf("Playing sound %i", alSource[0]);
 	}
 	else if (play == 0) {
 		alSourceStop(alSource[0]);
@@ -257,9 +257,9 @@ void toggle_music(bool play)
 void play_slide(void) 
 {
 	if (!dead && play){
-	alSourcePlay(alSource[3]);
-	//printf("Playing sound %d\n", alSource[3]);
-	play = !play;
+		alSourcePlay(alSource[3]);
+		//printf("Playing sound %d\n", alSource[3]);
+		play = !play;
 	}
 }
 
@@ -272,9 +272,9 @@ void play_dead(void)
 void play_jumpsound(void) 
 {
 	if (!dead && play){
-	alSourcePlay(alSource[5]);
-	//printf("Playing sound %i", alSource[6]);
-	play = !play;
+		alSourcePlay(alSource[5]);
+		//printf("Playing sound %i", alSource[6]);
+		play = !play;
 	}
 }
 
@@ -373,14 +373,14 @@ void clean_sounds(void)
 		alDeleteBuffers(1, &alBuffer[i]);
 		//fprintf("Deleting source[%d]\n", i);
 		if ((error = alGetError()) != AL_NO_ERROR) {
-		    //printf("Error: Deleting Sounds\n");
-		    printf("%s\n", get_ALerror(error).c_str());
-		    fprintf(stderr, "ALUT Error: %s\n", 
-			alutGetErrorString(alutGetError()));
-		    return;
+			//printf("Error: Deleting Sounds\n");
+			printf("%s\n", get_ALerror(error).c_str());
+			fprintf(stderr, "ALUT Error: %s\n", 
+					alutGetErrorString(alutGetError()));
+			return;
 		}
 	}
-	
+
 	//Close out OPAL itself
 	//Get active context
 	ALCcontext *Context = alcGetCurrentContext();
@@ -398,29 +398,20 @@ void clean_sounds(void)
 //images/runner/ directory into a ppm image
 string convertImage(string filename, string path, string filetype)
 {
-string oldfile = path + filename + filetype;
-string newfile = path + filename + ".ppm";
+	string oldfile = path + filename + filetype;
+	string newfile = path + filename + ".ppm";
 
-//converting sprite.png to sprite.ppm
-string newstuff =  "convert " + oldfile + " " + newfile;
-filename = system(newstuff.data());
-return filename;
+	//converting sprite.png to sprite.ppm
+	string newstuff =  "convert " + oldfile + " " + newfile;
+	filename = system(newstuff.data());
+	return filename;
 }
 
 Rect showDave(int location)
 {
-    Rect text;
-    text.bot = 380;
-    text.left = location;
-    text.center = 0;
-    return text;
+	Rect text;
+	text.bot = 380;
+	text.left = location;
+	text.center = 0;
+	return text;
 }
-
-//void Main_Menu(game *g)
-//{
-
-
-
-
-
-//}

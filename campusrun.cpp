@@ -4,7 +4,7 @@ Date: Spring 2016
 Purpose: This program demonstrates the use of OpenGL and XWindows to simulate
 a 2D representation of the 3D video game "Temple Run" while incorporating
 various concepts and elements from "Super Mario Bros."
-*/
+ */
 #include <stdio.h>
 #include <iostream>
 #include <stdlib.h>
@@ -40,11 +40,10 @@ extern ALuint alSource[];
 int restart = 0, temp = 0;
 int jump = 0, slide = 0, obstacle = -1, smoke = 0;
 int stuff_counter = 0, booster = 300;
-int set = 0, direction = -1, counter = 0;
-int jumpcount = 0, slidecount = 0, smokecount = 0;
+int set = 0, direction = -1, counter = 0, jumpcount = 0, slidecount = 0, smokecount = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
-	sprite_x = 140, sprite_y = 75, boostMovement = 8, spearMovement = 18, 
-	saucerMovement = 3, monsterMovement = 9, batMovement = 8;
+    sprite_x = 140, sprite_y = 75, boostMovement = 8, spearMovement = 8, 
+    saucerMovement = 3, monsterMovement = 10, batMovement = 5;
 float x = 600, y = 75, z = 1;
 double xdiff = 1, ydiff = 1;
 int standardy = 75;
@@ -53,10 +52,11 @@ int standardy = 75;
 //defined types
 typedef double Flt;
 typedef double Vec[3];
-typedef Flt Matrix[4][4];
+typedef Flt	Matrix[4][4];
 double backgroundx = -.0006, spritesheetx=0, deathsheetx=0, 
-	   monstersheetx=0, batsheetx = 0; 
+       monstersheetx=0, batsheetx = 0; 
 double jumpsheetx = 0, slidesheetx = 0;
+
 double skyx = -.00005;
 double farbackgroundx = -.0001;
 double groundx = -.005;
@@ -69,9 +69,8 @@ double grassx = -.05;
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 #define VecDot(a,b)	((a)[0]*(b)[0]+(a)[1]*(b)[1]+(a)[2]*(b)[2])
 #define VecSub(a,b,c) (c)[0]=(a)[0]-(b)[0]; \
-							 (c)[1]=(a)[1]-(b)[1]; \
+			     (c)[1]=(a)[1]-(b)[1]; \
 (c)[2]=(a)[2]-(b)[2]
-
 //constants
 const float timeslice = 1.0f;
 const float gravity = -0.2f;
@@ -81,7 +80,8 @@ const float gravity = -0.2f;
 Display *dpy;
 Window win;
 
-//----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
 //Setup timers
 const double physicsRate = 1.0 / 30.0;
 const double oobillion = 1.0 / 1e9;
@@ -99,7 +99,7 @@ void timeCopy(struct timespec *dest, struct timespec *source)
 {
 	memcpy(dest, source, sizeof(struct timespec));
 }
-//----------------------------------------------------------------------------
+//-----------------------------------------------------------------------------
 
 int image_counter = 0;
 int done=0;
@@ -117,23 +117,21 @@ typedef struct t_bigfoot {
 } Bigfoot;
 Bigfoot bigfoot;
 
-Ppmimage *runningImage, *deathImage, *jumpImage;
-Ppmimage *boostImage, *slideImage, *smokeImage;
+Ppmimage *runningImage, *deathImage, *jumpImage, *boostImage, *slideImage, *smokeImage;
 Ppmimage *grassImage, *groundImage, *skyImage, *farbackgroundImage, 
-		 *backgroundImage, *batImage;
+	 *backgroundImage, *batImage, *cannonballImage;
 Ppmimage *forestImage=NULL, *gameoverImage, *spearImage, *saucerImage, 
-		 *monsterImage;
-GLuint runningTexture, deathTexture, jumpTexture, speedTexture, slideTexture,
-	   gameoverTexture, smokeTexture;
+	 *monsterImage;
+GLuint runningTexture, deathTexture, jumpTexture, speedTexture, slideTexture, 
+       gameoverTexture, smokeTexture, cannonballTexture;
 GLuint silhouetteTexture, DeathsilhouetteTexture, JumpsilhouetteTexture, 
-	   slidesilhouetteTexture;
+       slidesilhouetteTexture;
 GLuint grassTexture, groundTexture, skyTexture, farbackgroundTexture, 
-	   backgroundTexture;
+       backgroundTexture;
 GLuint forestTexture, gameoversilhouetteTexture, spearTexture, 
-	   spearsilhouetteTexture, saucerTexture, saucersilhouetteTexture, 
-	   monsterTexture, monstersilhouetterTexture, 
-	   batTexture, batsilhouetteTexture;
-
+       spearsilhouetteTexture, saucerTexture, saucersilhouetteTexture, 
+       monsterTexture, monstersilhouetteTexture, 
+       batTexture, batsilhouetteTexture, cannonballsilhouetteTexture;
 char cScore[400];
 int name = 0;
 int score = 0;
@@ -148,7 +146,7 @@ int trees=1;
 int showRain=0;
 int deathCounter = 0;
 char user[20];
-
+//
 typedef struct t_raindrop {
 	int type;
 	int linewidth;
@@ -169,7 +167,7 @@ int totrain=0;
 int maxrain=0;
 void deleteRain(Raindrop *node);
 void cleanupRaindrops(void);
-
+//
 #define UMBRELLA_FLAT  0
 #define UMBRELLA_ROUND 1
 typedef struct t_umbrella {
@@ -210,8 +208,8 @@ struct Game {
 };
 
 //function prototypes
-float obstacleEffect(int m, float x, float y, float z, GLuint T, int &d, 
-		int &i, int &o, int sx, int xy, int &boost, 
+float obstacleEffect(int &m, float x, float y, float z, GLuint T, int &d, 
+		int &i, int &o, int sx, int &score, int xy, int &boost, 
 		double diff, double &msx, int slide);
 Rect displayName(int move);
 int randomObstacle();
@@ -277,7 +275,6 @@ int main(void)
 	//int keys = 0;
 	Game game;
 	game.n=0;	
-
 	logOpen();
 	initXWindows();
 	initOpengl();
@@ -318,10 +315,11 @@ int main(void)
 		}
 		glXSwapBuffers(dpy, win);
 		}
-		*/
+	 */
 	init();
 	clock_gettime(CLOCK_REALTIME, &timePause);
 	clock_gettime(CLOCK_REALTIME, &timeStart);
+
 	while (!done) {
 		while (XPending(dpy)) {
 			XEvent e;
@@ -517,8 +515,9 @@ void initOpengl(void)
 	//Do this to allow fonts
 	glEnable(GL_TEXTURE_2D);
 	initialize_fonts();
-
+	//
 	//load the images file into a ppm structure.
+	//
 	/* 
 	   string path = "./images/runner/";
 	   string filetype = ".png";
@@ -539,7 +538,8 @@ void initOpengl(void)
 	   convertImage("ground", path, filetype);
 	   convertImage("sky", path, filetype);
 	   convertImage("game_over", path, filetype);
-	   */
+	   <<<<<<< HEAD
+	 */
 
 	functioncall();
 
@@ -550,6 +550,7 @@ void initOpengl(void)
 	saucerImage        = ppm6GetImage("./images/runner/saucer.ppm");
 	monsterImage       = ppm6GetImage("./images/runner/monster.ppm");
 	boostImage         = ppm6GetImage("./images/speedboost.ppm");
+	cannonballImage    = ppm6GetImage("./images/cannonball.ppm");
 	batImage           = ppm6GetImage("./images/runner/bat.ppm");
 	slideImage         = ppm6GetImage("./images/Slide_000.ppm");
 	smokeImage         = ppm6GetImage("./images/Smoke.ppm");
@@ -560,9 +561,11 @@ void initOpengl(void)
 	groundImage        = ppm6GetImage("./images/ground.ppm");
 	skyImage           = ppm6GetImage("./images/sky.ppm");
 	gameoverImage      = ppm6GetImage("./images/game_over.ppm");
-
-	//Create opengl texture elements
+	//boostImage     = ppm6GetImage("./images/runner/speed_boost.ppm");
+	//
+	//create opengl texture elements
 	// glGenTextures(1, &bigfootTexture);
+	//glGenTextures(1, &jumpTexture);
 	glGenTextures(1, &runningTexture);
 	glGenTextures(1, &batTexture);
 	glGenTextures(1, &monsterTexture);
@@ -581,6 +584,31 @@ void initOpengl(void)
 	glGenTextures(1, &grassTexture);
 	glGenTextures(1, &slideTexture);
 
+	//-------------------------------------------------------------------------
+	//cannonball
+	//
+	int ball_w = cannonballImage->width;
+	int ball_h = cannonballImage->height;
+	//
+	glBindTexture(GL_TEXTURE_2D, cannonballTexture);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	glTexImage2D(GL_TEXTURE_2D, 0, 3, ball_w, ball_h, 0,
+			GL_RGB, GL_UNSIGNED_BYTE, cannonballImage->data);
+	//-------------------------------------------------------------------------
+	//ball silhouette
+	//this is similar to a sprite graphic
+	//
+	glBindTexture(GL_TEXTURE_2D, cannonballTexture);
+	//
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+	//
+	//must build a new set of data...
+	unsigned char *BallsilhouetteData = buildAlphaData(cannonballImage);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ball_w, ball_h, 0,
+			GL_RGBA, GL_UNSIGNED_BYTE, BallsilhouetteData);
 	//-------------------------------------------------------------------------
 	//bat
 	//
@@ -807,6 +835,17 @@ void checkResize(XEvent *e)
 	}
 }
 
+void initSounds(void)
+{
+	//You may add sound here for some extra credit.
+	//Fmod is not allowed.
+	//OpenAL sound only.
+	//Look for the openalTest folder under code.
+
+
+
+}
+
 void init() 
 {
 	umbrella.pos[0] = 220.0;
@@ -1014,6 +1053,17 @@ void cleanupRaindrops(void)
 	ihead=NULL;
 }
 
+void deleteRain(Raindrop *node)
+{
+	//remove a node from linked list
+	//this line keeps the compiler happy for now.
+	if (node) {}
+
+
+	//hints:
+	//check for some special cases:
+}
+
 void moveBigfoot()
 {
 	//move bigfoot...
@@ -1057,7 +1107,7 @@ void createRaindrop(const int n)
 		node->vel[0] = 
 			node->vel[1] = 0.0f;
 		node->color[0] = rnd() * 0.2f + 0.8f;
-		node->color[1] = rnd() *  0.2f + 0.8f;
+		node->color[1] = rnd() * 0.2f + 0.8f;
 		node->color[2] = rnd() * 0.2f + 0.8f;
 		node->color[3] = rnd() * 0.5f + 0.3f; //alpha
 		node->linewidth = random(8)+1;
@@ -1136,7 +1186,7 @@ void checkRaindrops()
 								node->pos[1] <= umbrella.lastpos[1]) {
 							if (node->linewidth > 1) {
 								Raindrop *savenode = node->next;
-								//deleteRain(node);
+								deleteRain(node);
 								node = savenode;
 								continue;
 							}
@@ -1169,7 +1219,7 @@ void checkRaindrops()
 							node->vel[1] += v[1] * dot * 1.0;
 						} else {
 							Raindrop *savenode = node->next;
-							//deleteRain(node);
+							deleteRain(node);
 							node = savenode;
 							continue;
 						}
@@ -1180,7 +1230,7 @@ void checkRaindrops()
 		if (node->pos[1] < -20.0f) {
 			//rain drop is below the visible area
 			Raindrop *savenode = node->next;
-			//deleteRain(node);
+			deleteRain(node);
 			node = savenode;
 			continue;
 		}
@@ -1250,14 +1300,16 @@ void drawRaindrops(void)
 
 void render(Game *game)
 {
-	//Will add r to display game instruction when the time comes
+
+	// will add r to diplay game instruction when the time comes
 	Rect b, nameText; 
 
 	//sprite_y = standardy*xdiff;
 	//Clear the screen
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
-
+	//
+	//
 	//draw a quad with texture
 	float wid = 60.0f;
 	wid *= xdiff;
@@ -1302,25 +1354,27 @@ void render(Game *game)
 			glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
 			glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
 			glEnd();
-
+			
 			int yellow = 0x00ffff00;
 			int endScore = score;
-			endScore -= 1;
+			//endScore -= 1;
 
 			Rect r;
 			r.bot = yres - 300;
-			r.left = xres - 500;
+			r.left = xres - 400;
 			ggprint16(&r, 50, yellow, "Your Score: %i", endScore);
 
 			r.bot = yres - 400;
-			r.left = xres - 500;
+			r.left = xres - 400;
 			ggprint16(&r, 50, yellow, "Press R to Restart");
 			ggprint16(&r, 50, yellow, "Press ESC to Exit");
+
+
 		}
 	}
 
 	int *point_y = &sprite_y;
-	//This makes sure the player can't double jump 
+	//this makes sure the player can't double jump 
 	if ((jump || stuff) && !dead) {
 		showRunner = 0;
 		jump = Jumping(jumpsheetx, (wid), jump, point_y, jumpTexture, 
@@ -1374,7 +1428,6 @@ void render(Game *game)
 		}
 		if (deathCounter < 9) 
 			runnerDeath(bigfoot, deathsheetx);
-
 		//If runner dies, play death sound
 		if (deathCounter < 2) {
 			play_dead();
@@ -1422,15 +1475,16 @@ void render(Game *game)
 		switch (obstacle) {
 			case 1:
 				x = obstacleEffect(boostMovement, x, y, z, speedTexture, 
-						dead, image_counter, obstacle, sprite_x, 
+						dead, image_counter, obstacle, sprite_x, score, 
 						sprite_y, booster, xdiff, monstersheetx, slide);
-				break;	
 				if (x == 192 /*&& runner touches boost*/) {
 					play_boost();
 				}
+
+				break;
 			case 2:
 				x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
-						dead, image_counter, obstacle, sprite_x, 
+						dead, image_counter, obstacle, sprite_x, score,
 						sprite_y, booster, xdiff, monstersheetx, slide);
 				if (x == 1002) {	
 					play_spears();
@@ -1438,7 +1492,7 @@ void render(Game *game)
 				break;
 			case 3:
 				x = obstacleEffect(saucerMovement, x, y, z, saucerTexture, 
-						dead, image_counter, obstacle, sprite_x, 
+						dead, image_counter, obstacle, sprite_x, score,
 						sprite_y, booster, xdiff, monstersheetx, slide);
 				//Play sound of Ship entering the screen
 				if (x == 11) {	
@@ -1461,8 +1515,8 @@ void render(Game *game)
 				}
 				break;
 			case 4:
-				x = obstacleEffect(monsterMovement, x, y, z, monsterTexture,
-						dead, image_counter, obstacle, sprite_x, 
+				x = obstacleEffect(monsterMovement, x, y, z, monsterTexture, 
+						dead, image_counter, obstacle, sprite_x, score,
 						sprite_y, booster, xdiff, monstersheetx, slide);
 				if (x == 1203) {
 					play_monster();
@@ -1470,16 +1524,19 @@ void render(Game *game)
 				if (x == 501) {
 					play_monster();
 				}
-
 				break;
 			case 5:
-				x = obstacleEffect(spearMovement, x, y, z, spearTexture,
-						dead, image_counter, obstacle, sprite_x, 
+				x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
+						dead, image_counter, obstacle, sprite_x, score,
 						sprite_y, booster, xdiff, batsheetx, slide);
-				batsheetx += 0.08349;
-				//Play sound for bat
-				if (x <= 600) {
-					alSourcePlay(alSource[22]);
+
+				break;
+			case 6:
+				x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
+						dead, image_counter, obstacle, sprite_x, score,
+						sprite_y, booster, xdiff, batsheetx, slide);
+				if (x == 1002) {	
+					play_spears();
 				}
 				break;
 			default: 
@@ -1489,7 +1546,7 @@ void render(Game *game)
 
 	float w, h;
 	//Draw shapes...
-
+	//
 	//circle
 	Shape *s;
 	float rad = 0.0;
@@ -1573,6 +1630,7 @@ void render(Game *game)
 		if (box_x < -100)
 			box_x = 900;
 	}
+
 
 	if (name) {
 		nameText = displayName(box_x - 30);
