@@ -50,8 +50,8 @@ int jump = 0, slide = 0, obstacle = -1, smoke = 0;
 int stuff_counter = 0, booster = 300;
 int set = 0, direction = -1, counter = 0, jumpcount = 0, slidecount = 0, smokecount = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
-    sprite_x = 140, sprite_y = 75, boostMovement = 8, spearMovement = 18, 
-    saucerMovement = 3, monsterMovement = 9, batMovement = 8;
+    sprite_x = 140, sprite_y = 75, boostMovement = 8, spearMovement = 8, 
+    saucerMovement = 3, monsterMovement = 10, batMovement = 5;
 float x = 600, y = 75, z = 1;
 double xdiff = 1, ydiff = 1;
 int standardy = 75;
@@ -127,11 +127,11 @@ Bigfoot bigfoot;
 
 Ppmimage *runningImage, *deathImage, *jumpImage, *boostImage, *slideImage, *smokeImage;
 Ppmimage *grassImage, *groundImage, *skyImage, *farbackgroundImage, 
-         *backgroundImage, *batImage;
+         *backgroundImage, *batImage, *cannonballImage;
 Ppmimage *forestImage=NULL, *gameoverImage, *spearImage, *saucerImage, 
          *monsterImage;
 GLuint runningTexture, deathTexture, jumpTexture, speedTexture, slideTexture, 
-       gameoverTexture, smokeTexture;
+       gameoverTexture, smokeTexture, cannonballTexture;
 GLuint silhouetteTexture, DeathsilhouetteTexture, JumpsilhouetteTexture, 
        slidesilhouetteTexture;
 GLuint grassTexture, groundTexture, skyTexture, farbackgroundTexture, 
@@ -139,7 +139,7 @@ GLuint grassTexture, groundTexture, skyTexture, farbackgroundTexture,
 GLuint forestTexture, gameoversilhouetteTexture, spearTexture, 
        spearsilhouetteTexture, saucerTexture, sucersilhouetteTexture, 
        monsterTexture, monstersilhouetterTexture, 
-       batTexture, batsilhouetteTexture;
+       batTexture, batsilhouetteTexture, cannonballsilhouetteTexture;
 char cScore[400];
 int name = 0;
 int score = 0;
@@ -216,8 +216,8 @@ struct Game {
 };
 
 //function prototypes
-float obstacleEffect(int m, float x, float y, float z, GLuint T, int &d, 
-        int &i, int &o, int sx, int xy, int &boost, 
+float obstacleEffect(int &m, float x, float y, float z, GLuint T, int &d, 
+        int &i, int &o, int sx, int &score, int xy, int &boost, 
         double diff, double &msx, int slide);
 Rect displayName(int move);
 int randomObstacle();
@@ -503,6 +503,7 @@ void initOpengl(void)
     saucerImage        = ppm6GetImage("./images/runner/saucer.ppm");
     monsterImage       = ppm6GetImage("./images/runner/monster.ppm");
     boostImage         = ppm6GetImage("./images/speedboost.ppm");
+    cannonballImage    = ppm6GetImage("./images/cannonball.ppm");
     batImage           = ppm6GetImage("./images/runner/bat.ppm");
     slideImage         = ppm6GetImage("./images/Slide_000.ppm");
     smokeImage         = ppm6GetImage("./images/Smoke.ppm");
@@ -536,6 +537,31 @@ void initOpengl(void)
     glGenTextures(1, &grassTexture);
     glGenTextures(1, &slideTexture);
 
+    //-------------------------------------------------------------------------
+    //cannonball
+    //
+    int ball_w = cannonballImage->width;
+    int ball_h = cannonballImage->height;
+    //
+    glBindTexture(GL_TEXTURE_2D, cannonballTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, ball_w, ball_h, 0,
+            GL_RGB, GL_UNSIGNED_BYTE, cannonballImage->data);
+    //-------------------------------------------------------------------------
+    //ball silhouette
+    //this is similar to a sprite graphic
+    //
+    glBindTexture(GL_TEXTURE_2D, cannonballTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *BallsilhouetteData = buildAlphaData(cannonballImage);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, ball_w, ball_h, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, BallsilhouetteData);
     //-------------------------------------------------------------------------
     //bat
     //
@@ -1357,29 +1383,33 @@ void render(Game *game)
         switch (obstacle) {
             case 1:
                 x = obstacleEffect(boostMovement, x, y, z, speedTexture, 
-                        dead, image_counter, obstacle, sprite_x, 
+                        dead, image_counter, obstacle, sprite_x, score, 
                         sprite_y, booster, xdiff, monstersheetx, slide);
                 break;
             case 2:
                 x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
-                        dead, image_counter, obstacle, sprite_x, 
+                        dead, image_counter, obstacle, sprite_x, score,
                         sprite_y, booster, xdiff, monstersheetx, slide);
                 break;
             case 3:
                 x = obstacleEffect(saucerMovement, x, y, z, saucerTexture, 
-                        dead, image_counter, obstacle, sprite_x, 
+                        dead, image_counter, obstacle, sprite_x, score,
                         sprite_y, booster, xdiff, monstersheetx, slide);
                 break;
             case 4:
                 x = obstacleEffect(monsterMovement, x, y, z, monsterTexture, 
-                        dead, image_counter, obstacle, sprite_x, 
+                        dead, image_counter, obstacle, sprite_x, score,
                         sprite_y, booster, xdiff, monstersheetx, slide);
                 break;
             case 5:
                 x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
-                        dead, image_counter, obstacle, sprite_x, 
+                        dead, image_counter, obstacle, sprite_x, score,
                         sprite_y, booster, xdiff, batsheetx, slide);
-                batsheetx += 0.08349;
+                break;
+            case 6:
+                x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
+                        dead, image_counter, obstacle, sprite_x, score,
+                        sprite_y, booster, xdiff, batsheetx, slide);
                 break;
             default: 
                 obstacle = -1;
