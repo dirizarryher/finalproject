@@ -37,14 +37,14 @@ bool play = false, king = false, spears = false, button1 = false;
 bool button2 = false, alien = false, confirmed = false, dave = false;
 extern ALuint alSource[];
 
-int restart = 0;
+int restart = 0, temp = 0;
 int jump = 0, slide = 0, obstacle = -1, smoke = 0;
 int stuff_counter = 0, booster = 300;
 int set = 0, direction = -1, counter = 0;
 int jumpcount = 0, slidecount = 0, smokecount = 0;
 int box_x = 400, box_y = 60, box_length = 40, val = 0,
-    sprite_x = 140, sprite_y = 75, boostMovement = 8, spearMovement = 18, 
-    saucerMovement = 3, monsterMovement = 9, batMovement = 8;
+	sprite_x = 140, sprite_y = 75, boostMovement = 8, spearMovement = 18, 
+	saucerMovement = 3, monsterMovement = 9, batMovement = 8;
 float x = 600, y = 75, z = 1;
 double xdiff = 1, ydiff = 1;
 int standardy = 75;
@@ -55,7 +55,7 @@ typedef double Flt;
 typedef double Vec[3];
 typedef Flt Matrix[4][4];
 double backgroundx = -.0006, spritesheetx=0, deathsheetx=0, 
-       monstersheetx=0, batsheetx = 0; 
+	   monstersheetx=0, batsheetx = 0; 
 double jumpsheetx = 0, slidesheetx = 0;
 double skyx = -.00005;
 double farbackgroundx = -.0001;
@@ -69,7 +69,7 @@ double grassx = -.05;
 #define VecCopy(a,b) (b)[0]=(a)[0];(b)[1]=(a)[1];(b)[2]=(a)[2]
 #define VecDot(a,b)	((a)[0]*(b)[0]+(a)[1]*(b)[1]+(a)[2]*(b)[2])
 #define VecSub(a,b,c) (c)[0]=(a)[0]-(b)[0]; \
-			     (c)[1]=(a)[1]-(b)[1]; \
+							 (c)[1]=(a)[1]-(b)[1]; \
 (c)[2]=(a)[2]-(b)[2]
 
 //constants
@@ -120,19 +120,19 @@ Bigfoot bigfoot;
 Ppmimage *runningImage, *deathImage, *jumpImage;
 Ppmimage *boostImage, *slideImage, *smokeImage;
 Ppmimage *grassImage, *groundImage, *skyImage, *farbackgroundImage, 
-	 *backgroundImage, *batImage;
+		 *backgroundImage, *batImage;
 Ppmimage *forestImage=NULL, *gameoverImage, *spearImage, *saucerImage, 
-	 *monsterImage;
+		 *monsterImage;
 GLuint runningTexture, deathTexture, jumpTexture, speedTexture, slideTexture,
-       gameoverTexture, smokeTexture;
+	   gameoverTexture, smokeTexture;
 GLuint silhouetteTexture, DeathsilhouetteTexture, JumpsilhouetteTexture, 
-       slidesilhouetteTexture;
+	   slidesilhouetteTexture;
 GLuint grassTexture, groundTexture, skyTexture, farbackgroundTexture, 
-       backgroundTexture;
+	   backgroundTexture;
 GLuint forestTexture, gameoversilhouetteTexture, spearTexture, 
-       spearsilhouetteTexture, saucerTexture, saucersilhouetteTexture, 
-       monsterTexture, monstersilhouetterTexture, 
-       batTexture, batsilhouetteTexture;
+	   spearsilhouetteTexture, saucerTexture, saucersilhouetteTexture, 
+	   monsterTexture, monstersilhouetterTexture, 
+	   batTexture, batsilhouetteTexture;
 
 char cScore[400];
 int name = 0;
@@ -211,16 +211,17 @@ struct Game {
 
 //function prototypes
 float obstacleEffect(int m, float x, float y, float z, GLuint T, int &d, 
-	int &i, int &o, int sx, int xy, int &boost, double diff, double &msx);
+		int &i, int &o, int sx, int xy, int &boost, 
+		double diff, double &msx, int slide);
 Rect displayName(int move);
 int randomObstacle();
 void saveData(char *u_Name, int score);
 int Jumping (double spritesheetx, float wid, int jump, int *sprite_y, 
-	GLuint jumpTexture, int stuff, double diff);
+		GLuint jumpTexture, int stuff, double diff);
 int sliding (int slidecount, double spritesheetx, float wid, int slide, 
-	Bigfoot &bigfoot, GLuint slideTexture);
+		Bigfoot &bigfoot, GLuint slideTexture);
 int smoking (int smokecount, double spritesheetx, float wid, int smoke,
-	Bigfoot &bigfoot, GLuint smokeTexture);
+		Bigfoot &bigfoot, GLuint smokeTexture);
 void runnerDeath (Bigfoot &b, double s);
 void initXWindows(void);
 void initOpengl(void);
@@ -237,7 +238,7 @@ void projectImage(float x, float y, float z, GLuint speedTexture, double diff);
 bool checkcollison(int sprite, float x, int sprite_y, float y, double diff);
 void funnystuff(int stuff_counter);
 void displaybackground(double backgroundx, GLuint Texture, int yres, 
-	int xres, bool toggle);
+		int xres, bool toggle);
 double farbackground(double x);
 double backgroundscroll(double x);
 double ground(double x);
@@ -278,28 +279,28 @@ int main(void)
 	game.n=0;	
 
 	logOpen();
-        initXWindows();
-        initOpengl();
-        init_sounds();
+	initXWindows();
+	initOpengl();
+	init_sounds();
 	init();
 
-/*	while (!done) {
+	/*	while (!done) {
 		while (XPending(dpy)) {
-			XEvent e;
-                        XNextEvent(dpy, &e);
-                        checkResize(&e);
-                        checkMouse(&e);
-                        done = checkKeys(&e);
-	}
-	Rect r;
-	r.bot = yres - 100;
-	r.left = 500;
-	r.center = 0;
-	ggprint16(&r, 36, 0xffffffff, "TEMPLE RUN 2D");
-	r.bot = yres - 500;
-	r.left = 250;
-	ggprint16(&r, 36, 0xffffffff, "(S)tart Game (C)ontrols (ESC)Exit Game");
-	if (done == 2) {
+		XEvent e;
+		XNextEvent(dpy, &e);
+		checkResize(&e);
+		checkMouse(&e);
+		done = checkKeys(&e);
+		}
+		Rect r;
+		r.bot = yres - 100;
+		r.left = 500;
+		r.center = 0;
+		ggprint16(&r, 36, 0xffffffff, "TEMPLE RUN 2D");
+		r.bot = yres - 500;
+		r.left = 250;
+		ggprint16(&r, 36, 0xffffffff, "(S)tart Game (C)ontrols (ESC)Exit Game");
+		if (done == 2) {
 		play ^= 1;
 		play_button1();
 		play = !play;
@@ -308,16 +309,16 @@ int main(void)
 		r.left = 250;	
 		ggprint16(&r, 36, "Arrow ^:	Jump");
 		ggprint16(&r, 36, "Arrow v:	Slide");
-	}
-	if (done == 3) {
+		}
+		if (done == 3) {
 		play = true;
 		toggle_music(play);
 		init();
 		break;
-	}
-	glXSwapBuffers(dpy, win);
-	}
-*/
+		}
+		glXSwapBuffers(dpy, win);
+		}
+		*/
 	init();
 	clock_gettime(CLOCK_REALTIME, &timePause);
 	clock_gettime(CLOCK_REALTIME, &timeStart);
@@ -538,7 +539,7 @@ void initOpengl(void)
 	   convertImage("ground", path, filetype);
 	   convertImage("sky", path, filetype);
 	   convertImage("game_over", path, filetype);
-	 */
+	   */
 
 	functioncall();
 
@@ -559,7 +560,7 @@ void initOpengl(void)
 	groundImage        = ppm6GetImage("./images/ground.ppm");
 	skyImage           = ppm6GetImage("./images/sky.ppm");
 	gameoverImage      = ppm6GetImage("./images/game_over.ppm");
-	
+
 	//Create opengl texture elements
 	// glGenTextures(1, &bigfootTexture);
 	glGenTextures(1, &runningTexture);
@@ -907,6 +908,7 @@ void checkKeys(XEvent *e)
 			printf("silhouette: %i\n",silhouette);
 			break;
 		case XK_t:
+			trees ^= 1;
 			dave ^= 1;
 			alSourcePlay(alSource[17]);
 			if (dave == 0)
@@ -1255,7 +1257,7 @@ void render(Game *game)
 	//Clear the screen
 	glClearColor(1.0, 1.0, 1.0, 1.0);
 	glClear(GL_COLOR_BUFFER_BIT);
-	
+
 	//draw a quad with texture
 	float wid = 60.0f;
 	wid *= xdiff;
@@ -1307,11 +1309,11 @@ void render(Game *game)
 
 			Rect r;
 			r.bot = yres - 300;
-			r.left = xres - 400;
+			r.left = xres - 500;
 			ggprint16(&r, 50, yellow, "Your Score: %i", endScore);
-			
+
 			r.bot = yres - 400;
-			r.left = xres - 400;
+			r.left = xres - 500;
 			ggprint16(&r, 50, yellow, "Press R to Restart");
 			ggprint16(&r, 50, yellow, "Press ESC to Exit");
 		}
@@ -1421,7 +1423,7 @@ void render(Game *game)
 			case 1:
 				x = obstacleEffect(boostMovement, x, y, z, speedTexture, 
 						dead, image_counter, obstacle, sprite_x, 
-						sprite_y, booster, xdiff, monstersheetx);
+						sprite_y, booster, xdiff, monstersheetx, slide);
 				break;	
 				if (x == 192 /*&& runner touches boost*/) {
 					play_boost();
@@ -1429,7 +1431,7 @@ void render(Game *game)
 			case 2:
 				x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
 						dead, image_counter, obstacle, sprite_x, 
-						sprite_y, booster, xdiff, monstersheetx);
+						sprite_y, booster, xdiff, monstersheetx, slide);
 				if (x == 1002) {	
 					play_spears();
 				}
@@ -1437,7 +1439,7 @@ void render(Game *game)
 			case 3:
 				x = obstacleEffect(saucerMovement, x, y, z, saucerTexture, 
 						dead, image_counter, obstacle, sprite_x, 
-						sprite_y, booster, xdiff, monstersheetx);
+						sprite_y, booster, xdiff, monstersheetx, slide);
 				//Play sound of Ship entering the screen
 				if (x == 11) {	
 					alien = true;
@@ -1459,9 +1461,9 @@ void render(Game *game)
 				}
 				break;
 			case 4:
-				x = obstacleEffect(monsterMovement, x, y, z, monsterTexture, 
+				x = obstacleEffect(monsterMovement, x, y, z, monsterTexture,
 						dead, image_counter, obstacle, sprite_x, 
-						sprite_y, booster, xdiff, monstersheetx);
+						sprite_y, booster, xdiff, monstersheetx, slide);
 				if (x == 1203) {
 					play_monster();
 				}
@@ -1471,9 +1473,9 @@ void render(Game *game)
 
 				break;
 			case 5:
-				x = obstacleEffect(batMovement, x, y, z, batTexture, 
+				x = obstacleEffect(spearMovement, x, y, z, spearTexture,
 						dead, image_counter, obstacle, sprite_x, 
-						sprite_y, booster, xdiff, batsheetx);
+						sprite_y, booster, xdiff, batsheetx, slide);
 				batsheetx += 0.08349;
 				//Play sound for bat
 				if (x <= 600) {
