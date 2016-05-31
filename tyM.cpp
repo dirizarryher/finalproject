@@ -8,7 +8,7 @@
    displayName will return an object to display text to the main function
    where it will be displayed in a moving box that will loop around forever.  
    */
-int mod = 1;
+int mod = 1, scoreMod = 1, showAlien = 0;
 #include "tyM.h"
 
 void saveData(char* u_Name, int score)
@@ -193,20 +193,20 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
         int &dead, int &image_counter, int &obstacle, int sprite_x, int &score,
         int sprite_y, int &booster, double diff, double &spritex, int slide)
 {
-    int luck = 2, showAlien = 0, collision = 0;
+    int luck = 2, collision = 0;
     glEnd();
     glPopMatrix();
     float wid = 50.0f*diff;
     //if(counter == somevalue)
-    if (score % 500 == 0)
-        movement++;
-    if (score > 3000+mod) {
-        image_counter = 50;
-        luck = 16;
-        showAlien = 1;
-        obstacle = 3;
-        mod += mod;
+    if (score > 2000+scoreMod) {
+        if (movement < 20) {
+            movement++;
+            scoreMod += 200;
+            cout << "Speed increased\n";
+        }
     }
+    if (score > 2000+mod)
+        obstacle = 3;
     switch (obstacle) {
         case 1:
             if (image_counter < 50) {
@@ -216,7 +216,6 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
             }
             else {
                 if (luck % 5 == 0 ) {
-                    cout << obstacle << endl;
                     x -= movement;
                     projectImage(x*diff, y*diff, z, Texture, diff);
                     if (x < -100 || checkcollison(sprite_x, x*diff, 
@@ -239,7 +238,6 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                 x = 1200;
             }
             else {
-                cout << obstacle << endl;
                 x -= movement;
                 projectImage(x*diff, y*diff, z, Texture, diff);
                 if (x < -100 || checkcollison(sprite_x, x*diff, 
@@ -247,7 +245,7 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                     if (checkcollison(sprite_x, x*diff, sprite_y, y*diff, diff))
                         dead = 1; 
                     else
-                        score += 100;
+                        score += 10;
                     image_counter = 0;
                     x = 900;
                     obstacle = -1;
@@ -261,8 +259,7 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                 luck = rand() % 1000 + 1;
             }
             else {
-                cout << obstacle << endl;
-                if (luck % 3 == 0 || luck % 8 == 0) {
+                if (luck % 3 == 0 || luck % 8 == 0 || score > 2000+mod ) {
                     x += movement;
                     projectImage(x*diff, (y+300)*diff, z, Texture, diff);
                     if (x > 1200 ) {
@@ -270,6 +267,7 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                         x = -100;
                         obstacle = 4;
                         showAlien = 1;
+                        mod += 2000;
                     }
                 }
                 else
@@ -282,7 +280,6 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                 x = 1400;
             }
             else {
-                cout << obstacle << endl;
                 if (showAlien) {
                     glPushMatrix();
                     glTranslatef(x*diff, y*diff, z);
@@ -307,7 +304,7 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                                     diff))
                             dead = 1; 
                         else
-                            score += 5000;
+                            score += 500;
                         image_counter = 0;
                         x = -100;
                         obstacle = -1;
@@ -323,7 +320,6 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                 x = 1200;
             }
             else {
-                cout << obstacle << endl;
                 x -= movement;
                 projectImage(x*diff, (y+35)*diff, z, Texture, diff);
                 if (slide)
@@ -334,7 +330,7 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                                 (y+35)*diff, diff))
                         dead = 1; 
                     else
-                        score += 200;
+                        score += 20;
                     image_counter = 0;
                     x = 900;
                     obstacle = -1;
@@ -347,7 +343,6 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                 x = 1200;
             }
             else {
-                cout << obstacle << endl;
                 x -= movement+2;
                 projectImage(x*diff, (y+35)*diff, z, Texture, diff);
                 if (slide)
@@ -358,7 +353,7 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                                 (y+35)*diff, diff))
                         dead = 1; 
                     else
-                        score += 1000;
+                        score += 50;
                     image_counter = 0;
                     x = 900;
                     obstacle = -1;
@@ -371,7 +366,6 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                 x = 1200;
             }
             else {
-                cout << obstacle << endl;
                 x -= movement+1;
                 projectImage(x*diff, y*diff, z, Texture, diff);
                 if (x < -100 || checkcollison(sprite_x, x*diff, 
@@ -379,7 +373,7 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                     if (checkcollison(sprite_x, x*diff, sprite_y, y*diff, diff))
                         dead = 1; 
                     else
-                        score += 1000;
+                        score += 50;
                     image_counter = 0;
                     x = 900;
                     obstacle = -1;
