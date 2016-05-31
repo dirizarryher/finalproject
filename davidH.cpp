@@ -426,3 +426,13 @@ Rect showDave(int location)
 	text.center = 0;
 	return text;
 }
+void convertTitle(void)
+{
+	string path = "./images/";
+	string filetype = ".png";
+	convertImage("TempleRunTitle", path, filetype);
+}
+void deleteTitle(void)
+{
+	system("rm -f ./images/TempleRunTitle.ppm");
+}

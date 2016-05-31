@@ -282,7 +282,8 @@ void Money_Money(void);
 void play_life(void);
 Rect showDave(int);
 void menuFunc(double xres, double yres, double diff);
-
+void deleteTitle();
+void convertTitle();
 int main(void)
 {
     memcpy(user, "temp", 5);
@@ -411,6 +412,7 @@ int main(void)
     cleanup_fonts();
     logClose();
     deletePPM();
+deleteTitle();
     return 0;
 }
 
@@ -572,9 +574,7 @@ void initOpengl(void)
        */
 
     functioncall();
-	string path = "./images/";
-	string filetype = ".png";
-	convertImage("TempleRunTitle", path, filetype);
+	convertTitle();
 
     jumpImage          = ppm6GetImage("./images/runner/jump_sheet.ppm");
     runningImage       = ppm6GetImage("./images/runner/runner_sheet2.ppm");
@@ -862,7 +862,7 @@ void initOpengl(void)
     glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
     glTexImage2D(GL_TEXTURE_2D, 0, 3,
             displayTitleImage->width, displayTitleImage->height,
-            0, GL_RGB, GL_UNSIGNED_BYTE, displayTitleImage->data);
+            0, GL_RGBA, GL_UNSIGNED_BYTE, displayTitleImage->data);
 	//
     //Sky
     //int forest_w = WINDOW_WIDTH * 2;
@@ -1463,10 +1463,10 @@ void render(Game *game)
         //Temple run Title
 		glBindTexture(GL_TEXTURE_2D, displayTitleTexture);
 		glBegin(GL_QUADS);
-        glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
-		glTexCoord2f(0.0f, 0.0f); glVertex2i(0, 315);
-        glTexCoord2f(1.0f, 0.0f); glVertex2i(315, 686);
-        glTexCoord2f(1.0f, 1.0f); glVertex2i(315, 0);
+            	glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
+	            glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
+	            glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
+	            glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
 		glEnd();
 
         menuFunc(xres, yres, xdiff);
