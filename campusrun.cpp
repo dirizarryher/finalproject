@@ -138,6 +138,7 @@ char cScore[400];
 int name = 0;
 int score = 0;
 int money = 0;
+int life = 0;
 int distance = 0;
 int showRunner=1;
 int endScore = 0;
@@ -1421,12 +1422,12 @@ void render(Game *game)
 	    //endScore -= 1;
 
 	    Rect r;
-	    r.bot = yres*xdiff;
-	    r.left = xres*xdiff;
+	    r.bot = (yres + ydiff)/5;
+	    r.left =(xres + xdiff)/2;
 	    ggprint16(&r, 50, yellow, "Your Score: %i", endScore);
 
-	    r.bot = yres*xdiff;
-	    r.left = xres*xdiff;
+	    r.bot = (yres + ydiff)/8;
+	    r.left = (xres + xdiff)/2;
 	    ggprint16(&r, 50, yellow, "Press R to Restart");
 	    ggprint16(&r, 50, yellow, "Press ESC to Exit");
 
@@ -1435,6 +1436,8 @@ void render(Game *game)
     }
     if (menu) {
 	showRunner = 0;
+	//Temple run Title
+	
 	menuFunc(xres, yres, xdiff);
     }
     if (!menu) {
@@ -1612,7 +1615,7 @@ void render(Game *game)
 			    dead, image_counter, obstacle, sprite_x, score,
 			    sprite_y, money, xdiff, batsheetx, slide);
 			if (money) {
-				MoneyMoney();
+				Money_Money();
 			}
 		    break;
 		case 9:
