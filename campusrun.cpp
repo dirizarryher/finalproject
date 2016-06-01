@@ -1519,7 +1519,6 @@ void render(Game *game)
         //
     }
     spritesheetx += .11111111111;
-    obstacle = 9;
     if (obstacle == -1)
         obstacle = randomObstacle();
     if (obstacle && !dead) {
