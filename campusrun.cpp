@@ -38,7 +38,7 @@ bool ambiance = 0, button2 = false, alien = false, confirmed = false;
 bool dave = false;
 extern ALuint alSource[];
 
-int restart = 0, temp = 0;
+int restart = 0, temp = 0, lives = 0;
 int jump = 0, slide = 0, obstacle = -1, smoke = 0;
 int stuff_counter = 0, booster = 300;
 int set = 0, direction = -1, counter = 0, jumpcount = 0, slidecount = 0, smokecount = 0;
@@ -120,18 +120,18 @@ Bigfoot bigfoot;
 
 Ppmimage *runningImage, *deathImage, *jumpImage, *boostImage, *slideImage, *smokeImage;
 Ppmimage *grassImage, *groundImage, *skyImage, *farbackgroundImage, 
-         *backgroundImage, *batImage, *moneyImage;
+         *backgroundImage, *batImage, *moneyImage, *lifeImage;
 Ppmimage *forestImage=NULL, *gameoverImage, *spearImage, *saucerImage, 
          *monsterImage;
 GLuint runningTexture, deathTexture, jumpTexture, speedTexture, slideTexture, 
-       gameoverTexture, smokeTexture, moneyTexture;
+       gameoverTexture, smokeTexture, moneyTexture, lifeTexture;
 GLuint silhouetteTexture, DeathsilhouetteTexture, JumpsilhouetteTexture, 
        slidesilhouetteTexture;
 GLuint grassTexture, groundTexture, skyTexture, farbackgroundTexture, 
        backgroundTexture;
 GLuint forestTexture, gameoversilhouetteTexture, spearTexture, 
        spearsilhouetteTexture, saucerTexture, saucersilhouetteTexture, 
-       monsterTexture, monstersilhouetteTexture, 
+       monsterTexture, monstersilhouetteTexturei, lifesilhouetteTexture, 
        batTexture, batsilhouetteTexture, moneysilhouetteTexture;
 char cScore[400];
 int name = 0;
@@ -210,6 +210,8 @@ struct Game {
 };
 
 //function prototypes
+void lifeIncrease(int &l);
+void scoreModifier(int &s);
 float obstacleEffect(int &m, float x, float y, float z, GLuint T, int &d, 
         int &i, int &o, int sx, int &score, int xy, int &boost, 
         double diff, double &msx, int slide);
@@ -356,12 +358,24 @@ int main(void)
             physicsCountdown -= physicsRate;
         }
         //Always render every frame.
-        score++;
+        if (score > 4000)
+            scoreModifier(score);
+        if (score > 8000) {
+            scoreModifier(score);
+            scoreModifier(score);
+        }
+        else
+            score++;
         movement(&game);
         render(&game);
         glXSwapBuffers(dpy, win);
         if (restart) {
-            endScore = 0;
+            lives++;
+            if (lives > 3) {
+                saveData(user, score);
+                score = 0;
+                endScore = 0;
+            }
             cleanupXWindows();
             cleanup_fonts();
             logClose();
@@ -371,7 +385,6 @@ int main(void)
             xdiff=1;
             dead = 0;
             deathCounter = 0;
-            score = 0;
             logOpen();
             initXWindows();
             initOpengl();
@@ -554,6 +567,7 @@ void initOpengl(void)
     monsterImage       = ppm6GetImage("./images/runner/monster.ppm");
     boostImage         = ppm6GetImage("./images/speedboost.ppm");
     moneyImage         = ppm6GetImage("./images/runner/money.ppm");
+    lifeImage          = ppm6GetImage("./images/runner/life.ppm");
     batImage           = ppm6GetImage("./images/runner/bat.ppm");
     slideImage         = ppm6GetImage("./images/Slide_000.ppm");
     smokeImage         = ppm6GetImage("./images/Smoke.ppm");
@@ -582,12 +596,38 @@ void initOpengl(void)
     glGenTextures(1, &gameoverTexture);
 
     glGenTextures(1, &skyTexture);
+    glGenTextures(1, &lifeTexture);
     glGenTextures(1, &farbackgroundTexture);
     glGenTextures(1, &backgroundTexture);
     glGenTextures(1, &groundTexture);
     glGenTextures(1, &grassTexture);
     glGenTextures(1, &slideTexture);
 
+    //-------------------------------------------------------------------------
+    //life
+    //
+    int life_w = lifeImage->width;
+    int life_h = lifeImage->height;
+    //
+    glBindTexture(GL_TEXTURE_2D, lifeTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3, life_w, life_h, 0,
+            GL_RGB, GL_UNSIGNED_BYTE, lifeImage->data);
+    //-------------------------------------------------------------------------
+    //life silhouette
+    //this is similar to a sprite graphic
+    //
+    glBindTexture(GL_TEXTURE_2D, lifeTexture);
+    //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    //
+    //must build a new set of data...
+    unsigned char *LifesilhouetteData = buildAlphaData(lifeImage);
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, life_w, life_h, 0,
+            GL_RGBA, GL_UNSIGNED_BYTE, LifesilhouetteData);
     //-------------------------------------------------------------------------
     //money
     //
@@ -1023,6 +1063,7 @@ void checkKeys(XEvent *e)
             }
             break;
         case XK_Escape:
+            saveData(user, score);
             done=1;
             break;
     }
@@ -1338,6 +1379,7 @@ void render(Game *game)
                     farbackgroundx-=.1;
                     backgroundx-=.6;
                     skyx-=.5;
+                    scoreModifier(score);
                     grassx-=.5;
                     groundx-=.05;
                     booster++;
@@ -1362,7 +1404,6 @@ void render(Game *game)
 
             int yellow = 0x00ffff00;
             if (endScore == 0) {
-                saveData(user, score);
                 endScore = score;
             }
             //endScore -= 1;
@@ -1478,6 +1519,7 @@ void render(Game *game)
         //
     }
     spritesheetx += .11111111111;
+    obstacle = 9;
     if (obstacle == -1)
         obstacle = randomObstacle();
     if (obstacle && !dead) {
@@ -1486,7 +1528,7 @@ void render(Game *game)
                 x = obstacleEffect(boostMovement, x, y, z, speedTexture, 
                         dead, image_counter, obstacle, sprite_x, score, 
                         sprite_y, booster, xdiff, monstersheetx, slide);
-                if (x == 190 /*&& runner touches boost*/) {
+                if (booster == 1) {
                     play_boost();
                 }
 
@@ -1504,7 +1546,7 @@ void render(Game *game)
                         dead, image_counter, obstacle, sprite_x, score,
                         sprite_y, booster, xdiff, monstersheetx, slide);
                 //Play sound of Ship entering the screen
-                if (x <= 10 && obstacle == 3) {	
+                if (x <= 10 && obstacle == 3 && score > 1000) {	
                     alien = true;
                     confirmed = true;
                     play_alien();
@@ -1554,9 +1596,11 @@ void render(Game *game)
                 x = obstacleEffect(boostMovement, x, y, z, moneyTexture, 
                         dead, image_counter, obstacle, sprite_x, score,
                         sprite_y, booster, xdiff, batsheetx, slide);
-                if (x == 800) {
-                    play_spears();
-                }
+                break;
+            case 9:
+                x = obstacleEffect(boostMovement, x, y, z, lifeTexture, 
+                        dead, image_counter, obstacle, sprite_x, lives,
+                        sprite_y, booster, xdiff, batsheetx, slide);
                 break;
             default: 
                 obstacle = -1;
