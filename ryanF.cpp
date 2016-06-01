@@ -250,6 +250,8 @@ void functioncall()
     string path = "./images/runner/";
     string filetype = ".png";
     convertImage("runner_sheet2", path, filetype);
+    convertImage("money", path, filetype);
+    convertImage("life", path, filetype);
     convertImage("jump_sheet", path, filetype);
     convertImage("spear", path, filetype);
     convertImage("saucer", path, filetype);
@@ -276,6 +278,8 @@ void deletePPM()
     system("rm -f ./images/runner/runner_sheet2.ppm");
     system("rm -f ./images/runner/jump_sheet.ppm");
     system("rm -f ./images/runner/spear.ppm");
+    system("rm -f ./images/runner/life.ppm");
+    system("rm -f ./images/runner/money.ppm");
     system("rm -f ./images/runner/saucer.ppm");
     system("rm -f ./images/runner/monster.ppm");
     system("rm -f ./images/runner/runner_sheet2.ppm");
