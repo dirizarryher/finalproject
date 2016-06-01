@@ -1487,8 +1487,6 @@ void render(Game *game)
         glPopMatrix();
         deathCounter++;
         deathsheetx += .11111;
-
-        //Need to stop the score count here?
     }
 
     if (showRunner && !jump && !dead) {
@@ -1552,11 +1550,11 @@ void render(Game *game)
                     play_illuminati();
                 }
                 //Play sound of Ship starting to exit screen
-                if (x == 500) {
+                if (x == 500 && obstacle == 3 && score > 1000) {
                     alSourcePlay(alSource[19]);
                 }
                 //Ensure all alien sounds have stopped
-                if (x == 900) {
+                if (x == 900 && obstacle == 3 && score > 1000) {
                     alien = false;
                     confirmed = false;
                     alSourceStop(alSource[18]);
