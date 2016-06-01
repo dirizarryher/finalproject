@@ -198,7 +198,7 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
     glPopMatrix();
     float wid = 50.0f*diff;
     //if(counter == somevalue)
-    if (score > 2000+scoreMod) {
+    if (score > 1000+scoreMod) {
         if (movement < 20) {
             movement++;
             scoreMod += 200;
@@ -259,7 +259,7 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                 luck = rand() % 1000 + 1;
             }
             else {
-                if (luck % 3 == 0 || luck % 8 == 0 || score > 2000+mod ) {
+                if (score > 1000+mod ) {
                     x += movement;
                     projectImage(x*diff, (y+300)*diff, z, Texture, diff);
                     if (x > 1200 ) {
@@ -320,14 +320,18 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                 x = 1200;
             }
             else {
+		cout << obstacle << endl;
                 x -= movement;
                 projectImage(x*diff, (y+35)*diff, z, Texture, diff);
-                if (slide)
+                if (slide) {
                     collision = 20;
-                if (x < -100 || checkcollison(sprite_x, x*diff, 
+		    if (diff > 1)
+			collision = 70;
+		}
+                if (x < -200 || checkcollison(sprite_x, x*diff, 
                             sprite_y-collision, (y+35)*diff, diff)) {
-                    if (checkcollison(sprite_x, x*diff, sprite_y-collision, 
-                                (y+35)*diff, diff))
+                    if (checkcollison(sprite_x, x*diff, sprite_y-collision*diff, 
+                                (y+35), diff))
                         dead = 1; 
                     else
                         score += 20;
@@ -343,11 +347,15 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                 x = 1200;
             }
             else {
+		cout << obstacle << endl;
                 x -= movement+2;
                 projectImage(x*diff, (y+35)*diff, z, Texture, diff);
-                if (slide)
+                if (slide) {
                     collision = 20;
-                if (x < -100 || checkcollison(sprite_x, x*diff, 
+		    if (diff > 1)
+			collision = 70;
+		}
+                if (x < -200 || checkcollison(sprite_x, x*diff, 
                             sprite_y-collision, (y+35)*diff, diff)) {
                     if (checkcollison(sprite_x, x*diff, sprite_y-collision, 
                                 (y+35)*diff, diff))

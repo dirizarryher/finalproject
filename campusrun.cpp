@@ -1500,7 +1500,7 @@ void render(Game *game)
 			dead, image_counter, obstacle, sprite_x, score,
 			sprite_y, booster, xdiff, monstersheetx, slide);
 		//Play sound of Ship entering the screen
-		if (x <= 10) {	
+		if (x <= 10 && obstacle == 3) {	
 		    alien = true;
 		    confirmed = true;
 		    play_alien();
