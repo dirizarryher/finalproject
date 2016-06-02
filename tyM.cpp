@@ -490,7 +490,8 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                                 sprite_y, y*diff, diff)) {
                         if (checkcollison(sprite_x,x*diff,sprite_y,
                                     y*diff,diff))
-                            lifeBoost = checkcollison(sprite_x, x*diff, 
+                            lifeBoost = checkcollison(sprite_x, 
+                                    x*diff, 
                                     sprite_y, y*diff, diff);
                         image_counter = 0;
                         if (lifeBoost) {
