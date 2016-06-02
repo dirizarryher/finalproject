@@ -39,7 +39,7 @@ bool dave = false;
 bool menu = 1;
 extern ALuint alSource[];
 
-int restart = 0, temp = 0, lives = 0;
+int restart = 0, temp = 0, lives = 3;
 int jump = 0, slide = 0, obstacle = -1, smoke = 0;
 int stuff_counter = 0, booster = 300;
 int set = 0, direction = -1, counter = 0, jumpcount = 0, slidecount = 0, smokecount = 0;
@@ -378,11 +378,11 @@ int main(void)
         render(&game);
         glXSwapBuffers(dpy, win);
         if (restart) {
-            lives++;
-            if (lives > 3) {
+            lives--;
+            endScore = 0;
+            if (lives == 0) {
                 saveData(user, score);
                 score = 0;
-                endScore = 0;
             }
             cleanupXWindows();
             cleanup_fonts();
