@@ -1,19 +1,25 @@
 // TyAnthoney Morrell CMPS 356
 /* This file will perform 
- * 1. Perform the runner dying animation
- * 2. Save user data to the database
+ * 1. Perform the runner dying animation using a function that 
+ *    takes textures as parameters and creates the animation.
+ * 2. Save user data to the database using a server connection to
+ *    a PHP script and store data in a mysql database
  * 3. Perform all of the obstacle/boost animations
+ *    uses a switch statement to perform random obstacle animations
+ *    and effects.
  * 4. Modify scores based on progress
  * 5. Provide the case number for each obstacle/boost to be called 
  */
 #include "tyM.h"
 
-int mod = 1; 
+int mod = 0;
 int scoreMod = 1;
 int showAlien = 0; 
 int boostMod = 0; 
 int moneyBoost = 0; 
 int lifeBoost = 0;
+int boostsMissed = 0;
+int obstaclesAvoided = 0;
 void saveData(char* u_Name, int score)
 {
     struct sockaddr_in *remote;
@@ -45,7 +51,8 @@ void saveData(char* u_Name, int score)
     fprintf(stderr, "IP is %s\n", ip);
     remote = (struct sockaddr_in *)malloc(sizeof(struct sockaddr_in *));
     remote->sin_family = AF_INET;
-    tmpres = inet_pton(AF_INET, ip, (void *)(&(remote->sin_addr.s_addr)));
+    tmpres = inet_pton(AF_INET, ip, 
+            (void *)(&(remote->sin_addr.s_addr)));
     if (tmpres < 0)  {
         perror("Can't set remote->sin_addr.s_addr");
         exit(1);
@@ -197,6 +204,16 @@ Rect displayName(int location)
     return nameBox; 
 }
 
+int boostCount()
+{
+    return boostsMissed;
+}
+
+int obstacleCount()
+{
+    return obstaclesAvoided;
+}
+
 void scoreModifier(int &score)
 {
     if (score > 2000) {
@@ -274,23 +291,28 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                 x = 1200;
             }
             else {
-                if (score > 1400+boostMod) {
+                if (score > 3400+boostMod) {
                     x -= movement;
                     projectImage(x*diff, y*diff, z, Texture, diff);
                     if (x < -100 || checkcollison(sprite_x, x*diff, 
                                 sprite_y, y*diff, diff)) {
                         if (checkcollison(sprite_x,x*diff,sprite_y,
-                                    y*diff,diff))
+                                    y*diff,diff)) {
                             booster = checkcollison(sprite_x, x*diff, 
                                     sprite_y, y*diff, diff);
+                        }
+                        else {
+                           boostsMissed++; 
+                        }
                         image_counter = 0;
                         boostMod += boostMod+200;
                         x = 900;
                         obstacle = -1;
                     }
                 }
-                else 
+                else { 
                     obstacle = 2;
+                }
             }
             break;
         case 2:
@@ -306,8 +328,10 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                     if (checkcollison(sprite_x, x*diff, sprite_y, 
                                 y*diff, diff))
                         dead = 1; 
-                    else
+                    else {
+                        obstaclesAvoided++;
                         score += 10;
+                    }
                     image_counter = 0;
                     x = 900;
                     obstacle = -1;
@@ -332,8 +356,9 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                         mod += 5000;
                     }
                 }
-                else
-                    obstacle = rand() % 9 + 5;
+                else {
+                    obstacle = rand() % 7 + 5;
+                }
             }
             break;
         case 4:
@@ -342,7 +367,7 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                 x = 1400;
             }
             else {
-                if (showAlien && score > 1000+mod) {
+                if (showAlien > 0) {
                     glPushMatrix();
                     glTranslatef(x*diff, y*diff, z);
                     glBindTexture(GL_TEXTURE_2D, Texture);
@@ -365,15 +390,18 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                         if (checkcollison(sprite_x, x*diff, sprite_y, y*diff, 
                                     diff))
                             dead = 1; 
-                        else
+                        else {
+                            obstaclesAvoided++;
                             score += 500;
+                        }
                         image_counter = 0;
                         x = -100;
                         obstacle = -1;
                     }
                 }
-                else 
+                else { 
                     obstacle = rand() % 7 + 5;
+                }
             }
             break;
         case 5:
@@ -395,8 +423,10 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                                 x*diff,sprite_y-collision*diff, 
                                 (y+35), diff))
                         dead = 1; 
-                    else
+                    else {
+                        obstaclesAvoided++;
                         score += 20;
+                    }
                     image_counter = 0;
                     x = 900;
                     obstacle = -1;
@@ -418,11 +448,14 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                 }
                 if (x < -200 || checkcollison(sprite_x, x*diff, 
                             sprite_y-collision, (y+35)*diff, diff)) {
-                    if (checkcollison(sprite_x, x*diff, sprite_y-collision, 
+                    if (checkcollison(sprite_x, x*diff, 
+                                sprite_y-collision, 
                                 (y+35)*diff, diff))
                         dead = 1; 
-                    else
+                    else { 
+                        obstaclesAvoided++;
                         score += 50;
+                    }
                     image_counter = 0;
                     x = 900;
                     obstacle = -1;
@@ -442,8 +475,10 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                     if (checkcollison(sprite_x, x*diff, 
                                 sprite_y, y*diff, diff))
                         dead = 1; 
-                    else
+                    else {
+                        obstaclesAvoided++;
                         score += 50;
+                    }
                     image_counter = 0;
                     x = 900;
                     obstacle = -1;
@@ -458,15 +493,19 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
             else {
                 if (score > 400+boostMod) {
                     x -= movement;
-		    cout << x << endl;
+                    cout << x << endl;
                     projectImage(x*diff, y*diff, z, Texture, diff);
                     if (x < -100 || checkcollison(sprite_x, x*diff, 
                                 sprite_y, y*diff, diff)) {
                         if (checkcollison(sprite_x,x*diff,sprite_y,
-                                    y*diff,diff))
+                                    y*diff,diff)) {
                             booster = checkcollison(sprite_x, x*diff, 
                                     sprite_y, y*diff, diff);
-				
+                        }
+                        else {
+                           boostsMissed++; 
+                        }
+
                         image_counter = 0;
                         if (booster)
                             score += 1500;
@@ -475,8 +514,9 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                         obstacle = -1;
                     }
                 }
-                else 
+                else {
                     obstacle = 2;
+                }
             }
             break;
         case 9:
@@ -485,16 +525,19 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                 x = 1200;
             }
             else {
-                if (lifeBoost == 0) {
+                if (lifeBoost == 0 && score < 5) {
                     x -= movement;
                     projectImage(x*diff, y*diff, z, Texture, diff);
                     if (x < -100 || checkcollison(sprite_x, x*diff, 
                                 sprite_y, y*diff, diff)) {
                         if (checkcollison(sprite_x,x*diff,sprite_y,
-                                    y*diff,diff))
+                                    y*diff,diff)) {
                             lifeBoost = checkcollison(sprite_x, 
-                                    x*diff, 
-                                    sprite_y, y*diff, diff);
+                                    x*diff, sprite_y, y*diff, diff);
+                        }
+                        else {
+                           boostsMissed++; 
+                        }
                         image_counter = 0;
                         if (lifeBoost) {
                             score += 1;
@@ -504,8 +547,9 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
                         obstacle = -1;
                     }
                 }
-                else
+                else {
                     obstacle = 2;
+                }
             }
             break;
         default: 

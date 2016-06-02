@@ -213,6 +213,8 @@ struct Game {
 };
 
 //function prototypes
+int obstacleCount();
+int boostCount();
 void lifeIncrease(int &l);
 void scoreModifier(int &s);
 float obstacleEffect(int &m, float x, float y, float z, GLuint T, int &d, 
@@ -1417,7 +1419,7 @@ void render(Game *game)
 
 	    int yellow = 0x00ffff00;
 	    if (endScore == 0) {
-		endScore = score;
+		    endScore = score;
 	    }
 	    //endScore -= 1;
 
@@ -1425,6 +1427,8 @@ void render(Game *game)
 	    r.bot = yres*xdiff;
 	    r.left = xres*xdiff;
 	    ggprint16(&r, 50, yellow, "Your Score: %i", endScore);
+	    ggprint16(&r, 50, yellow, "You Avoided %i Obstacles", obstacleCount());
+	    ggprint16(&r, 50, yellow, "You Missed %i Boosts", boostCount());
 
 	    r.bot = yres*xdiff;
 	    r.left = xres*xdiff;
@@ -1601,6 +1605,14 @@ void render(Game *game)
 		    }
 		    break;
 		case 6:
+		    x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
+			    dead, image_counter, obstacle, sprite_x, score,
+			    sprite_y, booster, xdiff, batsheetx, slide);
+		    if (x == 800) {
+			play_spears();
+		    }
+		    break;
+		case 7:
 		    x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
 			    dead, image_counter, obstacle, sprite_x, score,
 			    sprite_y, booster, xdiff, batsheetx, slide);
