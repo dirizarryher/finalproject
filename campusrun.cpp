@@ -137,6 +137,7 @@ GLuint forestTexture, gameoversilhouetteTexture, spearTexture,
 char cScore[400];
 int name = 0;
 int score = 0;
+int money = 0;
 int distance = 0;
 int showRunner=1;
 int endScore = 0;
@@ -272,6 +273,8 @@ void play_end(void);
 void play_king(void);
 void play_alien(void);
 void play_illuminati(void);
+void Money_Money(void);
+void play_life(void);
 Rect showDave(int);
 void menuFunc(double xres, double yres, double diff);
 
@@ -1418,12 +1421,12 @@ void render(Game *game)
 	    //endScore -= 1;
 
 	    Rect r;
-	    r.bot = yres - 100;
-	    r.left = xres/2;
+	    r.bot = yres*xdiff;
+	    r.left = xres*xdiff;
 	    ggprint16(&r, 50, yellow, "Your Score: %i", endScore);
 
-	    r.bot = yres - 400;
-	    r.left = xres/2;
+	    r.bot = yres*xdiff;
+	    r.left = xres*xdiff;
 	    ggprint16(&r, 50, yellow, "Press R to Restart");
 	    ggprint16(&r, 50, yellow, "Press ESC to Exit");
 
@@ -1607,12 +1610,18 @@ void render(Game *game)
 		case 8:
 		    x = obstacleEffect(boostMovement, x, y, z, moneyTexture, 
 			    dead, image_counter, obstacle, sprite_x, score,
-			    sprite_y, booster, xdiff, batsheetx, slide);
+			    sprite_y, money, xdiff, batsheetx, slide);
+			if (money) {
+				MoneyMoney();
+			}
 		    break;
 		case 9:
 		    x = obstacleEffect(boostMovement, x, y, z, lifeTexture, 
 			    dead, image_counter, obstacle, sprite_x, lives,
-			    sprite_y, booster, xdiff, batsheetx, slide);
+			    sprite_y, life, xdiff, batsheetx, slide);
+			    if (life) {
+			    	play_life();
+				}
 		    break;
 		default: 
 		    obstacle = -1;

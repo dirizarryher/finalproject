@@ -116,8 +116,10 @@ void init_sounds(void)
 
 	//ILLUMINATI
 	alBuffer[21] = alutCreateBufferFromFile("sounds/Illuminati.wav\0");
-	//Bat Sound
-	alBuffer[22] = alutCreateBufferFromFile("sounds/bat.wav\0");
+	//Money Sound
+	alBuffer[22] = alutCreateBufferFromFile("sounds/MoneyMoney.wav\0");
+	//Life Sound
+	alBuffer[23] = alutCreateBufferFromFile("sounds/LifeAlert.wav\0");
 
 	//Generate a source and store it into their respective buffers
 	//alGenSources(NUM_SOURCES, alSource);
@@ -161,7 +163,7 @@ void init_sounds(void)
 	alGetError();
 
 	//Ambiance attributes
-	alSourcef(alSource[0], AL_GAIN, 0.6f);
+	alSourcef(alSource[0], AL_GAIN, 0.4f);
 	alSourcef(alSource[0], AL_PITCH, 1.0f);
 	alSourcei(alSource[0], AL_LOOPING, AL_TRUE);
 
@@ -186,12 +188,12 @@ void init_sounds(void)
 	alSourcef(alSource[5], AL_PITCH, 1.5f);
 
 	//Speedboost sound attributes
-	alSourcef(alSource[6], AL_GAIN, 0.7f);
-	alSourcef(alSource[6], AL_PITCH, 1.2f);
+	alSourcef(alSource[6], AL_GAIN, 0.6f);
+	alSourcef(alSource[6], AL_PITCH, 1.5f);
 
 	//Powerup sound attributes
-	alSourcef(alSource[7], AL_GAIN, 0.7f);
-	alSourcef(alSource[7], AL_PITCH, 1.2f);
+	alSourcef(alSource[7], AL_GAIN, 0.6f);
+	alSourcef(alSource[7], AL_PITCH, 1.5f);
 
 	//Monster Growl attributes
 	alSourcef(alSource[12], AL_GAIN, 0.7f);
@@ -202,7 +204,7 @@ void init_sounds(void)
 	alSourcef(alSource[13], AL_PITCH, 2.0f);
 
 	//Monster 3 attributes
-	alSourcef(alSource[14], AL_GAIN, 0.8f);
+	alSourcef(alSource[14], AL_GAIN, 0.7f);
 	alSourcef(alSource[14], AL_PITCH, 2.0f);
 
 	//Button1 attributes
@@ -233,9 +235,13 @@ void init_sounds(void)
 	alSourcef(alSource[21], AL_GAIN, 0.5f);
 	alSourcef(alSource[21], AL_PITCH, 1.0f);
 
-	//Bat attributes
+	//Money attributes
 	alSourcef(alSource[22], AL_GAIN, 0.6f);
-	alSourcef(alSource[22], AL_PITCH, 1.5f);
+	alSourcef(alSource[22], AL_PITCH, 1.0f);
+
+	//Life Sound Attributes
+	alSourcef(alSource[23], AL_GAIN, 0.6f);
+	alSourcef(alSource[23], AL_PITCH, 1.0f);
 }
 
 void toggle_music(bool play)
@@ -251,7 +257,7 @@ void toggle_music(bool play)
 
 void play_slide(void) 
 {
-	if (!dead && play){
+	if (!dead && play) {
 		alSourcePlay(alSource[3]);
 		//printf("Playing sound %d\n", alSource[3]);
 		play = !play;
@@ -266,7 +272,7 @@ void play_dead(void)
 
 void play_jumpsound(void) 
 {
-	if (!dead && play){
+	if (!dead && play) {
 		alSourcePlay(alSource[5]);
 		//printf("Playing sound %i", alSource[6]);
 		play = !play;
@@ -332,7 +338,7 @@ void play_end(void)
 //Sound when T button is pushed (18)
 void play_king(void)
 {
-	if ((!dead && king)){
+	if ((!dead && king)) {
 		alSourcePlay(alSource[18]);
 		//printf("Playing sound %d\n", alSource[16]);
 		king = !king;
@@ -357,6 +363,16 @@ void play_illuminati(void)
 		//printf("Playing sound %d\n", alSource[17]);
 		confirmed = !confirmed;
 	}
+}
+
+void Money_Money(void) 
+{
+	alSourcePlay(alSource[22]);
+}
+
+void play_life(void)
+{
+	alSourcePlay(alSource[23]);
 }
 
 void clean_sounds(void) 

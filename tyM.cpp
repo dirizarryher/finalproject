@@ -458,15 +458,17 @@ float obstacleEffect(int &movement, float x, float y, float z, GLuint Texture,
             else {
                 if (score > 400+boostMod) {
                     x -= movement;
+		    cout << x << endl;
                     projectImage(x*diff, y*diff, z, Texture, diff);
                     if (x < -100 || checkcollison(sprite_x, x*diff, 
                                 sprite_y, y*diff, diff)) {
                         if (checkcollison(sprite_x,x*diff,sprite_y,
                                     y*diff,diff))
-                            moneyBoost = checkcollison(sprite_x, x*diff, 
+                            booster = checkcollison(sprite_x, x*diff, 
                                     sprite_y, y*diff, diff);
+				
                         image_counter = 0;
-                        if (moneyBoost)
+                        if (booster)
                             score += 1500;
                         boostMod += boostMod+500;
                         x = 900;
