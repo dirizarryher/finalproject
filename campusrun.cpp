@@ -123,7 +123,7 @@ Ppmimage *runningImage, *deathImage, *jumpImage, *boostImage, *slideImage, *smok
 Ppmimage *grassImage, *groundImage, *skyImage, *farbackgroundImage, 
          *backgroundImage, *batImage, *moneyImage, *lifeImage;
 Ppmimage *forestImage=NULL, *gameoverImage, *spearImage, *saucerImage, 
-         *monsterImage;
+         *monsterImage, *displayTitleImage;
 GLuint runningTexture, deathTexture, jumpTexture, speedTexture, slideTexture, 
        gameoverTexture, smokeTexture, moneyTexture, lifeTexture;
 GLuint silhouetteTexture, DeathsilhouetteTexture, JumpsilhouetteTexture, 
@@ -134,6 +134,8 @@ GLuint forestTexture, gameoversilhouetteTexture, spearTexture,
        spearsilhouetteTexture, saucerTexture, saucersilhouetteTexture, 
        monsterTexture, monstersilhouetteTexturei, lifesilhouetteTexture, 
        batTexture, batsilhouetteTexture, moneysilhouetteTexture;
+GLuint displayTitleTexture, displayTitlesilhouetteTexture;
+
 char cScore[400];
 int name = 0;
 int score = 0;
@@ -570,6 +572,9 @@ void initOpengl(void)
        */
 
     functioncall();
+	string path = "./images/";
+	string filetype = ".png";
+	convertImage("TempleRunTitle", path, filetype);
 
     jumpImage          = ppm6GetImage("./images/runner/jump_sheet.ppm");
     runningImage       = ppm6GetImage("./images/runner/runner_sheet2.ppm");
@@ -590,7 +595,8 @@ void initOpengl(void)
     groundImage        = ppm6GetImage("./images/ground.ppm");
     skyImage           = ppm6GetImage("./images/sky.ppm");
     gameoverImage      = ppm6GetImage("./images/game_over.ppm");
-    //boostImage     = ppm6GetImage("./images/runner/speed_boost.ppm");
+    displayTitleImage  = ppm6GetImage("./images/TempleRunTitle.ppm");
+	//boostImage     = ppm6GetImage("./images/runner/speed_boost.ppm");
     //
     //create opengl texture elements
     // glGenTextures(1, &bigfootTexture);
@@ -606,6 +612,7 @@ void initOpengl(void)
     glGenTextures(1, &silhouetteTexture);
     glGenTextures(1, &forestTexture);
     glGenTextures(1, &gameoverTexture);
+	glGenTextures(1, &displayTitleTexture);
 
     glGenTextures(1, &skyTexture);
     glGenTextures(1, &lifeTexture);
@@ -847,7 +854,16 @@ void initOpengl(void)
             gameoverImage->width, gameoverImage->height,
             0, GL_RGB, GL_UNSIGNED_BYTE, gameoverImage->data);
     //-------------------------------------------------------------------------
+	//
+	//displayTitle
+    glBindTexture(GL_TEXTURE_2D, displayTitleTexture);
     //
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MAG_FILTER,GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D,GL_TEXTURE_MIN_FILTER,GL_NEAREST);
+    glTexImage2D(GL_TEXTURE_2D, 0, 3,
+            displayTitleImage->width, displayTitleImage->height,
+            0, GL_RGB, GL_UNSIGNED_BYTE, displayTitleImage->data);
+	//
     //Sky
     //int forest_w = WINDOW_WIDTH * 2;
     //int forest_h = WINDOW_HEIGHT;
@@ -1445,6 +1461,13 @@ void render(Game *game)
     if (menu) {
         showRunner = 0;
         //Temple run Title
+		glBindTexture(GL_TEXTURE_2D, displayTitleTexture);
+		glBegin(GL_QUADS);
+        glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
+		glTexCoord2f(0.0f, 0.0f); glVertex2i(0, 315);
+        glTexCoord2f(1.0f, 0.0f); glVertex2i(315, 686);
+        glTexCoord2f(1.0f, 1.0f); glVertex2i(315, 0);
+		glEnd();
 
         menuFunc(xres, yres, xdiff);
     }
