@@ -36,6 +36,7 @@ using namespace std;
 bool play = false, king = false, spears = false, button1 = false; 
 bool ambiance = 0, button2 = false, alien = false, confirmed = false;
 bool dave = false;
+bool menu = 1;
 extern ALuint alSource[];
 
 int restart = 0, temp = 0, lives = 0;
@@ -49,7 +50,7 @@ float x = 600, y = 75, z = 1;
 double xdiff = 1, ydiff = 1;
 int standardy = 75;
 //int sprite_y = standardy*xdiff;
-
+int flag = 0;
 //defined types
 typedef double Flt;
 typedef double Vec[3];
@@ -220,12 +221,12 @@ Rect displayName(int move);
 int randomObstacle();
 void saveData(char *u_Name, int score);
 int Jumping (double spritesheetx, float wid, int jump, int *sprite_y, 
-	GLuint jumpTexture, int stuff, double diff);
+	GLuint jumpTexture, int stuff, double diff, int* score, int* dead, int* flag);
 int sliding (int slidecount, double spritesheetx, float wid, int slide, 
 	Bigfoot &bigfoot, GLuint slideTexture);
 int smoking (int smokecount, double spritesheetx, float wid, int smoke,
 	Bigfoot &bigfoot, GLuint smokeTexture);
-void runnerDeath (Bigfoot &b, double s);
+void runnerDeath (Bigfoot &b, double s, double diff);
 void initXWindows(void);
 void initOpengl(void);
 void cleanupXWindows(void);
@@ -275,6 +276,7 @@ void play_illuminati(void);
 void Money_Money(void);
 void play_life(void);
 Rect showDave(int);
+void menuFunc(double xres, double yres, double diff);
 
 int main(void)
 {
@@ -385,7 +387,7 @@ int main(void)
 	    memcpy(user, "temp", 5);
 	    //int keys = 0;
 	    game.n=0;
-	    xdiff=1;
+	    //xdiff=1;
 	    dead = 0;
 	    deathCounter = 0;
 	    logOpen();
@@ -395,6 +397,8 @@ int main(void)
 	    clock_gettime(CLOCK_REALTIME, &timePause);
 	    clock_gettime(CLOCK_REALTIME, &timeStart);
 	    restart = 0;
+	    jump = 0;
+	    stuff = 0;
 	}
     }
     cleanupXWindows();
@@ -433,8 +437,10 @@ void setTitle(void)
 
 void setupScreenRes(const int w, const int h)
 {
-    xres = w;
-    yres = h;
+    if (!restart) {
+	xres = w;
+	yres = h;
+    }
 }
 
 
@@ -983,6 +989,8 @@ void checkKeys(XEvent *e)
 	    break;
 	case XK_f:
 	    stuff ^= 1;
+	    if(flag < 2)
+	    	flag++;
 	    break;
 	case XK_m:
 	    ambiance ^= 1;
@@ -1042,7 +1050,8 @@ void checkKeys(XEvent *e)
 	    if (--ndrops < 0)
 		ndrops = 0;
 	    break;
-	case XK_n:
+	case XK_space:
+	    menu = 0;
 	    break;
 	case XK_w:
 	    if (shift) {
@@ -1377,7 +1386,7 @@ void render(Game *game)
 	    displaybackground(groundx, groundTexture, yres/20, xres, 0);
 	    //grass
 	    //displaybackground(grassx, grassTexture, (yres/20), xres, 0);
-	    if (!dead) {
+	    if (!dead && !menu) {
 		if (booster < 200) {
 		    farbackgroundx-=.1;
 		    backgroundx-=.6;
@@ -1412,309 +1421,316 @@ void render(Game *game)
 	    //endScore -= 1;
 
 	    Rect r;
-	    r.bot = yres - 100;
-	    r.left = xres/2;
+	    r.bot = yres*xdiff;
+	    r.left = xres*xdiff;
 	    ggprint16(&r, 50, yellow, "Your Score: %i", endScore);
 
-	    r.bot = yres - 400;
-	    r.left = xres/2;
+	    r.bot = yres*xdiff;
+	    r.left = xres*xdiff;
 	    ggprint16(&r, 50, yellow, "Press R to Restart");
 	    ggprint16(&r, 50, yellow, "Press ESC to Exit");
 
 
 	}
     }
-
-    int *point_y = &sprite_y;
-    //this makes sure the player can't double jump 
-    if ((jump || stuff) && !dead) {
+    if (menu) {
 	showRunner = 0;
-	jump = Jumping(jumpsheetx, (wid), jump, point_y, jumpTexture, 
-		stuff, xdiff);
-	jumpcount++;
-	play_jumpsound();
+	menuFunc(xres, yres, xdiff);
+    }
+    if (!menu) {
+	int *point_y = &sprite_y;
+	//this makes sure the player can't double jump 
+	if ((jump || stuff) && !dead && !menu) {
+	    showRunner = 0;
+	    jump = Jumping(jumpsheetx, (wid), jump, point_y, jumpTexture, 
+		    stuff, xdiff, &score, &dead, &flag);
+	    jumpcount++;
+	    play_jumpsound();
 
-	if (jumpcount == 4) {
-	    jumpsheetx += .1;
+	    if (jumpcount == 4) {
+		jumpsheetx += .1;
+		jumpcount = 0;
+	    }
+
+	} else {
+	    showRunner = 1;
+	    sprite_y = standardy*xdiff;
 	    jumpcount = 0;
+	    jumpsheetx = 0;
+	    play = !play;
 	}
 
-    } else {
-	showRunner = 1;
-	sprite_y = standardy*xdiff;
-	jumpcount = 0;
-	jumpsheetx = 0;
-	play = !play;
-    }
+	/////////////////////////////////slide
+	if (slide) {
+	    showRunner = 0;
+	    slide = sliding(slidecount, slidesheetx, wid, slide, bigfoot, 
+		    slideTexture);
+	    slidecount++;
+	    slidesheetx++;
 
-    /////////////////////////////////slide
-    if (slide) {
-	showRunner = 0;
-	slide = sliding(slidecount, slidesheetx, wid, slide, bigfoot, 
-		slideTexture);
-	slidecount++;
-	slidesheetx++;
-
-	if (slidecount == 4){
-	    slidesheetx += 1;
+	    if (slidecount == 4){
+		slidesheetx += 1;
+		slidecount = 0;
+		play_slide();
+	    }
+	} else { 
+	    showRunner = 1;
 	    slidecount = 0;
-	    play_slide();
+	    slidesheetx = 0;
+	    play = 0;
 	}
-    } else { 
-	showRunner = 1;
-	slidecount = 0;
-	slidesheetx = 0;
-	play = 0;
-    }
 
-    if (dead) {
-	glPushMatrix();
-	glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
-	if (!silhouette) {
-	    glBindTexture(GL_TEXTURE_2D, DeathsilhouetteTexture);
-	} else {
-	    glBindTexture(GL_TEXTURE_2D, DeathsilhouetteTexture);
-	    glEnable(GL_ALPHA_TEST);
-	    glAlphaFunc(GL_GREATER, 0.0f);
-	    glColor4ub(255,255,255,255);
-	}
-	if (deathCounter < 9) { 
-	    runnerDeath(bigfoot, deathsheetx);
-	}
-	//If runner dies, play death sound
-	if (deathCounter < 2) {
-	    play_dead();
-	    play_end();
-	}
-	glEnd();
-	glPopMatrix();
-	deathCounter++;
-	deathsheetx += .11111;
-    }
+	if (dead) {
+	    glPushMatrix();
+	    glTranslatef(bigfoot.pos[0], bigfoot.pos[1], bigfoot.pos[2]);
+	    if (!silhouette) {
+		glBindTexture(GL_TEXTURE_2D, DeathsilhouetteTexture);
+	    } else {
+		glBindTexture(GL_TEXTURE_2D, DeathsilhouetteTexture);
+		glEnable(GL_ALPHA_TEST);
+		glAlphaFunc(GL_GREATER, 0.0f);
+		glColor4ub(255,255,255,255);
+	    }
+	    if (deathCounter < 9) { 
+		runnerDeath(bigfoot, deathsheetx, xdiff);
+	    }
+	    //If runner dies, play death sound
+	    if (deathCounter < 2) {
+		play_dead();
+		play_end();
+	    }
+	    glEnd();
+	    glPopMatrix();
+	    deathCounter++;
+	    deathsheetx += .11111;
 
-    if (showRunner && !jump && !dead) {
-	glPushMatrix();
-	glTranslatef(bigfoot.pos[0], sprite_y, bigfoot.pos[2]);
-	if (!silhouette) {
-	    glBindTexture(GL_TEXTURE_2D, runningTexture);
-	} else {
-	    glBindTexture(GL_TEXTURE_2D, silhouetteTexture);
-	    glEnable(GL_ALPHA_TEST);
-	    glAlphaFunc(GL_GREATER, 0.0f);
-	    glColor4ub(255,255,255,255);
+	    //Need to stop the score count here?
 	}
-	glBegin(GL_QUADS);
-	if (bigfoot.vel[0] > 0.0) {
-	    glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
-	    glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
-	    glTexCoord2f(0.111111111f+spritesheetx, 0.0f);glVertex2i(wid,wid);
-	    glTexCoord2f(0.111111111f+spritesheetx, 1.0f);glVertex2i(wid,-wid);
-	} else {
-	    glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
-	    glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
-	    glTexCoord2f(0.1f, 1.0f); glVertex2i( wid, wid);
-	    glTexCoord2f(0.1f, 0.0f); glVertex2i( wid,-wid);
+
+	if (showRunner && !jump && !dead) {
+	    glPushMatrix();
+	    glTranslatef(bigfoot.pos[0], sprite_y, bigfoot.pos[2]);
+	    if (!silhouette) {
+		glBindTexture(GL_TEXTURE_2D, runningTexture);
+	    } else {
+		glBindTexture(GL_TEXTURE_2D, silhouetteTexture);
+		glEnable(GL_ALPHA_TEST);
+		glAlphaFunc(GL_GREATER, 0.0f);
+		glColor4ub(255,255,255,255);
+	    }
+	    glBegin(GL_QUADS);
+	    if (bigfoot.vel[0] > 0.0) {
+		glTexCoord2f(0.0f+spritesheetx, 1.0f); glVertex2i(-wid,-wid);
+		glTexCoord2f(0.0f+spritesheetx, 0.0f); glVertex2i(-wid, wid);
+		glTexCoord2f(0.111111111f+spritesheetx, 0.0f);glVertex2i(wid,wid);
+		glTexCoord2f(0.111111111f+spritesheetx, 1.0f);glVertex2i(wid,-wid);
+	    } else {
+		glTexCoord2f(0.0f, 1.0f); glVertex2i(-wid,-wid);
+		glTexCoord2f(0.0f, 0.0f); glVertex2i(-wid, wid);
+		glTexCoord2f(0.1f, 1.0f); glVertex2i( wid, wid);
+		glTexCoord2f(0.1f, 0.0f); glVertex2i( wid,-wid);
+	    }
+	    glEnd();
+	    glPopMatrix();
+	    //
 	}
-	glEnd();
-	glPopMatrix();
+	spritesheetx += .11111111111;
+	if (obstacle == -1)
+	    obstacle = randomObstacle();
+	if (obstacle && !dead && !menu) {
+	    switch (obstacle) {
+		case 1:
+		    x = obstacleEffect(boostMovement, x, y, z, speedTexture, 
+			    dead, image_counter, obstacle, sprite_x, score, 
+			    sprite_y, booster, xdiff, monstersheetx, slide);
+		    if (booster == 1) {
+			play_boost();
+		    }
+
+		    break;
+		case 2:
+		    x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
+			    dead, image_counter, obstacle, sprite_x, score,
+			    sprite_y, booster, xdiff, monstersheetx, slide);
+		    if (x == 800) {	
+			play_spears();
+		    }
+		    break;
+		case 3:
+		    x = obstacleEffect(saucerMovement, x, y, z, saucerTexture, 
+			    dead, image_counter, obstacle, sprite_x, score,
+			    sprite_y, booster, xdiff, monstersheetx, slide);
+		    //Play sound of Ship entering the screen
+		    if (x <= 10 && obstacle == 3 && score > 1000) {	
+			alien = true;
+			confirmed = true;
+			play_alien();
+			play_illuminati();
+		    }
+		    //Play sound of Ship starting to exit screen
+		    if (x == 500) {
+			alSourcePlay(alSource[19]);
+		    }
+		    //Ensure all alien sounds have stopped
+		    if (x == 900) {
+			alien = false;
+			confirmed = false;
+			alSourceStop(alSource[18]);
+			alSourceStop(alSource[19]);
+			alSourceStop(alSource[20]);
+		    }
+		    break;
+		case 4:
+		    x = obstacleEffect(monsterMovement, x, y, z, monsterTexture, 
+			    dead, image_counter, obstacle, sprite_x, score,
+			    sprite_y, booster, xdiff, monstersheetx, slide);
+		    if (x == 1200) {
+			play_monster();
+		    }
+		    if (x == 600) {
+			play_monster();
+		    }
+		    break;
+		case 5:
+		    x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
+			    dead, image_counter, obstacle, sprite_x, score,
+			    sprite_y, booster, xdiff, batsheetx, slide);
+		    if (x == 800) {
+			play_spears();
+		    }
+		    break;
+		case 6:
+		    x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
+			    dead, image_counter, obstacle, sprite_x, score,
+			    sprite_y, booster, xdiff, batsheetx, slide);
+		    if (x == 800) {
+			play_spears();
+		    }
+		    break;
+		case 8:
+		    x = obstacleEffect(boostMovement, x, y, z, moneyTexture, 
+			    dead, image_counter, obstacle, sprite_x, score,
+			    sprite_y, money, xdiff, batsheetx, slide);
+			if (money) {
+				MoneyMoney();
+			}
+		    break;
+		case 9:
+		    x = obstacleEffect(boostMovement, x, y, z, lifeTexture, 
+			    dead, image_counter, obstacle, sprite_x, lives,
+			    sprite_y, life, xdiff, batsheetx, slide);
+			    if (life) {
+			    	play_life();
+				}
+		    break;
+		default: 
+		    obstacle = -1;
+	    }
+	}
+
+	float w, h;
+	//Draw shapes...
 	//
-    }
-    spritesheetx += .11111111111;
-    if (obstacle == -1)
-	obstacle = randomObstacle();
-    if (obstacle && !dead) {
-	switch (obstacle) {
-	    case 1:
-		x = obstacleEffect(boostMovement, x, y, z, speedTexture, 
-			dead, image_counter, obstacle, sprite_x, score, 
-			sprite_y, booster, xdiff, monstersheetx, slide);
-		if (booster == 1 && obstacle == 1) {
-		    play_boost();
-		}
-
-		break;
-	    case 2:
-		x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
-			dead, image_counter, obstacle, sprite_x, score,
-			sprite_y, booster, xdiff, monstersheetx, slide);
-		if (x == 800 && obstacle == 2) {	
-		    play_spears();
-		}
-		break;
-	    case 3:
-		x = obstacleEffect(saucerMovement, x, y, z, saucerTexture, 
-			dead, image_counter, obstacle, sprite_x, score,
-			sprite_y, booster, xdiff, monstersheetx, slide);
-		//Play sound of Ship entering the screen
-		if (x <= 10 && obstacle == 3 && score > 1000) {	
-		    alien = true;
-		    confirmed = true;
-		    play_alien();
-		    play_illuminati();
-		}
-		//Play sound of Ship starting to exit screen
-		if (x == 500 && obstacle == 3 && score > 1000) {
-		    alSourcePlay(alSource[19]);
-		}
-		//Ensure all alien sounds have stopped
-		if (x == 900 && obstacle == 3 && score > 1000) {
-		    alien = false;
-		    confirmed = false;
-		    alSourceStop(alSource[18]);
-		    alSourceStop(alSource[19]);
-		    alSourceStop(alSource[20]);
-		}
-		break;
-	    case 4:
-		x = obstacleEffect(monsterMovement, x, y, z, monsterTexture, 
-			dead, image_counter, obstacle, sprite_x, score,
-			sprite_y, booster, xdiff, monstersheetx, slide);
-		if (x == 1200 && obstacle == 4) {
-		    play_monster();
-		}
-		if (x == 600 && obstacle == 4) {
-		    play_monster();
-		}
-		break;
-	    case 5:
-		x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
-			dead, image_counter, obstacle, sprite_x, score,
-			sprite_y, booster, xdiff, batsheetx, slide);
-		if (x == 800 && obstacle == 5) {
-		    play_spears();
-		}
-		break;
-	    case 6:
-		x = obstacleEffect(spearMovement, x, y, z, spearTexture, 
-			dead, image_counter, obstacle, sprite_x, score,
-			sprite_y, booster, xdiff, batsheetx, slide);
-		if (x == 800 && obstacle == 6) {
-		    play_spears();
-		}
-		break;
-	    case 8:
-		x = obstacleEffect(boostMovement, x, y, z, moneyTexture, 
-			dead, image_counter, obstacle, sprite_x, score,
-			sprite_y, money, xdiff, batsheetx, slide);
-		if (money) {
-		    Money_Money();
-		}
-		money = 0;
-		break;
-	    case 9:
-		x = obstacleEffect(boostMovement, x, y, z, lifeTexture, 
-			dead, image_counter, obstacle, sprite_x, lives,
-			sprite_y, booster, xdiff, batsheetx, slide);
-		if (booster == 1 && obstacle == 9) {
-		    play_life();
-		}
-		break;
-	    default: 
-		obstacle = -1;
+	//circle
+	Shape *s;
+	float rad = 0.0;
+	int x = 0, y = 0;
+	glColor3ub(90,140,90);
+	for (int i = 0; i < SEGMENTS; i++) {
+	    for (int j = 0; j < 2; j++) {
+		s = &game->circle[j];
+		x = cos(ADJUST) * s->radius + s->center.x;
+		y = sin(ADJUST) * s->radius + s->center.y;
+		rad += ADJUST;
+		glVertex2f(x, y);
+	    }
 	}
-    }
 
-    float w, h;
-    //Draw shapes...
-    //
-    //circle
-    Shape *s;
-    float rad = 0.0;
-    int x = 0, y = 0;
-    glColor3ub(90,140,90);
-    for (int i = 0; i < SEGMENTS; i++) {
-	for (int j = 0; j < 2; j++) {
-	    s = &game->circle[j];
-	    x = cos(ADJUST) * s->radius + s->center.x;
-	    y = sin(ADJUST) * s->radius + s->center.y;
-	    rad += ADJUST;
-	    glVertex2f(x, y);
+	//draw box
+	glColor3ub(90,140,90);
+	for (int j = 0; j < 5; j++) {
+	    s = &game->box[j];
+	    glPushMatrix();
+	    glTranslatef(s->center.x, s->center.y, s->center.z);
+	    w = s->width;
+	    h = s->height;
+	    glBegin(GL_QUADS);
+	    glVertex2i(-w,-h);
+	    glVertex2i(-w, h);
+	    glVertex2i( w, h);
+	    glVertex2i( w,-h);
+	    glEnd();
+	    glPopMatrix();
 	}
+
+
+	glDisable(GL_TEXTURE_2D);
+	//glColor3f(1.0f, 0.0f, 0.0f);
+	//glBegin(GL_QUADS);
+	//	glVertex2i(10,10);
+	//	glVertex2i(10,60);
+	//	glVertex2i(60,60);
+	//	glVertex2i(60,10);
+	//glEnd();
+	//return;
+	glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+	glEnable(GL_BLEND);
+	if (showRain)
+	    drawRaindrops();
+	glDisable(GL_BLEND);
+	glEnable(GL_TEXTURE_2D);
+	//
+	if (showUmbrella)
+	    drawUmbrella();
+	glBindTexture(GL_TEXTURE_2D, 0);
+	//
+	//
+	//r.bot = yres - 20;
+	//r.left = 10;
+	//r.center = 0;
+	b.bot = yres + xdiff - 20;
+	b.left = 550;
+	b.center = 0;
+	sprintf(cScore, "SCORE: %d", score); 
+	/*ggprint8b(&r, 16, 0, "B - Bigfoot");
+	  ggprint8b(&r, 16, 0, "F - Forest");
+	  ggprint8b(&r, 16, 0, "S - Silhouette");
+	  ggprint8b(&r, 16, 0, "T - Trees");
+	  ggprint8b(&r, 16, 0, "U - Umbrella");
+	  ggprint8b(&r, 16, 0, "R - Rain");
+	  ggprint8b(&r, 16, 0, "D - Deflection");
+	  ggprint8b(&r, 16, 0, "N - Sounds");*/
+	ggprint8b(&b, 26*xdiff, 0, cScore);
+
+	if (dave == 1) {
+	    nameText = showDave(box_x);
+	    ggprint16(&nameText, 100, 100, "David Hernandez");
+
+	    game->box[0].width = 200;
+	    game->box[0].height = 75;
+	    game->box[0].center.x = box_x -= 1.75;
+	    game->box[0].center.y = box_y;
+
+	    if (box_x < -100)
+		box_x = 900;
+	}
+
+
+	if (name) {
+	    nameText = displayName(box_x - 30);
+	    ggprint8b(&nameText, 26, 0, "Ty Morrell");
+
+	    game->box[0].width = box_length;
+	    game->box[0].height = 10;
+	    game->box[0].center.x = box_x -= 2;
+	    game->box[0].center.y = box_y;
+
+	    if (box_x < -30)
+		box_x = 800;
+	}
+	wid = 60;
     }
-
-    //draw box
-    glColor3ub(90,140,90);
-    for (int j = 0; j < 5; j++) {
-	s = &game->box[j];
-	glPushMatrix();
-	glTranslatef(s->center.x, s->center.y, s->center.z);
-	w = s->width;
-	h = s->height;
-	glBegin(GL_QUADS);
-	glVertex2i(-w,-h);
-	glVertex2i(-w, h);
-	glVertex2i( w, h);
-	glVertex2i( w,-h);
-	glEnd();
-	glPopMatrix();
-    }
-
-
-    glDisable(GL_TEXTURE_2D);
-    //glColor3f(1.0f, 0.0f, 0.0f);
-    //glBegin(GL_QUADS);
-    //	glVertex2i(10,10);
-    //	glVertex2i(10,60);
-    //	glVertex2i(60,60);
-    //	glVertex2i(60,10);
-    //glEnd();
-    //return;
-    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-    glEnable(GL_BLEND);
-    if (showRain)
-	drawRaindrops();
-    glDisable(GL_BLEND);
-    glEnable(GL_TEXTURE_2D);
-    //
-    if (showUmbrella)
-	drawUmbrella();
-    glBindTexture(GL_TEXTURE_2D, 0);
-    //
-    //
-    //r.bot = yres - 20;
-    //r.left = 10;
-    //r.center = 0;
-    b.bot = yres - 20;
-    b.left = 550;
-    b.center = 0;
-    sprintf(cScore, "SCORE: %d", score); 
-    /*ggprint8b(&r, 16, 0, "B - Bigfoot");
-      ggprint8b(&r, 16, 0, "F - Forest");
-      ggprint8b(&r, 16, 0, "S - Silhouette");
-      ggprint8b(&r, 16, 0, "T - Trees");
-      ggprint8b(&r, 16, 0, "U - Umbrella");
-      ggprint8b(&r, 16, 0, "R - Rain");
-      ggprint8b(&r, 16, 0, "D - Deflection");
-      ggprint8b(&r, 16, 0, "N - Sounds");*/
-    ggprint8b(&b, 26, 0, cScore);
-
-    if (dave == 1) {
-	nameText = showDave(box_x);
-	ggprint16(&nameText, 100, 100, "David Hernandez");
-
-	game->box[0].width = 200;
-	game->box[0].height = 75;
-	game->box[0].center.x = box_x -= 1.75;
-	game->box[0].center.y = box_y;
-
-	if (box_x < -100)
-	    box_x = 900;
-    }
-
-
-    if (name) {
-	nameText = displayName(box_x - 30);
-	ggprint8b(&nameText, 26, 0, "Ty Morrell");
-
-	game->box[0].width = box_length;
-	game->box[0].height = 10;
-	game->box[0].center.x = box_x -= 2;
-	game->box[0].center.y = box_y;
-
-	if (box_x < -30)
-	    box_x = 800;
-    }
-    wid = 60;
+	    showRunner = 1;
 }
 
 void movement(Game *game)
