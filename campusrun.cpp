@@ -1422,16 +1422,20 @@ void render(Game *game)
                 endScore = score;
             }
             //endScore -= 1;
-
-            Rect r;
-            r.bot = (yres + ydiff)/5;
-            r.left =(xres + xdiff)/2;
+          Rect r;
+		 
+		r.bot = (yres + ydiff) - (80 - ydiff);
+		r.left = (xres + xdiff)/2;
             ggprint16(&r, 50, yellow, "Your Score: %i", endScore);
+
+		r.bot = (yres + ydiff)/6;
+            r.left =((xres + xdiff)/2) - 150;
             ggprint16(&r, 50, yellow, "You Avoided %i Obstacles", obstacleCount());
+
             ggprint16(&r, 50, yellow, "You Missed %i Boosts", boostCount());
 
-            r.bot = (yres + ydiff)/8;
-            r.left = (xres + xdiff)/2;
+		r.bot = (yres + ydiff)/6;
+            r.left =((xres + xdiff)/2) + 150;
             ggprint16(&r, 50, yellow, "Press R to Restart");
             ggprint16(&r, 50, yellow, "Press ESC to Exit");
 
