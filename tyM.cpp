@@ -163,9 +163,9 @@ char *build_get_query(char *host, char *page)
     sprintf(query, tpl, getpage, host, USERAGENT);
     return query;
 }
-void runnerDeath (Bigfoot &bigfoot, double spritesheetx) 
+void runnerDeath (Bigfoot &bigfoot, double spritesheetx, double diff) 
 {
-    float wid = 60.0f;
+    float wid = 60.0f*diff;
     glBegin(GL_QUADS);
     if (bigfoot.vel[0] > 0.0) {
         glTexCoord2f(0.0f+spritesheetx, 1.0f); 
