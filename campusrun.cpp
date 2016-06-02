@@ -1461,13 +1461,18 @@ void render(Game *game)
     if (menu) {
         showRunner = 0;
         //Temple run Title
-		glBindTexture(GL_TEXTURE_2D, displayTitleTexture);
+		/*glBindTexture(GL_TEXTURE_2D, displayTitleTexture);
 		glBegin(GL_QUADS);
             	glTexCoord2f(0.0f, 1.0f); glVertex2i(0, 0);
 	            glTexCoord2f(0.0f, 0.0f); glVertex2i(0, yres);
 	            glTexCoord2f(1.0f, 0.0f); glVertex2i(xres, yres);
 	            glTexCoord2f(1.0f, 1.0f); glVertex2i(xres, 0);
-		glEnd();
+		glEnd();*/
+	Rect r;
+	r.bot = (yres + ydiff) -(100 - ydiff);
+	r.left = (xres + xdiff) / 2;
+        ggprint16(&r, 150, 0, "Temple Run 2D");
+
 
         menuFunc(xres, yres, xdiff);
     }
