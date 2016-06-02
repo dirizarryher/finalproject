@@ -249,9 +249,13 @@ void toggle_music(bool play)
 	if (play == 1) {
 		alSourcePlay(alSource[0]);
 		//printf("Playing sound %i", alSource[0]);
+		play = !play;
+		return;
 	}
-	if (play == 0) {
+	if (play != 1) {
 		alSourceStop(alSource[0]);
+		play = 0;
+		return;
 	}
 }
 
