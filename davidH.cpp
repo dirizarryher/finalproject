@@ -241,7 +241,7 @@ void init_sounds(void)
 
 	//Life Sound Attributes
 	alSourcef(alSource[23], AL_GAIN, 0.6f);
-	alSourcef(alSource[23], AL_PITCH, 1.0f);
+	alSourcef(alSource[23], AL_PITCH, 1.4f);
 }
 
 void toggle_music(bool play)
