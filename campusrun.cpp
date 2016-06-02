@@ -138,6 +138,7 @@ char cScore[400];
 int name = 0;
 int score = 0;
 int money = 0;
+int life  = 0;
 int distance = 0;
 int showRunner=1;
 int endScore = 0;
@@ -1612,7 +1613,7 @@ void render(Game *game)
 			    dead, image_counter, obstacle, sprite_x, score,
 			    sprite_y, money, xdiff, batsheetx, slide);
 			if (money) {
-				MoneyMoney();
+				Money_Money();
 			}
 		    break;
 		case 9:
